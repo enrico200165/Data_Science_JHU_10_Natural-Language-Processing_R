@@ -249,7 +249,9 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
   if (!missing(in_dir) & !is.na(in_dir) & nchar(in_dir) > 0) {
     nomeFile <- paste0(in_dir,"/",nomeFile)
   }
-  
+
+  textSize <- file.info(nomeFile).size
+    
   exists = TRUE
   exists <- exists && exists(varName)
   filled <- exists && (object.size(mydf) > 256)
@@ -289,9 +291,12 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
       mydf <- corpus(my_rt)
       # print(paste("blogs",format(object.size(my_rt), units = "MiB")))      
       saveRDS(mydf, file = rdsFName)
-      return(mydf)
+      
+      rdsSize <- file.info(rdsFName).size
+      print(paste("test size/rds size = ",textSize/rdsSize))
     }
   }
+  return(mydf)
 }
 
 
@@ -305,11 +310,11 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
   
   s <- if(subsetPar) {"subset*"} else {"full*"}
   qc_blogs <<- readtextIfEmpty(qc_blogs,data_dir_corpus
-                               ,paste0("*blogs*",s))
+                               ,paste0("en*blogs*",s))
   qc_news  <<- readtextIfEmpty(qc_news,data_dir_corpus
-                               ,paste0("*news*",s))
+                               ,paste0("en*news*",s))
   qc_twitts <<- readtextIfEmpty(qc_twitts,data_dir_corpus
-                                ,paste0("*twitt*",s))
+                                ,paste0("en*twitt*",s))
 }
 
 
