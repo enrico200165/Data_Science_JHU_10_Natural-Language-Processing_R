@@ -1,0 +1,15 @@
+---
+output:
+  md_document:
+    pandoc_args: [
+#      "-k", "1024m"
+#      ,"--to", "gfm"
+    ]
+    variant: gfm
+---  
+
+# Getting texts into R
+  
+### Kenneth Benoit
+### 27 April 2017
+  
