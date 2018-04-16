@@ -8,7 +8,7 @@ inc <- function(e1) eval.parent(substitute(e1 <- e1+1))
 
 # --- data directories ---
 superdir= ".."
-data_dir_start <- file.path(superdir,superdir,superdir,superdir,"data_dev")
+data_dir_start <- file.path(superdir,superdir,superdir,superdir,superdir,"data_dev")
 getDataDir <- function(ddir) {
   while (nchar(ddir) > 4 & !dir.exists(ddir) & grepl(paste0(superdir,"[\\/]"),ddir)) {
     ddir <- substring(ddir,nchar(superdir)+2, nchar(ddir))
