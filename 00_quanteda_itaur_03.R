@@ -1,3 +1,6 @@
+require(tm)
+#require(devtools)
+# install_github("quanteda/quanteda")
 require(quanteda)
 # help(package = "quanteda")
 #install.packages("readtext")
@@ -19,6 +22,7 @@ myCorpus <- corpus(data_char_ukimmig2010
                    #, notes = "My first corpus"
                    )
 # a VCorpus object from the tm package
+require(tm)
 data(crude, package = "tm")
 myTmCorpus <- corpus(crude)
 summary(myTmCorpus, 5)
@@ -39,7 +43,11 @@ summary(myTmCorpus, 5)
 # (All ecnoding functions are handled by the stringi package.)
 
 require(readtext)
-setwd("C:\\Users\\enrico\\GDRIVE\\CAPSTONE\\Quanteda\\ITAUR\\3_file_import")
+current_dir <- getwd()
+# setwd("C:\\Users\\enrico\\GDRIVE\\CAPSTONE\\Quanteda\\ITAUR\\3_file_import")
+# 
+setwd("C:\\Users\\e_viali\\Documents\\dev\\ITAUR\\3_file_import")
+
 myCorpus <- corpus(readtext("inaugural/*.txt"))
 myCorpus <- corpus(readtext("sotu/*.txt"))
 
@@ -89,25 +97,54 @@ myCorpus <- corpus(tf2)
 head(docvars(tf2))
 
 
+tf1 <- readtext("inaugTexts.csv", text_field = "inaugSpeech")
+tf1
+myCorpus <- corpus(tf1)
+
+tf2 <- readtext("text_example.csv", text_field = "Title")
+myCorpus <- corpus(tf2)
+head(docvars(tf2))
+head(docvars(myCorpus))
+
+
+
+setwd(current_dir)
+
+
+
 # -------------------------------------------------------------------
 # Working with corpus objects
 # -------------------------------------------------------------------
+
+#  can subset the corpus using these variables
 recentCorpus <- corpus_subset(data_corpus_inaugural, Year > 1980)
 oldCorpus <- corpus_subset(data_corpus_inaugural, Year < 1880)
 
+# create document-feature matrices by aggregating on the variables
 require(magrittr)
 ## Loading required package: magrittr
 demCorpus <- corpus_subset(sotuCorpus, party == 'Democratic')
 demFeatures <- dfm(demCorpus, remove = stopwords('english')) %>%
-  dfm_trim(min_doc = 3, min_count = 5) %>% 
+  dfm_trim(min_doc = 3, min_termfreq = 5) %>% 
+  # dfm_weight(type='tfidf')
+  #
   dfm_weight(scheme='prop')
+# EV useful for exploratory 
 topfeatures(demFeatures)
+
+repCorpus <- corpus_subset(sotuCorpus, party == 'Republican')
+repFeatures <- dfm(repCorpus, remove = stopwords('english')) %>%
+  dfm_trim(min_doc = 3, min_termfreq = 5) %>% 
+  # dfm_weight(type='tfidf')
+  dfm_weight(scheme='prop')
+topfeatures(repFeatures)
 
 #  quanteda corpus objects can be combined using the + operator:
 data_corpus_inaugural2 <- demCorpus + repCorpus
 dfm(data_corpus_inaugural2, remove = stopwords('english'), verbose = FALSE) %>%
-  dfm_trim(min_doc = 3, min_count = 5) %>% 
-  dfm_tfidf() %>% 
+  dfm_trim(min_doc = 3, min_termfreq = 5) %>% 
+  # dfm_weight(type='tfidf') %>% 
+  dfm_weight(scheme='prop') %>% 
   topfeatures
 
 # It should also be possible to load a zip file containing texts directly 
