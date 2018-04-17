@@ -1,8 +1,15 @@
 
 require(quanteda)
 require(readtext)
+
+
 source("01_globals.R")
 source("01_preprocess.R")
+
+# examples
+# http://rpubs.com/erodriguez/milestone1
+# 
+
 
 
 corp <- NA
