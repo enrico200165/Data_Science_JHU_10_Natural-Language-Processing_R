@@ -10,12 +10,12 @@ library(stringr)
 # https://www.r-bloggers.com/using-sqlite-in-r/
 # install.packages("RSQLite", dependencies = TRUE)
 # install.packages("sqldf")
-library(DBI); 
-library(RSQLite); 
-library(sqldf)
+require(DBI);
+require(RSQLite);
+require(sqldf)
 
-library(readtext)
-library(quanteda)
+require(readtext)
+require(quanteda)
 
 
 source("01_preprocess_lib.R")

@@ -3,9 +3,10 @@
 # http://www.mjdenny.com/Text_Processing_In_R.html
 
 # install.packages("stringr", dependencies = TRUE)
-library(stringr)
-
-library(dplyr)
+require(quanteda)
+require(stringr)
+require(readtext)
+require(dplyr)
 
 #######################################################
 #           DICTIONARY
@@ -250,8 +251,6 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
     nomeFile <- paste0(in_dir,"/",nomeFile)
   }
 
-  textSize <- file.info(nomeFile).size
-    
   exists = TRUE
   exists <- exists && exists(varName)
   filled <- exists && (object.size(mydf) > 256)
@@ -290,12 +289,10 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
       
       mydf <- corpus(my_rt)
       # print(paste("blogs",format(object.size(my_rt), units = "MiB")))      
-      saveRDS(mydf, file = rdsFName)
-      
-      rdsSize <- file.info(rdsFName).size
-      print(paste("test size/rds size = ",textSize/rdsSize))
     }
   }
+  if (!file.exists(rdsFName))
+    saveRDS(mydf, file = rdsFName)
   return(mydf)
 }
 
@@ -328,6 +325,7 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
 
 myTest <- function() {
   ptm <- proc.time()
+  print(list.files(data_dir_corpus))
   readInQCorp(data_dir_corpus, FALSE)
   print("time")
   print(proc.time() - ptm)
@@ -337,5 +335,5 @@ myTest <- function() {
   print(paste("twitts",format(object.size(qc_twitts), units = "MiB")))
 }
 
-# myTest()
+#myTest()
 
