@@ -33,6 +33,10 @@ vignettes/*.pdf
 *.knit.md
 .Rproj.user
 
+
+# R data
+.RDataTmp
+
 # R persistence/serialization files
 *rds
 *html

@@ -1,4 +1,7 @@
 
+orig_dir <- dirname(sys.frame(1)$ofile)
+
+prj_dir <- function() setwd(orig_dir)
 
 db_fname <- "words_en.sqlite"
 
@@ -23,6 +26,19 @@ getDataDir <- function(ddir) {
 data_dir <- getDataDir(data_dir_start)
 data_dir_cap <- file.path(data_dir,"capstone_data")
 data_dir_corpus <- file.path(data_dir_cap,"data_in/corpus/")
+
+
+itaur_dir <- function() {
+  if (Sys.info()["nodename"] == "LTPGJSDPX1") {
+    "C:\\Users\\e_viali\\Documents\\dev\\ITAUR"
+  } else {
+    if (Sys.info()["nodename"] == "asus") {
+      "asusdir"
+    } else {
+      NA
+    }
+  }
+}
 
 
 # --- Corpuses ---
