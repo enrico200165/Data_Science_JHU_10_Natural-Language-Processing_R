@@ -9,10 +9,20 @@ require(quanteda.corpora)
 require(spacyr)
 library(ggplot2)
 
+
 summary(data_corpus_inaugural)
+# ev
+head(summary(data_corpus_inaugural), n=2)
+str(summary(data_corpus_inaugural))
+
 
 # does not work as expected
 summary(data_corpus_inaugural[1:5])
+#ev
+str(data_corpus_inaugural[1])
+names(data_corpus_inaugural[1])
+
+
 
 data_corpus_inaugural[1]
 
@@ -21,13 +31,16 @@ data_corpus_inaugural[2]
 ndoc(data_corpus_inaugural)
 
 docnames(data_corpus_inaugural)
+str(docnames(data_corpus_inaugural))
 
 nchar(data_corpus_inaugural[1:7])
 str(nchar(data_corpus_inaugural[1:7]))
 
 ntoken(data_corpus_inaugural[1:7])
+str(ntoken(data_corpus_inaugural[1:7]))
 
-tokens("Today is Thursday in Canberra. It is yesterday in London.")
+t <- tokens("Today is Thursday in Canberra. It is yesterday in London.")
+str(t)
 
 vec <- c(one = "This is text one", 
          two = "This, however, is the second text")
@@ -38,12 +51,16 @@ tokens(char_tolower(vec), remove_punct = TRUE)
 inaugTokens <- tokens(data_corpus_inaugural, remove_punct = TRUE)
 tokens_tolower(inaugTokens[2])
 
+
+# Once each text has been split into words, we can use the dfm 
+# function to create a matrix of counts of the occurrences of 
+# each word in each document
 inaugDfm <- dfm(inaugTokens)
-trimmedInaugDfm <- dfm_trim(inaugDfm, min_doc = 5, min_count = 10)
+(trimmedInaugDfm <- dfm_trim(inaugDfm, min_doc = 5, min_termfreq = 10))
 
 require(magrittr)
 inaugDfm2 <- dfm(inaugTokens) %>% 
-  dfm_trim(min_doc = 5, min_count = 10) %>% 
+  dfm_trim(min_doc = 5, min_termfreq = 10) %>% 
   dfm_tfidf()
 
 methods(dfm)
