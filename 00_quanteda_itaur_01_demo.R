@@ -1,5 +1,4 @@
 ## Demonstration of quanteda's capabilities
-##
 ## Ken Benoit <kbenoit@lse.ac.uk>
 ## Paul Nulty <p.nulty@lse.ac.uk>
 
@@ -10,47 +9,81 @@ help(package = "quanteda")
 ## create a corpus from a text vector of UK immigration texts
 summary(data_char_ukimmig2010)
 str(data_char_ukimmig2010)
+lapply(substr(data_char_ukimmig2010,1,16), function(x) x)
 
 # create a corpus from immigration texts
-immigCorpus <- corpus(data_char_ukimmig2010, 
-                      metacorpus = list(notes = "Created as part of a demo."))
-docvars(immigCorpus) <- data.frame(party = names(data_char_ukimmig2010), 
-                                   year = 2010)
-summary(immigCorpus)
+immigCorpus <- corpus(
+  data_char_ukimmig2010
+  ,metacorpus = list(notes = "Created as part of a demo."))
+docvars(immigCorpus) <- data.frame(
+  party = names(data_char_ukimmig2010)
+ ,year = 2010)
+docvars(immigCorpus)
+head(summary(immigCorpus), n = 2)
 
-# explore using kwic
-kwic(immigCorpus, "deport", window = 3)
-kwic(immigCorpus, phrase("illegal immig*"), window = 3)
+
+# kwic
+kw <- kwic(immigCorpus
+ ,"deport", window = 3)
+sloop::otype(kw)
+str(kw)
+
+
+# kwic example
+kwic(immigCorpus
+ ,phrase("illegal immig*")
+ ,window = 3)
+
+
+#subset corpus on docvars
+corpus_subset(immigCorpus, party == "BNP")
+
 
 # extract a document-feature matrix
-immigDfm <- dfm(corpus_subset(immigCorpus, party == "BNP"))
+immigDfm <- dfm(
+  corpus_subset(immigCorpus
+   ,party == "BNP"))
 textplot_wordcloud(immigDfm)
-immigDfm <- dfm(corpus_subset(immigCorpus, party == "BNP"), 
-                remove = c(stopwords("english"), "will"),
-                remove_punct = TRUE)
-textplot_wordcloud(immigDfm, 
-                   random.color = TRUE, rot.per = .25, 
-                   colors = sample(colors()[2:128], 5))
+immigDfm <- dfm(
+  corpus_subset(immigCorpus, party == "BNP")
+  ,remove = c(stopwords("english"), "will")
+  ,remove_punct = TRUE)
+textplot_wordcloud(immigDfm
+ ,random.color = TRUE
+ ,rot.per = .25
+ ,colors = sample(colors()[2:128], 5))
 
 # change units to sentences
-immigCorpusSent <- corpus_reshape(immigCorpus, to = "sentences")
-summary(immigCorpusSent, 20)
+immigCorpus$settings$units
+immigCorpusSent <- corpus_reshape(
+  immigCorpus, to = "sentences")
+immigCorpusSent$settings$units
 
 
 ## tokenize some texts
 txt <- "#TextAnalysis is MY <3 4U @myhandle gr8 #stuff :-)"
-tokens(txt, remove_punct = TRUE)
-tokens(txt, remove_punct = TRUE, remove_twitter = FALSE)
-tokens(txt, remove_punct = TRUE, remove_twitter = TRUE)
-(toks <- tokens(char_tolower(txt), remove_punct = TRUE, 
-                remove_twitter = TRUE))
+tokens(txt, remove_punct = FALSE)
+tokens(txt, remove_punct = TRUE
+ ,remove_twitter = TRUE)
 
+
+# tokens, structure, maybe repeated
+tk <- tokens(txt, remove_punct = FALSE)
+sloop::otype(tk)
+str(tk)
+
+
+# token WHAT
 # tokenize sentences
-(sents <- tokens(data_char_ukimmig2010[3], what = "sentence"))
+tk <- tokens(data_char_ukimmig2010[3]
+ ,what = "sentence")
+attr(tk,"what")
 # tokenize characters
-tokens(data_char_ukimmig2010[5], what = "character")[[1]][1:100]
+tk <- tokens(data_char_ukimmig2010[5]
+ ,what = "character")
+attr(tk,"what")
 
-
+# finoqui
 ## some descriptive statistics
 
 ## create a document-feature matrix from the inaugural corpus
@@ -147,7 +180,7 @@ collocs3 <- tokens(data_corpus_inaugural) %>%
   tokens_remove(stopwords("english"), padding = TRUE) %>%
   tokens_remove("\\p{P}", valuetype = "regex", padding = TRUE) %>%
   textstat_collocations(size = 3)
-head(collocs3, 20)
-
+# head(collocs3, 20)
+head(collocs3, 2)
 
 
