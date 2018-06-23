@@ -81,6 +81,7 @@ print(dfmsInaug2[1:3,1:5])
 myDfm <- dfm(c("My Christmas was ruined by your opposition tax plan.",
                "Does the United_States or Sweden have more progressive taxation?"),
              tolower = FALSE, verbose = TRUE)
+
 # selects features (types?) whose name ends in s or has .y
 dfm_select(myDfm, pattern = c("s$", ".y"), selection = "keep", valuetype = "regex")
 dfm_select(myDfm, pattern = c("s$"), selection = "keep", valuetype = "regex")

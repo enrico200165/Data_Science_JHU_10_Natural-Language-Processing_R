@@ -1,10 +1,12 @@
+print("started")
+
 require(quanteda, quietly = TRUE, warn.conflicts = FALSE)
 # help(package = "quanteda")
 #install.packages("readtext")
 require(readtext)
 #install.packages("devtools")
 #
-devtools::install_github("quanteda/quanteda.corpora")
+# devtools::install_github("quanteda/quanteda.corpora")
 require(quanteda.corpora)
 #install.packages("spacyr")
 require(spacyr)
@@ -128,3 +130,6 @@ topfeatures(myDfm2) # without stopwords
 topfeatures(myDfm3) # without stopwords or punctuation
 
 # End
+
+
+print("completed");

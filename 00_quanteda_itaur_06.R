@@ -8,6 +8,7 @@ require(readtext)
 require(quanteda.corpora)
 #install.packages("spacyr")
 require(spacyr)
+require(readtext)
 library(ggplot2)
 
 # --- external files ---
@@ -23,10 +24,10 @@ prj_dir()
 
 #
 # setwd("C:\\Users\\enrico\\GDRIVE\\CAPSTONE\\Quanteda\\ITAUR\\6_advanced")
-setwd(file.path(itaur_dir(),"6_advanced"))
+# setwd(file.path(itaur_dir(),"6_advanced"))
 # getwd()
 
-load("tweetSample.RData")
+load("./data/tweetSample.RData")
 str(tweetSample)
 
 require(lubridate)
@@ -72,12 +73,12 @@ require(scales)
 plotDf <- count(spitzAll, kand, day=day) %>% 
   mutate(day = as.Date(day-1, origin = "2014-01-01"))
 
-ggplot(data=plotDf, aes(x=day, y=n, colour=kand)) + 
-  geom_line(size=1) +
-  scale_y_continuous(labels = comma) + geom_vline(xintercept=as.numeric(as.Date("2014-05-15")), linetype=4) +
-  geom_vline(xintercept=as.numeric(as.Date("2014-05-25")), linetype=4) +
-  theme(axis.text=element_text(size=12),
-        axis.title=element_text(size=14,face="bold"))
+ggplot(data=plotDf, aes(x=day, y=n, colour=kand)) 
+  + geom_line() 
+  + scale_y_continuous(labels = comma) 
+  + geom_vline(xintercept=as.numeric(as.Date("2014-05-15"))) 
+  + geom_vline(xintercept=as.numeric(as.Date("2014-05-25"))) 
+#  + theme(axis.text=element_text(), axis.title=element_text())
 
 # use the keptFeatures argument to dfm() to analyse 
 # only hashtags for each candidate’s text.
@@ -102,7 +103,8 @@ data(data_corpus_amicus, package = "quanteda.corpora")
 refs <- docvars(data_corpus_amicus, "trainclass")
 refs <- (as.numeric(refs) - 1.5)*2
 amicusDfm <- dfm(data_corpus_amicus)
-wm <- textmodel_wordscores(amicusDfm, y = refs)
+wm <- textmodel_wordscores(
+  amicusDfm, y = refs)
 summary(wm)
 preds <- predict(wm, newdata = amicusDfm)
 summary(preds)
@@ -120,8 +122,9 @@ dfm(data_corpus_irishbudget2010) %>%
   textplot_scale1d
 
 # Poisson scaling
-ieWF <- dfm(data_corpus_irishbudget2010, remove_punct = TRUE) %>%
-  textmodel_wordfish(dir = c(6,5))
+ieWF <- dfm(data_corpus_irishbudget2010
+ ,remove_punct = TRUE) %>%
+textmodel_wordfish(dir = c(6,5))
 summary(ieWF)
 textplot_scale1d(ieWF)
 
@@ -130,14 +133,18 @@ textplot_scale1d(ieWF)
 # LDA info https://www.quora.com/What-is-a-good-explanation-of-Latent-Dirichlet-Allocation
 require(topicmodels)
 ## Loading required package: topicmodels
-mycorpus <- corpus_subset(data_corpus_inaugural, Year > 1950)
-quantdfm <- dfm(mycorpus, verbose = FALSE, remove_punct = TRUE,
-                remove = c(stopwords('english'), 'will', 'us', 'nation', 'can', 'peopl*', 'americ*'))
-ldadfm <- convert(quantdfm, to = "topicmodels")
-lda <- LDA(ldadfm, control = list(alpha = 0.1), k = 20)
+mycorpus <- corpus_subset(data_corpus_inaugural
+ ,Year > 1950)
+quantdfm <- dfm(mycorpus
+ ,verbose = FALSE, remove_punct = TRUE
+ ,remove = c(stopwords('english')
+ ,'will', 'us', 'nation', 'can', 'peopl*', 'americ*'))
+ldadfm <- convert(quantdfm
+ ,to = "topicmodels")
+lda <- LDA(ldadfm
+ ,control = list(alpha = 0.1)
+ ,k = 20)
 terms(lda, 10)
-
-
 
 
 # ---------------------------------------------------------
