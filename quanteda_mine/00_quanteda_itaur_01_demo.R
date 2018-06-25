@@ -2,7 +2,10 @@
 ## Ken Benoit <kbenoit@lse.ac.uk>
 ## Paul Nulty <p.nulty@lse.ac.uk>
 
-library("quanteda")
+require(quanteda)
+
+# devtools::install_github("hadley/s3")
+require(sloop)
 
 help(package = "quanteda")
 
