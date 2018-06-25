@@ -13,10 +13,20 @@ knitr::opts_chunk$set(
 
 
 # Foreword  
-In data science I have often heard statements like "start/lead with the question". Here I try to follow that principles.   
-The question we are given in the capstone project is (next) word prediction.  
-I have seen some didactic examples of EDA in NL where the "question"/goal was to predict whether an email was spam or not. For that and similar questions "neuter" and/or common words were considered not very useful, ex "stopwords" less common words could be useful and meaningful, so such analysis explore and use concepts like [TF-IDF](https://en.wikipedia.org/wiki/Tf-idf).  
-At this very initial stages my understanding is that, due to the difference in the "question", at least in some cases, we have opposite requirement to the "predict spam" examples: for instance we are interested in very frequent words (and n-grams) so this analysis will be rather different from the spam examples.
+Goal of EDA (exploratory Data Analysis) is to get a general idea of the data.
+One of the key principles taught in the course, probably the key principle is **"start/lead with the question"**.
+The question is clearly defined by the objective of the capstone project: next
+word predictions. We are also given some requirements, not of interest for non
+specialists, that make very clear that information about volume of data (ex. size
+and length of text, number of different workds) might be important.
+Here I try to follow that principles, so this analysis might be slightly
+different from examples of text  EDA available in courses books and internet as they have a different focus("question") than ours. For instance:  a basic didactic example is the "question" to predict whether an email is spam or not. 
+For that questions "neuter" and/or common words are not  useful (ex. "stopwords") while less common words could be useful and meaningful.
+For our "question"/goal it seems that we cannot ignore stopwords. 
+An exploratory analysis is not a final place to draw conclusion but an initial place to understand the data, so  rather than discard "stopwords" up front as other analysis probably would, in our EDA it seems important to get information about stopwords, information useful at later stages to decide what to do about them,
+
+
+
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',

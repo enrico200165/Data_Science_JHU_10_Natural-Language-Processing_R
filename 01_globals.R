@@ -10,8 +10,6 @@ SERIAL_PREFIX <- "SERIALIZATION_"
 inc <- function(e1) eval.parent(substitute(e1 <- e1+1))
 
 # --- data directories ---
-superdir= ".."
-data_dir_start <- file.path(superdir,superdir,superdir,superdir,superdir,"data_dev")
 getDataDir <- function(ddir) {
   while (nchar(ddir) > 4 & !dir.exists(ddir) & grepl(paste0(superdir,"[\\/]"),ddir)) {
     ddir <- substring(ddir,nchar(superdir)+2, nchar(ddir))
@@ -19,10 +17,11 @@ getDataDir <- function(ddir) {
   }
   if(dir.exists(ddir)) {
     return(ddir)
-  } else {
-    return(NA)
   }
+  return(NA)
 }
+superdir= ".."
+data_dir_start <- file.path(superdir,superdir,superdir,superdir,superdir,"data_dev")
 data_dir <- getDataDir(data_dir_start)
 data_dir_cap <- file.path(data_dir,"capstone_data")
 data_dir_corpus <- file.path(data_dir_cap,"data_in/corpus/")
