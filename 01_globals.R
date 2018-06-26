@@ -1,6 +1,6 @@
 
-orig_dir <- dirname(sys.frame(1)$ofile)
-
+# orig_dir <- dirname(sys.frame(1)$ofile)
+orig_dir <- getwd()
 prj_dir <- function() setwd(orig_dir)
 
 db_fname <- "words_en.sqlite"
@@ -9,22 +9,32 @@ SERIAL_PREFIX <- "SERIALIZATION_"
 
 inc <- function(e1) eval.parent(substitute(e1 <- e1+1))
 
-# --- data directories ---
-getDataDir <- function(ddir) {
-  while (nchar(ddir) > 4 & !dir.exists(ddir) & grepl(paste0(superdir,"[\\/]"),ddir)) {
-    ddir <- substring(ddir,nchar(superdir)+2, nchar(ddir))
-    # print(ddir)
+
+# --------------------------------------------------------------------
+#                         data directories
+# --------------------------------------------------------------------
+
+
+dev_data_dir <- function() {
+  if (Sys.info()["nodename"] == "LTPGJSDPX1") {
+    "C:\\Users\\e_viali\\Documents\\dev\\ITAUR"
+  } else if (Sys.info()["nodename"] == "asus") {
+    "asusdir"
+  } else if (Sys.info()["nodename"] == "THPAD-W530") {
+    "V:\\data\\pers_dev\\data_dev"
+  } else {
+    NA
   }
-  if(dir.exists(ddir)) {
-    return(ddir)
-  }
-  return(NA)
 }
-superdir= ".."
-data_dir_start <- file.path(superdir,superdir,superdir,superdir,superdir,"data_dev")
-data_dir <- getDataDir(data_dir_start)
+
+
+# superdir= ".."
+data_dir <- dev_data_dir();
+dir.exists(data_dir)
 data_dir_cap <- file.path(data_dir,"capstone_data")
+dir.exists(data_dir_cap)
 data_dir_corpus <- file.path(data_dir_cap,"data_in/corpus/")
+dir.exists(data_dir_corpus)
 
 
 itaur_dir <- function() {
@@ -33,6 +43,8 @@ itaur_dir <- function() {
   } else {
     if (Sys.info()["nodename"] == "asus") {
       "asusdir"
+    } else if (Sys.info()["nodename"] == "THPAD-W530") {
+      "C:\\Users\\enrico\\GDrv_enrico.viali\\CAPSTONE\\Quanteda\\ITAUR"
     } else {
       NA
     }
