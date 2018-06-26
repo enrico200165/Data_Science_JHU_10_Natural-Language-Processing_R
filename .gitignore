@@ -41,4 +41,6 @@ vignettes/*.pdf
 *rds
 *html
 
+# data texts files
+*.txt
 

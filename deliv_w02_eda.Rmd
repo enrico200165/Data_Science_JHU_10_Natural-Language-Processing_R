@@ -42,14 +42,14 @@ source("01_globals.R")
 
 
 ```{r load_files, echo=TRUE}
-fnames_pattern <- file.path(data_dir_corpus,"*subset*")
+#fnames_pattern <- file.path(data_dir_corpus,"*subset*")
 
-blogs <- readtext(fnames_pattern
- ,docvarsfrom = "filenames", dvsep = "-"
- ,docvarnames = c("lang","title","subset","nlines_kept","nlines_read"))
+#blogs <- readtext(fnames_pattern
+# ,docvarsfrom = "filenames", dvsep = "-"
+# ,docvarnames = c("lang","title","subset","nlines_kept","nlines_read"))
 
-myCorpus <- corpus(blogs)
-print(summary(myCorpus))
+#myCorpus <- corpus(blogs)
+#print(summary(myCorpus))
 ```
 
 

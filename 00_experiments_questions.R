@@ -43,3 +43,34 @@ class(kwds)
 # [1] "keyness"    "textstat"   "data.frame"
 kwds[which(kwds[,1] == "uk"), ]
 
+
+# ---------------------------------------------------------
+#   System Commands
+# ---------------------------------------------------------
+# No system, system2:
+# http://stat.ethz.ch/R-manual/R-devel/library/base/html/system2.html
+command = "ls"
+system2(command = command
+        ,args = ".",
+        stdout = TRUE, stderr = "", stdin = "", input = NULL
+        #,env = character(), wait = TRUE
+        #,minimized = FALSE, invisible = TRUE, timeout = 0
+        )
+command = "wc"
+args <- "--bytes"
+args <- paste(args,"--chars")
+args <- paste(args,"--words")
+args <- paste(args,"--lines")
+args <- paste(args,"--max-line-length")
+args <- paste(args,"deliv_w02_eda.Rmd")
+out <- system2(command = command
+        ,args = args,
+        stdout = TRUE, stderr = "", stdin = "", input = NULL
+        #,env = character(), wait = TRUE
+        #,minimized = FALSE, invisible = TRUE, timeout = 0
+)
+
+print(out)
+spl <- strsplit(out)
+(spl)
+"newline", "word", "character", "byte", "max.line.length"
