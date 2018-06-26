@@ -206,7 +206,7 @@ readTxtFileToStringVectors <- function(fname, nrLinesToRead) {
     print(paste("no files found in",targetDir))
     return(FALSE)
   }
-  textFiles <- grep("en.*",textFiles,value = TRUE)
+  # textFiles <- grep("en.*",textFiles,value = TRUE)
   # textFiles <- grep(".*tw.*",textFiles,value = TRUE)
   textFiles <- grep("subset",textFiles,value = TRUE,invert = T)
   
@@ -243,62 +243,73 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
 
 
 # -----------------------------------------------
-  readtextIfEmpty <- function(mydf, in_dir, nomeFile) {
+  readtextIfEmpty <- function(mydf, in_dir, nFile) {
 # -----------------------------------------------
   varName <- deparse(substitute(mydf))
   
-  if (!missing(in_dir) & !is.na(in_dir) & nchar(in_dir) > 0) {
-    nomeFile <- paste0(in_dir,"/",nomeFile)
+  if ( missing(in_dir) || is.na(in_dir) || (nchar(in_dir) <= 0)
+    ) {
+    nomeFile <- nFile
+  } else {
+    stopifnot(dir.exists(in_dir))
+    nomeFile <- paste0(in_dir,"/",nFile)
   }
 
-  exists = TRUE
-  exists <- exists && exists(varName)
-  filled <- exists && (object.size(mydf) > 256)
   
-  hasSerialization = TRUE
-  rdsFName <- paste0(SERIAL_PREFIX,varName,".rds")
-  hasSerialization <- hasSerialization && file.exists(rdsFName)
-  
+  exists <- exists(varName)
+  filled <- exists && (!is.null(nrow(mydf)) &&  nrow(mydf)> 0)
   if (filled) {
     print(paste(varName,"exists and is filled, do nothing"))
     return(mydf)
   }
   
-  if (!exists | !filled) {
+  if (!exists || !filled) {
     
+    rdsFName <- paste0(SERIAL_PREFIX,varName,".rds")
+    hasSerialization <- file.exists(rdsFName)
     if (hasSerialization) {
       print(paste(varName,"reading serialization"))
       mydf <- readRDS(rdsFName)
       # assign(varName,mydf,.GlobalEnv) # pass it outside,
       assign(varName,mydf,envir=parent.frame(n = 1))
       return(mydf)
-    } else {
-      print(paste(varName,"reading file from",nomeFile," and writing serialization"))
-      if (is.null(list.files(nomeFile)) || length(list.files(nomeFile)) <= 0) {
-         return(data.frame(a = integer()))
-      }
-          
-      my_rt <- readtext(nomeFile, docvarsfrom = "filenames"
-                       ,docvarnames = c("lng","country","type","b","c","d")
-                       ,dvsep = "[_.]", encoding = "UTF-8"
-                       , verbosity = 3)
-      
-      # cannot set docvars like in a corpus with docvars(corpus) <- 
-      # this is not a corpus, is a df, more basically
-      print(head(my_rt,1))
-      sampled_pctg <- as.numeric(my_rt[7])*100/as.numeric(my_rt[8])
-      my_rt <- select(my_rt,-c(6:ncol(my_rt)))
-      my_rt$sample_pctg <- sampled_pctg
-      # print(docvars(mydf))
-      
-      mydf <- corpus(my_rt)
-      # print(paste("blogs",format(object.size(my_rt), units = "MiB")))      
+    } 
+    if (is.null(nomeFile) || length(nomeFile) <= 0  || !file.exists(nomeFile)) {
+        print(paste("no files found for:",nomeFile))
+         return(NA)
     }
+    print(paste(varName,"reading file from",nomeFile," and writing serialization"))
+    # split1 <- strsplit(nFile,"_")[[1]]
+    # split2 <- strsplit(split1[2],".",fixed=T)[[1]]
+    # docv <- data.frame(lng = split2[1], type = split2[1])
+    
+    my_rt <- readtext(nomeFile
+    #
+    , docvarsfrom = "filenames", docvarnames = c("country","lng","type",
+                                                 "dummy1", "lines_in", "lines_tot") ,dvsep = "[_.]"
+                      , encoding = "UTF-8"
+                       , verbosity = 3)
+    #docvars(my_rt) <- docv
+    # cannot set docvars like in a corpus with docvars(corpus) <- 
+    # this is not a corpus, is a df, more basically
+    print(head(my_rt,1))
+    sampled_pctg <- 100*docvars(my_rt)$lines_in/docvars(my_rt)$lines_tot
+    my_rt <- select(my_rt,-c(6:ncol(my_rt)))
+    my_rt$sample_pctg <- sampled_pctg
+    
+    my_rt
+    # print(docvars(mydf))
+    # mydf <- corpus(my_rt)
+    # print(paste("blogs",format(object.size(my_rt), units = "MiB")))      
   }
-  if (!file.exists(rdsFName))
-    saveRDS(mydf, file = rdsFName)
+  
+  
+  if (!file.exists(rdsFName)) {
+    print(paste("saving serialization to: ",rdsFName));
+    saveRDS(my_rt, file = rdsFName)
+  }
 
-  mydf
+  my_rt
 }
 
 
@@ -306,17 +317,22 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
   readInQCorp <- function(data_dir_corpus, subsetPar) {
 # ---------------------------------------------------------
 # lazy reads files matching regex into a corpus
-  filesInDir <- list.files(data_dir_corpus)
-  # print(filesInDir)
+    
+  print(paste("data_dir_corpus:",data_dir_corpus))
+    
+  filesInDir <- list.files(data_dir_corpus,"*bset*")
   # files2readBool <- str_detect(filesInDir, file_regex)
+
+  df <- readtextIfEmpty(qc_blogs,data_dir_corpus
+                         ,filesInDir[1])
+  for (fname in filesInDir[2:length(filesInDir)]) {
+    curdf <- readtextIfEmpty(qc_blogs,data_dir_corpus
+                             ,fname)
+    df <- bind_rows(df,curdf)
+  }
   
-  s <- if(subsetPar) {"subset*"} else {"full*"}
-  qc_blogs <<- readtextIfEmpty(qc_blogs,data_dir_corpus
-                               ,paste0("en*blogs*",s))
-  qc_news  <<- readtextIfEmpty(qc_news,data_dir_corpus
-                               ,paste0("en*news*",s))
-  qc_twitts <<- readtextIfEmpty(qc_twitts,data_dir_corpus
-                                ,paste0("en*twitt*",s))
+  myc <- corpus(df)
+  myc
 }
 
 
@@ -331,6 +347,10 @@ unitTests <- function() {
   print(" --- Unit Testing --- ")
     
   if (T) {
+    subsetTextFilesByLines(data_dir_corpus, 5,1000)
+  }
+
+  if (T) {
     readInQCorp(data_dir_corpus, FALSE)
   }  
   
@@ -338,13 +358,14 @@ unitTests <- function() {
     ptm <- proc.time()
     print(list.files(data_dir_corpus))
     readInQCorp(data_dir_corpus, FALSE)
-    print("time")
+    print(paste("exec time",paste(proc.time() - ptm,collapse = " ")))
     print(proc.time() - ptm)
   # print(docvars(qc_blogs))
     print(paste("blogs",format(object.size(qc_blogs), units = "MiB")))
     print(paste("news",format(object.size(qc_news), units = "MiB")))
     print(paste("twitts",format(object.size(qc_twitts), units = "MiB")))
   }
+  
   print(" --- Tests Completed --- ")
 }
 
