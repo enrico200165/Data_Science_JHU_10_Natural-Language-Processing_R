@@ -83,6 +83,7 @@ wcForFile <- function(fdir,fname) {
     ,n_word = splNums[1]
     ,newline = splNums[1]
     ,max_line_len = splNums[5]
+    ,stringsAsFactors=FALSE
     )
   # print(wcDfRow)
   wcDfRow
