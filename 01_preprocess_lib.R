@@ -274,6 +274,10 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
       return(mydf)
     } else {
       print(paste(varName,"reading file from",nomeFile," and writing serialization"))
+      if (is.null(list.files(nomeFile)) || length(list.files(nomeFile)) <= 0) {
+         return(data.frame(a = integer()))
+      }
+          
       my_rt <- readtext(nomeFile, docvarsfrom = "filenames"
                        ,docvarnames = c("lng","country","type","b","c","d")
                        ,dvsep = "[_.]", encoding = "UTF-8"
@@ -293,7 +297,8 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
   }
   if (!file.exists(rdsFName))
     saveRDS(mydf, file = rdsFName)
-  return(mydf)
+
+  mydf
 }
 
 
@@ -315,25 +320,33 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
 }
 
 
+
+# --------------------------------------------------------------------
+#                         Unit Tests
+# --------------------------------------------------------------------
+
+
+unitTests <- function() {
+
+  print(" --- Unit Testing --- ")
+    
+  if (T) {
+    readInQCorp(data_dir_corpus, FALSE)
+  }  
   
-# ---------------------------------------------------------
-#     Test
-# ---------------------------------------------------------
-
-# 
-# 
-
-myTest <- function() {
-  ptm <- proc.time()
-  print(list.files(data_dir_corpus))
-  readInQCorp(data_dir_corpus, FALSE)
-  print("time")
-  print(proc.time() - ptm)
+  if(T) {
+    ptm <- proc.time()
+    print(list.files(data_dir_corpus))
+    readInQCorp(data_dir_corpus, FALSE)
+    print("time")
+    print(proc.time() - ptm)
   # print(docvars(qc_blogs))
-  print(paste("blogs",format(object.size(qc_blogs), units = "MiB")))
-  print(paste("news",format(object.size(qc_news), units = "MiB")))
-  print(paste("twitts",format(object.size(qc_twitts), units = "MiB")))
+    print(paste("blogs",format(object.size(qc_blogs), units = "MiB")))
+    print(paste("news",format(object.size(qc_news), units = "MiB")))
+    print(paste("twitts",format(object.size(qc_twitts), units = "MiB")))
+  }
+  print(" --- Tests Completed --- ")
 }
 
-#myTest()
 
+unitTests()
