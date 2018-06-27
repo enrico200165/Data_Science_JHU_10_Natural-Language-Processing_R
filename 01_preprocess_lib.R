@@ -134,10 +134,16 @@ source("01_globals.R")
   
 
 # ---------------------------------------------------------
-  subsetLines <- function(fname, nrLinesKept, nrLinesRead) {
+  subsetLines <- function(fname, in_dir, out_dir,nrLinesKept, nrLinesRead) {
 # ---------------------------------------------------------
+
+    stopifnot(all(dir.exists(in_dir),dir.exists(out_dir)))
+    
     descr <- paste0("_", nrLinesKept, "_", nrLinesRead)
     fnameOut <- subsetFileName(fname, descr)
+    fnameOut <- file.path(out_dir,fnameOut)
+    fname <- file.path(in_dir,fname)
+    stopifnot(file.exists(fname))
     cat("subsetting\n", fname, " to\n", fnameOut)
 
     # enc <- iconvlist()[309] # utf8
@@ -197,7 +203,7 @@ readTxtFileToStringVectors <- function(fname, nrLinesToRead) {
   
   
 # ---------------------------------------------------------
-  subsetTextFilesByLines <- function(targetDir,nrLinesKept, nrLinesRead) {
+  subsetTextFilesByLines <- function(targetDir, out_dir, nrLinesKept, nrLinesRead) {
 # ---------------------------------------------------------
     
   print(paste("workdir:",getwd(),"looking for files in dir: ",targetDir))
@@ -210,9 +216,9 @@ readTxtFileToStringVectors <- function(fname, nrLinesToRead) {
   # textFiles <- grep(".*tw.*",textFiles,value = TRUE)
   textFiles <- grep("subset",textFiles,value = TRUE,invert = T)
   
-  textFiles <- file.path(data_dir_corpus, textFiles)
+  # textFiles <- file.path(data_dir_corpus, textFiles)
   sapply(textFiles, FUN = function(x) { 
-    subsetLines(x, nrLinesKept, nrLinesRead); TRUE
+    subsetLines(x, targetDir, out_dir,nrLinesKept, nrLinesRead); TRUE
     } )
 } 
     
@@ -264,11 +270,10 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
   }
   
   if (!exists || !filled) {
-    
-    rdsFName <- paste0(SERIAL_PREFIX,varName,".rds")
+    rdsFName <- paste0(SERIAL_PREFIX,nFile,".rds")
     hasSerialization <- file.exists(rdsFName)
     if (hasSerialization) {
-      print(paste(varName,"reading serialization"))
+      print(paste(varName,"reading serialization from:",rdsFName))
       mydf <- readRDS(rdsFName)
       # assign(varName,mydf,.GlobalEnv) # pass it outside,
       assign(varName,mydf,envir=parent.frame(n = 1))
@@ -284,7 +289,6 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
     # docv <- data.frame(lng = split2[1], type = split2[1])
     
     my_rt <- readtext(nomeFile
-    #
     , docvarsfrom = "filenames", docvarnames = c("country","lng","type",
                                                  "dummy1", "lines_in", "lines_tot") ,dvsep = "[_.]"
                       , encoding = "UTF-8"
@@ -296,43 +300,69 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
     sampled_pctg <- 100*docvars(my_rt)$lines_in/docvars(my_rt)$lines_tot
     my_rt <- select(my_rt,-c(6:ncol(my_rt)))
     my_rt$sample_pctg <- sampled_pctg
-    
     my_rt
     # print(docvars(mydf))
     # mydf <- corpus(my_rt)
-    # print(paste("blogs",format(object.size(my_rt), units = "MiB")))      
+    # print(single Quanteda paste("blogs",format(text object.size(my_rt), units = "MiB")))text       
   }
   
   
   if (!file.exists(rdsFName)) {
-    print(paste("saving serialization to: ",rdsFName));
+    print(paste("saving serialization to: ",rdsFName))
     saveRDS(my_rt, file = rdsFName)
   }
 
   my_rt
 }
 
-
-# ---------------------------------------------------------
-  readInQCorp <- function(data_dir_corpus, subsetPar) {
-# ---------------------------------------------------------
-# lazy reads files matching regex into a corpus
-    
-  print(paste("data_dir_corpus:",data_dir_corpus))
-    
-  filesInDir <- list.files(data_dir_corpus,"*bset*")
-  # files2readBool <- str_detect(filesInDir, file_regex)
-
-  df <- readtextIfEmpty(qc_blogs,data_dir_corpus
-                         ,filesInDir[1])
-  for (fname in filesInDir[2:length(filesInDir)]) {
-    curdf <- readtextIfEmpty(qc_blogs,data_dir_corpus
-                             ,fname)
-    df <- bind_rows(df,curdf)
-  }
+# Reads a single file for pattern
+readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus, fnamePattern) {
   
-  myc <- corpus(df)
-  myc
+  fname <- list.files(data_dir_corpus,paste0(fnamePattern,".*\\.txt"))
+  stopifnot(length(fname) == 1)
+  
+  readtextIfEmpty(text_df,data_dir_corpus,fname)
+}
+
+# --------------------------------------------------------------------
+readInQCorp <- function(data_dir_corpus, subsetPar) 
+# --------------------------------------------------------------------
+# lazy reads text files matching pattern into a single Quanteda corpus
+{    
+  
+  print(paste("data_dir_corpus:single Quanteda ",data_dir_corpus))
+  filesInDir <- list.files(data_dir_corpus,"*bset*"); print(filesInDir)
+  
+  
+  en_US_blogs   <- readtextIfEmpty_Wrapper(en_US_blogs,data_dir_corpus,  "en_US.blogs")
+  texts_df <- en_US_blogs
+  en_US_news    <- readtextIfEmpty_Wrapper(en_US_news,data_dir_corpus,   "en_US.news")
+  bind_rows(texts_df,en_US_news)
+  en_US_twitter <- readtextIfEmpty_Wrapper(en_US_twitter,data_dir_corpus,"en_US.twitter")
+  bind_rows(texts_df,en_US_twitter)
+  
+  de_DE_blogs   <- readtextIfEmpty_Wrapper(de_DE_blogs,data_dir_corpus,  "de_DE.blogs")
+  bind_rows(texts_df, de_DE_blogs)
+  de_DE_news    <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus,   "de_DE.news")
+  bind_rows(texts_df, de_DE_news)
+  de_DE_twitter <- readtextIfEmpty_Wrapper(de_DE_twitter,data_dir_corpus,"de_DE.twitter")
+  bind_rows(texts_df, de_DE_twitter)
+  
+  fi_FI_blogs   <- readtextIfEmpty_Wrapper(fi_FI_blogs,data_dir_corpus,"fi_FI.blogs")
+  bind_rows(texts_df, fi_FI_blogs)
+  fi_FI_news    <- readtextIfEmpty_Wrapper(fi_FI_news,data_dir_corpus, "fi_FI.news")
+  bind_rows(texts_df, fi_FI_news)
+  fi_FI_twitter <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus, "fi_FI.twitter")
+  bind_rows(texts_df, fi_FI_twitter)
+  
+  ru_RU_blogs   <- readtextIfEmpty_Wrapper(ru_RU_blogs,data_dir_corpus,"ru_RU.blogs")
+  bind_rows(texts_df, ru_RU_blogs)
+  ru_RU_news    <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus, "ru_RU.news")
+  bind_rows(texts_df, ru_RU_news)
+  ru_RU_twitter <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus, "ru_RU.twitter")
+  bind_rows(texts_df, ru_RU_twitter)
+  
+  corpus(texts_df)
 }
 
 
@@ -346,15 +376,23 @@ unitTests <- function() {
 
   print(" --- Unit Testing --- ")
     
-  if (T) {
-    subsetTextFilesByLines(data_dir_corpus, 5,1000)
+  #  if (T) {
+  if (F) {
+    subsetTextFilesByLines(data_dir_corpus_in
+                           ,data_dir_corpus_work
+                           ,5,1000)
   }
 
   if (T) {
-    readInQCorp(data_dir_corpus, FALSE)
+    qc <- readInQCorp(data_dir_corpus_work, FALSE)
+    smr <- summary(qc)
+    rm(qc)
+    print(str(smr))
+    print("")
   }  
   
-  if(T) {
+#  if(T) {
+  if(F) {
     ptm <- proc.time()
     print(list.files(data_dir_corpus))
     readInQCorp(data_dir_corpus, FALSE)

@@ -33,8 +33,9 @@ data_dir <- dev_data_dir();
 dir.exists(data_dir)
 data_dir_cap <- file.path(data_dir,"capstone_data")
 dir.exists(data_dir_cap)
-data_dir_corpus <- file.path(data_dir_cap,"data_in/corpus/")
-dir.exists(data_dir_corpus)
+data_dir_corpus_in <- file.path(data_dir_cap,"data_in/corpus/")
+data_dir_corpus_work <- file.path(data_dir_cap,"data_work/corpus/")
+dir.exists(data_dir_corpus_work)
 
 
 itaur_dir <- function() {
