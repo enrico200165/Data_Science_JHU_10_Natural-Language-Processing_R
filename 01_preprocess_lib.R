@@ -134,7 +134,8 @@ source("01_globals.R")
   
 
 # ---------------------------------------------------------
-  subsetLines <- function(fname, in_dir, out_dir,nrLinesKept, nrLinesRead) {
+  subsetLines <- function(fname, in_dir, out_dir, nrLinesKept
+  ,nrLinesRead,forceIt) {
 # ---------------------------------------------------------
 
     stopifnot(all(dir.exists(in_dir),dir.exists(out_dir)))
@@ -145,6 +146,10 @@ source("01_globals.R")
     fname <- file.path(in_dir,fname)
     stopifnot(file.exists(fname))
     cat("subsetting\n", fname, " to\n", fnameOut)
+    if (!forceIt && file.exists(fnameOut)) {
+      print(paste("subset already exists, not overwriting it:",fnameOut))
+      return(TRUE)
+    }
 
     # enc <- iconvlist()[309] # utf8
     enc <- getOption("encoding")
@@ -177,6 +182,7 @@ source("01_globals.R")
       gc() 
     }
     )
+    TRUE
   }
 
   
@@ -203,13 +209,16 @@ readTxtFileToStringVectors <- function(fname, nrLinesToRead) {
   
   
 # ---------------------------------------------------------
-  subsetTextFilesByLines <- function(targetDir, out_dir, nrLinesKept, nrLinesRead) {
+  subsetTextFilesByLines <- function(in_dir, out_dir, nrLinesKept
+    ,nrLinesRead, forceIt) {
 # ---------------------------------------------------------
     
-  print(paste("workdir:",getwd(),"looking for files in dir: ",targetDir))
-  textFiles <- list.files(targetDir)
+  print(paste("out dir:",out_dir," - in dir: ",in_dir))
+  stopifnot(dir.exists(in_dir))
+  stopifnot(dir.exists(out_dir))
+  textFiles <- list.files(in_dir)
   if (length(textFiles) <= 0) {
-    print(paste("no files found in",targetDir))
+    print(paste("no files found in",in_dir))
     return(FALSE)
   }
   # textFiles <- grep("en.*",textFiles,value = TRUE)
@@ -218,7 +227,7 @@ readTxtFileToStringVectors <- function(fname, nrLinesToRead) {
   
   # textFiles <- file.path(data_dir_corpus, textFiles)
   sapply(textFiles, FUN = function(x) { 
-    subsetLines(x, targetDir, out_dir,nrLinesKept, nrLinesRead); TRUE
+    subsetLines(x, in_dir, out_dir,nrLinesKept, nrLinesRead, forceIt); TRUE
     } )
 } 
     
@@ -318,6 +327,8 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
 # Reads a single file for pattern
 readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus, fnamePattern) {
   
+  stopifnot(dir.exists(data_dir_corpus))
+  
   fname <- list.files(data_dir_corpus,paste0(fnamePattern,".*\\.txt"))
   stopifnot(length(fname) == 1)
   
@@ -330,7 +341,8 @@ readInQCorp <- function(data_dir_corpus, subsetPar)
 # lazy reads text files matching pattern into a single Quanteda corpus
 {    
   
-  print(paste("data_dir_corpus:single Quanteda ",data_dir_corpus))
+  print(paste("readInQCorp",data_dir_corpus))
+  stopifnot(dir.exists(data_dir_corpus))
   filesInDir <- list.files(data_dir_corpus,"*bset*"); print(filesInDir)
   
   
@@ -376,11 +388,11 @@ unitTests <- function() {
 
   print(" --- Unit Testing --- ")
     
-  #  if (T) {
-  if (F) {
+  if (T) {
+  #if (F) {
     subsetTextFilesByLines(data_dir_corpus_in
                            ,data_dir_corpus_work
-                           ,5,1000)
+                           ,5,1000, F)
   }
 
   if (T) {

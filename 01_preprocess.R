@@ -1,6 +1,5 @@
-# Sources
-# https://rpubs.com/lmullen/nlp-chapter
-# http://www.mjdenny.com/Text_Processing_In_R.html
+#data on
+# https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip
 
 # install.packages("stringr", dependencies = TRUE)
 library(stringr)
