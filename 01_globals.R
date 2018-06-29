@@ -82,6 +82,61 @@ itaur_dir <- function() {
 }
 
 
+#---------------------------------------------------------------------
+  readIfEmpty <- function(df, nomeFile) 
+#---------------------------------------------------------------------
+{
+  varName <- "1235413fsdfsdfsdfdsfsdfdfs"
+  varName <- deparse(substitute(df))
+  if (missing(nomeFile)) {
+    nomeFile <- paste0(varName,".rds")
+  }
+  
+
+  if (!exists(varName)
+      || is.null(df)
+      || (is.data.frame(df) && nrow(df) <= 0)) {
+    if (file.exists(nomeFile)) {
+      # print(paste(varName,"is empty, trying to read", nomeFile))
+      df <- readRDS(nomeFile)
+      #assign(varName,df,.GlobalEnv) # pass it outside
+      assign(varName,df,parent.frame(n = 1)) # pass it outside
+      return(TRUE)
+    } else {
+      # no file to read from
+    }
+    # otherwise would be always read
+  } else {
+    # print(paste(varName,"is not empty"))
+  }
+  # print(paste("exit",varName, "has rows", nrow(df)))
+  FALSE
+}
+
+
+
+#---------------------------------------------------------------------
+  serializeIfNeeded <- function(dfPar, forceIt, rdsFName) 
+#---------------------------------------------------------------------
+{
+  varName <- deparse(substitute(dfPar))
+  if (missing(rdsFName)) {
+    rdsFName <- paste0(varName,".rds")
+  }
+  
+  if (!file.exists(rdsFName) || forceIt) {
+    # if(exists(varName)) {
+    if(TRUE) {
+      # print(paste("serializig to .rds var:",varName,"file:",rdsFName))
+      saveRDS(dfPar, file = rdsFName)
+    } else {
+      # print(paste("not serializing because not exists var: ",varName))
+    }
+  }
+   
+}
+
+
 # --- Corpuses ---
 # qc: quanteda corpus
 
@@ -94,3 +149,23 @@ if (!exists("qc_twitts")) qc_twitts <- NA
 #    Tests
 # ------------------------------------------
 # print(getDataDir(data_dir))
+
+testIt <- function() {
+  
+  if (readIfEmpty(mydf)) {
+    # print("ok, I could read it")
+  } else {
+    print("NO, I could NOT read it")
+    # mydf <- data.frame(a = 1:3,b = 11:13)
+  }
+  
+  serializeIfNeeded(mydf,FALSE)
+  mydf <<- NULL
+  readIfEmpty(mydf)
+  print(mydf)
+}
+
+#
+#
+# testIt()
+# print(mydf)

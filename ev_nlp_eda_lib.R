@@ -1,3 +1,4 @@
+require(dplyr)
 require(stringr)
 
 
@@ -106,6 +107,45 @@ require(stringr)
   wcDf <- bind_rows(myrows)
 }
 
+# --------------------------------------------------------------------
+  physicalAnalysis <- function()
+#---------------------------------------------------------------------
+{
+
+  linux_wc_bound <- function(x) wcForFile(data_dir_corpus_in,x)
+  lsForFile_bound <- function(x) lsForFile(x,data_dir_corpus_in, "--block-size=M") 
+  
+  ls_df <- getWCInfo(data_dir_corpus_in,"*.txt",lsForFile_bound)
+  wc_df <- getWCInfo(data_dir_corpus_in,"*.txt",linux_wc_bound)
+  basic_df <- lngCountryTypeDF(ls_df[,1])
+
+  ret = basic_df
+  ret = merge(ret,ls_df,key = 1)
+  ret = merge(ret,wc_df,key = 1)
+  ret
+}
+
+
+#---------------------------------------------------------------------
+  lngCountryTypeDF <- function(fnames) 
+#---------------------------------------------------------------------
+{
+    mydf <- data.frame(dummy = 1:length(fnames))
+    
+    # print(fnames)
+    splits <- str_split(fnames,"[_\\.]")
+    
+    mydf[[TXT_FNAME]] = fnames 
+    mydf[[TXT_CTR]] = sapply(splits, function(x) x[1]) 
+    mydf[[TXT_LNG]] = sapply(splits, function(x) x[2]) 
+    mydf[[TXT_TYP]] = sapply(splits, function(x) x[3]) 
+
+    mydf[["dummy"]] = NULL
+    
+    mydf
+}
+  
+  
 
 
 # ====================================================================
@@ -114,21 +154,31 @@ require(stringr)
 
 
 testIt <- function(){
+
   source("01_globals.R")
-  
-  
-  linux_wc_bound <- function(x) wcForFile(data_dir_corpus_in,x)
+
   lsForFile_bound <- function(x) lsForFile(x,data_dir_corpus_in, "--block-size=M") 
+  linux_wc_bound <- function(x) wcForFile(data_dir_corpus_in,x)
   
+  if (readIfEmpty(linux_wc_bound)) {
+    print("ok, I could read it")
+  } else {
+    print("NO, I could NOT read it")
+    wc_df <- getWCInfo(data_dir_corpus_in,"*.txt",linux_wc_bound)
+    print(wc_df)
+    serializeIfNeeded(linux_wc_bound,FALSE)  
+  }
   
-  ls_df <- getWCInfo(data_dir_corpus_in,"*.txt",lsForFile_bound)
-  print(ls_df)
-  wc_df <- getWCInfo(data_dir_corpus_in,"*.txt",linux_wc_bound)
-  print(wc_df)
-  
-  print(merge(ls_df,wc_df))
 }
 
-if(T) testIt()
-  
+# if(T) testIt()
+# 
+
+if(F ) {
+  source("01_globals.R")
+  x <- physicalAnalysis()
+  print(str(x))
+  print(x)
+}
+
 

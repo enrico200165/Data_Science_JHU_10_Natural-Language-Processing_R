@@ -7,25 +7,40 @@ output: html_document
 
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE
+  collapse = TRUE, cache = FALSE
 )
 ```
 
-
 # Foreword  
-Goal of EDA (exploratory Data Analysis) is to get a general idea of the data.
-One of the key principles taught in the course, probably the key principle is **"start/lead with the question"**.
-The question is clearly defined by the objective of the capstone project: next
-word predictions. We are also given some requirements, not of interest for non
-specialists, that make very clear that information about volume of data (ex. size
-and length of text, number of different workds) might be important.
-Here I try to follow that principles, so this analysis might be slightly
-different from examples of text  EDA available in courses books and internet as they have a different focus("question") than ours. For instance:  a basic didactic example is the "question" to predict whether an email is spam or not. 
-For that questions "neuter" and/or common words are not  useful (ex. "stopwords") while less common words could be useful and meaningful.
-For our "question"/goal it seems that we cannot ignore stopwords. 
-An exploratory analysis is not a final place to draw conclusion but an initial place to understand the data, so  rather than discard "stopwords" up front as other analysis probably would, in our EDA it seems important to get information about stopwords, information useful at later stages to decide what to do about them,
+## Approach
+One of the key principles taught in the course is **"start/lead with the question"**.  
+This EDA (exploratory data analysis) is for a question very clearly 
+defined by the objective of the  capstone project: "next word prediction".  
+Along with the question we are also given some requirements, not reported 
+here  because too specialistic, from which is clear that size of data 
+might be important for our implementation. 
 
+Our question/goals is different from text analysis examples often found
+in other books. For instance it is different from the very common example,
+provided also in our course, of predicting whether an email is spam or not.
+For that "questions" neuter or frequent words (ex. "stopwords") are 
+not  useful  while less common words could be useful and meaningful.
+For our "question" it seems that we cannot ignore neuter or frequent 
+words,it is possible that they might be the most important.
 
+Goal of EDA (exploratory Data Analysis) is to get an initial and general 
+understanding of the data. EDA is not a place to draw conclusions neither
+should be influenced by premature hypothesis, sowe will not sacrifice 
+generality or plunge into details that belong to later stages, but we 
+will also take into account what our question is and the point of 
+attention about data sizes we have been provided.  
+
+## Data Overview
+We are provided text in the following languages:
+- English
+- Finnish
+- German
+- Russian
 
 
 ```{r global_options, include=FALSE}
@@ -34,22 +49,29 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
 ```
 
 ```{r load_libraries, echo=FALSE}
+require(dplyr)
 require(quanteda)
 require(readtext)
+require(knitr)
 source("01_globals.R")
+source("ev_nlp_eda_lib.R")
+
 ```
 
 
 
-```{r load_files, echo=TRUE}
-#fnames_pattern <- file.path(data_dir_corpus,"*subset*")
+## Physical / Low Level Examination of data
 
-#blogs <- readtext(fnames_pattern
-# ,docvarsfrom = "filenames", dvsep = "-"
-# ,docvarnames = c("lang","title","subset","nlines_kept","nlines_read"))
+```{r load_files, echo = FALSE}
+require(kableExtra)
+readIfEmpty(phys_an_df)
+if (!exists("phys_an_df") || nrow(phys_an_df) <= 0) {
+  phys_an_df <- physicalAnalysis()
+  serializeIfNeeded(phys_an_df,FALSE)
+}
+row.names(phys_an_df) <- NULL
+phys_an_df %>%  kable(row.names = FALSE) %>% kable_styling()
 
-#myCorpus <- corpus(blogs)
-#print(summary(myCorpus))
 ```
 
 

@@ -68,4 +68,3 @@ for(fname in file.path(data_dir_corpus,files)) {
 nchar(data_corpus_inaugural[1:7])/ntoken(data_corpus_inaugural[1:7])
 # remove punctuation
 # ntoken(data_corpus_inaugural[1:7], remove_punct = TRUE)
-
