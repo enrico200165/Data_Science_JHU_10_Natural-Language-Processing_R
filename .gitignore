@@ -44,5 +44,7 @@ vignettes/*.pdf
 # data texts files
 *.txt
 
+
 # quanteda data
 quanteda_mine/data/
+itaur_copy_modify/data

@@ -17,7 +17,9 @@ require(dplyr)
 # https://www.r-bloggers.com/using-sqlite-in-r/
 # install.packages("RSQLite", dependencies = TRUE)
 # install.packages("sqldf")
-library(DBI); library(RSQLite); library(sqldf)
+require(DBI); 
+require(RSQLite); 
+require(sqldf)
 
 
 source("01_globals.R")
@@ -388,8 +390,8 @@ unitTests <- function() {
 
   print(" --- Unit Testing --- ")
     
-  if (T) {
-  #if (F) {
+  #if (T) {
+  if (F) {
     subsetTextFilesByLines(data_dir_corpus_in
                            ,data_dir_corpus_work
                            ,5,1000, F)

@@ -1,4 +1,30 @@
 
+
+
+# --------------------------------------------------------------------
+#                   CONSTANTS
+# --------------------------------------------------------------------
+TXT_CTR = "country"
+TXT_LNG = "language"
+TXT_TYP = "type"
+
+TXT_FNAME = "file"
+TXT_SIZE  = "size"
+TXT_SIZE_U  = "size_units"
+TXT_BYTES = "n_byte"
+TXT_NCHAR = "n_char"
+TXT_NTOKENS = "n_tokens"
+TXT_NNLINES = "n_newlines"
+
+
+
+
+# --------------------------------------------------------------------
+#                   TO ORGANIZE
+# --------------------------------------------------------------------
+
+
+
 # orig_dir <- dirname(sys.frame(1)$ofile)
 orig_dir <- getwd()
 prj_dir <- function() setwd(orig_dir)
@@ -23,6 +49,8 @@ dev_data_dir <- function() {
     file.path("C:","Users","enrico","Documents","dev","dev_data")
   } else if (Sys.info()["nodename"] == "THPAD-W530") {
     "V:\\data\\pers_dev\\data_dev"
+  } else if (Sys.info()["nodename"] == "enrico-ThinkPad-W530") {  
+    file.path("/","media","enrico","usbdata","data","pers_dev","data_dev")
   } else {
     NA
   }

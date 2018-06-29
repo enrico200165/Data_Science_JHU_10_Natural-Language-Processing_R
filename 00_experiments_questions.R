@@ -1,3 +1,4 @@
+require(dplyr)
 require(quanteda)
 # help(package = "quanteda")
 #install.packages("readtext")
@@ -52,11 +53,18 @@ source("01_globals.R")
 # No system, system2:
 # http://stat.ethz.ch/R-manual/R-devel/library/base/html/system2.html
 
-
-wcForFile <- function(fdir,fname) {
-
+#---------------------------------------------------------------------
+  wcForFile <- function(fdir,fname) 
+#---------------------------------------------------------------------
+# wc *nix command on file
+# ret: dataframe row with full wc output
+{ 
   print(paste("wcForFile() file:",fname))
+
+  stopifnot(dir.exists(fdir))
   file_path <- file.path(fdir,fname)
+  stopifnot(file.exists(file_path))
+  
   command = "wc"
   args <- "--bytes"
   args <- paste(args,"--chars")
@@ -81,7 +89,7 @@ wcForFile <- function(fdir,fname) {
     ,n_byte = splNums[4]
     ,n_char = splNums[3]
     ,n_word = splNums[1]
-    ,newline = splNums[1]
+    ,n_newline = splNums[1]
     ,max_line_len = splNums[5]
     ,stringsAsFactors=FALSE
     )
@@ -90,19 +98,24 @@ wcForFile <- function(fdir,fname) {
 }
 
 
-
-getWCInfo <- function(data_dir, ptrn) {
-
-  flist <- list.files(data_dir,ptrn)
+# --------------------------------------------------------------------
+  getWCInfo <- function(data_dir, ptrn)
+# --------------------------------------------------------------------
+# runs wc *nix on a set of file
+# ret: wc output in dataframe
+{
+  stopifnot(dir.exists(data_dir))
   
-  # wcForFile(data_dir_corpus,flist[[1]])
+  flist <- list.files(data_dir,ptrn)
+  stopifnot(length(flist) > 1)
   
   myrows <- lapply(flist, function(x) wcForFile(data_dir,x))
-  wcDfSeed <-myrows[[1]]; 
-  wcDf <- bind_rows(wcDfSeed,myrows[2:length(myrows)])
-  wcDf
+#  wcDfSeed <-myrows[[1]]; 
+#  wcDf <- bind_rows(wcDfSeed,myrows[2:length(myrows)])
+#  wcDf
+  wcDf <- bind_rows(myrows)
 }
 
-mydf <- getWCInfo(data_dir_corpus,"*.txt")
+mydf <- getWCInfo(data_dir_corpus_in,"*.txt")
 
 print(mydf)
