@@ -13,8 +13,8 @@ TXT_SIZE  = "size"
 TXT_SIZE_U  = "size_units"
 TXT_BYTES = "n_byte"
 TXT_NCHAR = "n_char"
-TXT_NTOKENS = "n_tokens"
-TXT_NNLINES = "n_newlines"
+TXT_NTOKENS = "n_token"
+TXT_NNLINES = "n_newline"
 
 
 
@@ -96,20 +96,21 @@ itaur_dir <- function() {
   if (!exists(varName)
       || is.null(df)
       || (is.data.frame(df) && nrow(df) <= 0)) {
+    print(paste(varName,"is empty", nomeFile))
     if (file.exists(nomeFile)) {
-      # print(paste(varName,"is empty, trying to read", nomeFile))
       df <- readRDS(nomeFile)
       #assign(varName,df,.GlobalEnv) # pass it outside
       assign(varName,df,parent.frame(n = 1)) # pass it outside
       return(TRUE)
     } else {
-      # no file to read from
+      print(paste(varName,"cannot read, no file: ", nomeFile))
     }
     # otherwise would be always read
   } else {
-    # print(paste(varName,"is not empty"))
+    print(paste(varName,"is alread filled","has rows", nrow(df)))
+    return(TRUE)
   }
-  # print(paste("exit",varName, "has rows", nrow(df)))
+  # print(paste("exit",varName, ))
   FALSE
 }
 

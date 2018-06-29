@@ -156,12 +156,10 @@ require(stringr)
 testIt <- function(){
 
   source("01_globals.R")
-
   lsForFile_bound <- function(x) lsForFile(x,data_dir_corpus_in, "--block-size=M") 
   linux_wc_bound <- function(x) wcForFile(data_dir_corpus_in,x)
   
   if (readIfEmpty(linux_wc_bound)) {
-    print("ok, I could read it")
   } else {
     print("NO, I could NOT read it")
     wc_df <- getWCInfo(data_dir_corpus_in,"*.txt",linux_wc_bound)
@@ -174,11 +172,44 @@ testIt <- function(){
 # if(T) testIt()
 # 
 
-if(F ) {
-  source("01_globals.R")
-  x <- physicalAnalysis()
-  print(str(x))
-  print(x)
-}
 
+
+#if(T) {
+  source("01_globals.R")
+
+  require(ggplot2)
+
+  if (readIfEmpty(phys_df)) {
+  } else {
+    print("NO, I could NOT read it")
+    phys_df <- physicalAnalysis()
+    serializeIfNeeded(phys_df,FALSE)  
+  }
+
+  p <- ggplot(data=phys_df, aes(x = type, y = n_token)) 
+  p <- p + geom_bar(stat="identity"
+                    ,aes(fill = language), position = "dodge"
+                    )  
+  # p <- p + facet_grid(~language)
+  p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  print(p)
+
+  
+  
+    
+  print(str(phys_df))
+  print(phys_df)
+#}
+
+try <- function(xPar,yPar,fillPar)  {
+  p <- ggplot(data=phys_df, aes_string(x = xPar, y = yPar)) 
+  p <- p + geom_bar(stat="identity"
+                    ,aes_string(fill = fillPar), position = "dodge")
+  # p <- p + facet_grid(~language)
+  p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  print(p)
+  
+}
+try(TXT_TYP,TXT_NTOKENS,TXT_LNG)
+try(TXT_LNG,TXT_NTOKENS,TXT_TYP)
 
