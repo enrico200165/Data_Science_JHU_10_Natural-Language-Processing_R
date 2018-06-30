@@ -259,6 +259,72 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
   return(list(lines = lines, vars = dvars, dnames = docnames))
 }
 
+# --------------------------------------------------------------------
+readtextIfEmpty_DELETE <- function(mydf, in_dir, nFile)
+  # --------------------------------------------------------------------
+# 
+{
+  varName <- deparse(substitute(mydf))
+  
+  if ( missing(in_dir) || is.na(in_dir) || (nchar(in_dir) <= 0)
+  ) {
+    nomeFile <- nFile
+  } else {
+    stopifnot(dir.exists(in_dir))
+    nomeFile <- file.path(in_dir,nFile)
+  }
+  
+  exists <- exists(varName)
+  filled <- exists && (!is.null(nrow(mydf)) &&  nrow(mydf)> 0)
+  if (filled) {
+    print(paste(varName,"exists and is filled, do nothing"))
+    return(mydf)
+  }
+  
+  if (!exists || !filled) {
+    rdsFName <- paste0(SERIAL_PREFIX,nFile,".rds")
+    hasSerialization <- file.exists(rdsFName)
+    if (hasSerialization) {
+      print(paste(varName,"reading serialization from:",rdsFName))
+      mydf <- readRDS(rdsFName)
+      # assign(varName,mydf,.GlobalEnv) # pass it outside,
+      assign(varName,mydf,envir=parent.frame(n = 1))
+      return(mydf)
+    } 
+    if (is.null(nomeFile) || length(nomeFile) <= 0  || !file.exists(nomeFile)) {
+      print(paste("no files found for:",nomeFile))
+      return(NA)
+    }
+    
+    print(paste(varName,"reading file from",nomeFile," and writing serialization"))
+    my_rt <- readtext(nomeFile
+                      , docvarsfrom = "filenames", docvarnames = c("country","lng","type",
+                                                                   "dummy1", "lines_in", "lines_tot") ,dvsep = "[_.]"
+                      , encoding = "UTF-8"
+                      , verbosity = 1)
+    #docvars(my_rt) <- docv
+    # cannot set docvars like in a corpus with docvars(corpus) <- 
+    # this is not a corpus, is a df, more basically
+    print(head(my_rt,1))
+    sampled_pctg <- 100*docvars(my_rt)$lines_in/docvars(my_rt)$lines_tot
+    my_rt <- select(my_rt,-c(6:ncol(my_rt)))
+    my_rt$sample_pctg <- sampled_pctg
+    
+    # print(docvars(mydf))
+    # mydf <- corpus(my_rt)
+    # print(single Quanteda paste("blogs",format(text object.size(my_rt), units = "MiB")))text       
+  }
+  
+  nomeFile
+  if (!file.exists(rdsFName)) {
+    print(paste("saving serialization to: ",rdsFName))
+    saveRDS(my_rt, file = rdsFName)
+  }
+  
+  my_rt
+}
+
+
 
 # --------------------------------------------------------------------
   readtextIfEmpty <- function(mydf, in_dir, nFile)
@@ -296,11 +362,8 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
         print(paste("no files found for:",nomeFile))
          return(NA)
     }
+
     print(paste(varName,"reading file from",nomeFile," and writing serialization"))
-    # split1 <- strsplit(nFile,"_")[[1]]
-    # split2 <- strsplit(split1[2],".",fixed=T)[[1]]
-    # docv <- data.frame(lng = split2[1], type = split2[1])
-    
     my_rt <- readtext(nomeFile
     , docvarsfrom = "filenames", docvarnames = c("country","lng","type",
                                                  "dummy1", "lines_in", "lines_tot") ,dvsep = "[_.]"
@@ -319,12 +382,11 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
     # print(single Quanteda paste("blogs",format(text object.size(my_rt), units = "MiB")))text       
   }
   
-  
   if (!file.exists(rdsFName)) {
     print(paste("saving serialization to: ",rdsFName))
     saveRDS(my_rt, file = rdsFName)
   }
-
+  
   my_rt
 }
 
@@ -490,6 +552,23 @@ unitTests <- function() {
 }
 
 
-unitTests()
+# unitTests()
 # 
-qc <- readRDS("qc_full.rds")
+
+if (!readIfEmpty(qc_full)) {
+  qc_full <- readInQCorp2(data_dir_corpus_in, FALSE)
+  serializeIfNeeded(qc_full, FALSE) 
+}
+
+ntypes <- ntype(qc_full)
+print(paste("nr types:"))
+z <- sapply(ntypes, function(x) { invisible(print(paste((x))))}  )
+
+print(paste("trying to calculate DFM, probably will crash"))
+
+if (!readIfEmpty(dfm_qc_full)) {
+  dfm_qc_full <-dfm(qc_full)
+  serializeIfNeeded(dfm_qc_full, FALSE) 
+}
+
+

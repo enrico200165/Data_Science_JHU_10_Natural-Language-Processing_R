@@ -17,6 +17,7 @@ TXT_NTOKENS = "n_token"
 TXT_NNLINES = "n_newline"
 
 
+SERIAL_PREFIX <- "SERIALIZATION_"
 
 
 # --------------------------------------------------------------------
@@ -31,7 +32,6 @@ prj_dir <- function() setwd(orig_dir)
 
 db_fname <- "words_en.sqlite"
 
-SERIAL_PREFIX <- "SERIALIZATION_"
 
 inc <- function(e1) eval.parent(substitute(e1 <- e1+1))
 
@@ -92,11 +92,14 @@ itaur_dir <- function() {
     nomeFile <- paste0(varName,".rds")
   }
   
+  nomeFile <- paste0(SERIAL_PREFIX,nomeFile)
+  
   if (!exists(varName)
       || is.null(df)
       || (length(df) <= 0 && nrow(df) <= 0)) {
     print(paste(varName,"is empty", nomeFile))
     if (file.exists(nomeFile)) {
+      print(paste("found serialization for:",varName," file:", nomeFile))
       df <- readRDS(nomeFile)
       #assign(varName,df,.GlobalEnv) # pass it outside
       assign(varName,df,parent.frame(n = 1)) # pass it outside
@@ -123,6 +126,8 @@ itaur_dir <- function() {
   if (missing(rdsFName)) {
     rdsFName <- paste0(varName,".rds")
   }
+
+  rdsFName <- paste0(SERIAL_PREFIX,rdsFName)
   
   if (!file.exists(rdsFName) || forceIt) {
     # if(exists(varName)) {
