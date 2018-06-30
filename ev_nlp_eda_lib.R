@@ -201,7 +201,7 @@ testIt <- function(){
   print(phys_df)
 #}
 
-try <- function(xPar,yPar,fillPar)  {
+basicPlot <- function(xPar,yPar,fillPar)  {
   p <- ggplot(data=phys_df, aes_string(x = xPar, y = yPar)) 
   p <- p + geom_bar(stat="identity"
                     ,aes_string(fill = fillPar), position = "dodge")
@@ -210,6 +210,6 @@ try <- function(xPar,yPar,fillPar)  {
   print(p)
   
 }
-try(TXT_TYP,TXT_NTOKENS,TXT_LNG)
-try(TXT_LNG,TXT_NTOKENS,TXT_TYP)
+basicPlot(TXT_TYP,TXT_NTOKENS,TXT_LNG)
+basicPlot(TXT_LNG,TXT_NTOKENS,TXT_TYP)
 

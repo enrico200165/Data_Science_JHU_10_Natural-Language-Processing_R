@@ -71,7 +71,6 @@ if (!exists("phys_an_df") || nrow(phys_an_df) <= 0) {
 }
 row.names(phys_an_df) <- NULL
 phys_an_df %>%  kable(row.names = FALSE) %>% kable_styling()
-
 ```
 
 

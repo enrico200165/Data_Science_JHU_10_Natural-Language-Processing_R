@@ -92,10 +92,9 @@ itaur_dir <- function() {
     nomeFile <- paste0(varName,".rds")
   }
   
-
   if (!exists(varName)
       || is.null(df)
-      || (is.data.frame(df) && nrow(df) <= 0)) {
+      || (length(df) <= 0 && nrow(df) <= 0)) {
     print(paste(varName,"is empty", nomeFile))
     if (file.exists(nomeFile)) {
       df <- readRDS(nomeFile)
@@ -136,6 +135,27 @@ itaur_dir <- function() {
   }
    
 }
+
+
+# --------------------------------------------------------------------
+  GiB <- function (x, digits)
+# --------------------------------------------------------------------
+{
+  if (missing(digits))
+    digits <- 2
+  round(x/(2^30),digits)
+}
+
+
+# --------------------------------------------------------------------
+MiB <- function (x, digits)
+# --------------------------------------------------------------------
+{
+  if (missing(digits))
+    digits <- 2
+  round(x/(2^20),digits)
+}
+
 
 
 # --- Corpuses ---
