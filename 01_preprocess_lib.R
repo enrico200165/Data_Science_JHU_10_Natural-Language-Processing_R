@@ -557,8 +557,8 @@ unitTests <- function() {
 
 if (!readIfEmpty(qc_full)) {
   qc_full <- readInQCorp2(data_dir_corpus_in, FALSE)
-  serializeIfNeeded(qc_full, FALSE) 
 }
+serializeIfNeeded(qc_full, FALSE) 
 
 ntypes <- ntype(qc_full)
 print(paste("nr types:"))

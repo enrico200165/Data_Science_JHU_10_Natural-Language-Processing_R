@@ -33,8 +33,6 @@ prj_dir <- function() setwd(orig_dir)
 db_fname <- "words_en.sqlite"
 
 
-inc <- function(e1) eval.parent(substitute(e1 <- e1+1))
-
 
 # --------------------------------------------------------------------
 #                         data directories
@@ -82,11 +80,51 @@ itaur_dir <- function() {
 }
 
 
+# --------------------------------------------------------------------
+  inc <- function(e1) eval.parent(substitute(e1 <- e1+1))
+# --------------------------------------------------------------------
+
+
+#---------------------------------------------------------------------
+  setCoreDF <- function(std_df, lng, ttype, name_col, value, set_it) 
+#---------------------------------------------------------------------
+# assumes a data frame with language and text type as ID columns
+# adds value to a given column
+{
+  stopifnot(c(TXT_LNG,TXT_TYP) %in% names(std_df))
+  if (missing(set_it)) set_it <- FALSE
+  
+  varName <- deparse(substitute(std_df))
+  
+  row_to_update <- which(
+    std_df[[TXT_LNG]] == lng & std_df[[TXT_TYP]] == ttype)
+  col_to_update <- which(name_col == names(std_df))
+  
+  if ( (length(row_to_update) <= 0) 
+      || (length(col_to_update) <= 0)
+      ){
+    print("warn: col or row not found")
+    return(FALSE)
+  }
+
+  if(set_it) {
+    std_df[row_to_update,col_to_update] <- value
+  } else { # add to it
+    std_df[row_to_update,col_to_update] <- value + std_df[row_to_update,col_to_update]
+  }
+  
+  assign(varName,std_df,parent.frame(n = 1)) # pass it outside
+  TRUE
+}
+
+
 #---------------------------------------------------------------------
   readIfEmpty <- function(df, nomeFile) 
 #---------------------------------------------------------------------
+# probably should be rewritten (to use a better subfunction I will
+# probably write soon)
 {
-  varName <- "1235413fsdfsdfsdfdsfsdfdfs"
+  varName <- ""
   varName <- deparse(substitute(df))
   if (missing(nomeFile)) {
     nomeFile <- paste0(varName,".rds")
@@ -107,7 +145,6 @@ itaur_dir <- function() {
     } else {
       print(paste(varName,"cannot read, no file: ", nomeFile))
     }
-    # otherwise would be always read
   } else {
     print(paste(varName,"is alread filled","has rows", nrow(df)))
     return(TRUE)
@@ -190,6 +227,44 @@ testIt <- function() {
   readIfEmpty(mydf)
   print(mydf)
 }
+
+
+testAddToCoreDF <- function() {
+  
+  d <- data.frame(language = c(rep("EN",3),rep("RU",3)
+    ,rep("FI",3),rep("DE",3))
+    , country = c(rep("USA",3),rep("ru",3)
+                  ,rep("fi",3),rep("ddr",3))
+    ,type = rep(c("blog","news","twitter"),4)
+    ,value = rep(100,12)
+    )
+
+  setCoreDF(d,"DE","blog","value",90)
+  setCoreDF(d,"EN","blog","value",91)
+  setCoreDF(d,"FI","blog","value",92)
+  setCoreDF(d,"RU","blog","value",93,T)
+
+  setCoreDF(d,"DE","news","value",80)
+  setCoreDF(d,"EN","news","value",81)
+  setCoreDF(d,"FI","news","value",82)
+  setCoreDF(d,"RU","news","value",83,T)
+
+  t <- "twitter"
+  i <- 50
+  setCoreDF(d,"DE",t,"value",i)
+  setCoreDF(d,"EN",t,"value",i+1)
+  setCoreDF(d,"FI",t,"value",i+2)
+  setCoreDF(d,"RU",t,"value",(i+3),T)
+
+  upateCoreDF(d,"DE","news","value",99999)
+  
+  print(d)
+  print("")
+}
+# 
+testAddToCoreDF()
+
+
 
 #
 #

@@ -12,3 +12,5 @@ require(spacyr)
 
 source("01_globals.R")
 
+methods(class = class(
+  data_corpus_inaugural)[1])
