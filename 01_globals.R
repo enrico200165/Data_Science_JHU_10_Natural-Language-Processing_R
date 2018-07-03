@@ -194,12 +194,16 @@ itaur_dir <- function() {
   names_removed <- setdiff(names_initial, env_names(e))
 }
 
+
+
+
 testRemoveAllVarExcept <- function() {
   a <- 1;  b <-2; c <- 3; d <- 4; e <- 99; f <- 5
   removed <- removeAllVarExcept(c("d","previous_names"))
   print(paste("vars removed: ",paste(removed,collapse = " ")))
 }
-# testRemoveAllVarExcept()
+# 
+testRemoveAllVarExcept()
 
 
 # --------------------------------------------------------------------
