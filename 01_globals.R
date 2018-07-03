@@ -175,8 +175,31 @@ itaur_dir <- function() {
       # print(paste("not serializing because not exists var: ",varName))
     }
   }
-   
 }
+
+
+# --------------------------------------------------------------------
+  removeAllVarExcept <- function (survivors,e)
+# --------------------------------------------------------------------
+{
+  if (missing(e))
+    #e <- env_parent()
+    e <- parent.frame()
+  
+  names_initial <- env_names(e)
+
+  victims <- setdiff(env_names(e),survivors)
+  env_unbind(e, victims)
+
+  names_removed <- setdiff(names_initial, env_names(e))
+}
+
+testRemoveAllVarExcept <- function() {
+  a <- 1;  b <-2; c <- 3; d <- 4; e <- 99; f <- 5
+  removed <- removeAllVarExcept(c("d","previous_names"))
+  print(paste("vars removed: ",paste(removed,collapse = " ")))
+}
+# testRemoveAllVarExcept()
 
 
 # --------------------------------------------------------------------
@@ -261,8 +284,7 @@ testAddToCoreDF <- function() {
   print(d)
   print("")
 }
-# 
-testAddToCoreDF()
+# testAddToCoreDF()
 
 
 
