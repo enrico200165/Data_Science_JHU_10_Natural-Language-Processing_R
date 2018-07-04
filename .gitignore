@@ -4,6 +4,11 @@
 
 # Session Data files
 .RData
+compact.RData
+# R data
+.RDataTmp
+
+
 
 # Example code in package build process
 *-Ex.R
@@ -18,8 +23,9 @@
 .Rproj.user/
 
 # produced vignettes
-vignettes/*.html
-vignettes/*.pdf
+*.html
+*.pdf
+*.md
 
 # OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
 .httr-oauth
@@ -34,8 +40,6 @@ vignettes/*.pdf
 .Rproj.user
 
 
-# R data
-.RDataTmp
 
 # R persistence/serialization files
 *rds
@@ -43,6 +47,9 @@ vignettes/*.pdf
 
 # data texts files
 *.txt
+
+itaur_copy_modify
+
 
 
 # quanteda data

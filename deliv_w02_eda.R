@@ -3,8 +3,9 @@ require(quanteda)
 require(readtext)
 
 
-source("01_globals.R")
-source("01_preprocess.R")
+# source("01_globals.R")
+# source("01_preprocess.R")
+source("ev_nlp_eda_lib.R")
 
 # examples
 # http://rpubs.com/erodriguez/milestone1
@@ -14,7 +15,7 @@ source("01_preprocess.R")
 
 corp <- NA
 
-fnames_pattern <- file.path(data_dir_corpus,"*subset*")
+fnames_pattern <- file.path(data_dir_corpus_in,"*subset*")
 texts <- readtext(fnames_pattern
    ,docvarsfrom = "filenames", dvsep = "[_.]"
    ,docvarnames = c("lang","dummy_1","title","dummy_2","nlines_kept","nlines_read"))
@@ -29,9 +30,9 @@ print(summary(corp_lines))
 
 
 
-ignore <- function() {
+ignore <- function(data_dir) {
 
-for(fname in file.path(data_dir_corpus,files)) {
+for(fname in file.path(data_dir,files)) {
   result <- enricoReadText(fname, -1)
   texts <- result[["lines"]]
   vars <- result[["vars"]]
@@ -49,22 +50,4 @@ for(fname in file.path(data_dir_corpus,files)) {
 }
 }
 
-# fnames_pattern <- file.path(data_dir_corpus,"*subset*")
-# 
-# blogs <- readtext(fnames_pattern
-#  ,docvarsfrom = "filenames", dvsep = "[_.]"
-# ,docvarnames = c("lang","ignore_1","title","subset","nlines_kept","nlines_read"))
-# 
-# 
-# str(blogs)
-# 
-# myCorpus <- corpus(blogs)
-# print(summary(myCorpus))
-# 
-# 
-
-# lunghezza tokens con quanteda
-# eventualmente applica grouping, supportato in quanteda
-nchar(data_corpus_inaugural[1:7])/ntoken(data_corpus_inaugural[1:7])
-# remove punctuation
-# ntoken(data_corpus_inaugural[1:7], remove_punct = TRUE)
+ignore(data_dir_corpus_work)

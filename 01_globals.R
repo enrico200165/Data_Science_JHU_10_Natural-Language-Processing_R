@@ -1,6 +1,4 @@
 
-
-
 # --------------------------------------------------------------------
 #                   CONSTANTS
 # --------------------------------------------------------------------
@@ -119,11 +117,41 @@ itaur_dir <- function() {
 
 
 #---------------------------------------------------------------------
-  readIfEmpty <- function(df, nomeFile) 
+serializeIfNeeded <- function(dfPar, forceIt, rdsFName) 
+  #---------------------------------------------------------------------
+{
+  varName <- deparse(substitute(dfPar))
+  if (missing(rdsFName)) {
+    rdsFName <- paste0(varName,".rds")
+  }
+  
+  rdsFName <- paste0(SERIAL_PREFIX,rdsFName)
+  
+  if (!file.exists(rdsFName) || forceIt) {
+    # if(exists(varName)) {
+    if(TRUE) {
+      # print(paste("serializig to .rds var:",varName,"file:",rdsFName))
+      saveRDS(dfPar, file = rdsFName)
+    } else {
+      # print(paste("not serializing because not exists var: ",varName))
+    }
+  }
+}
+
+
+#---------------------------------------------------------------------
+  readIfEmpty <- function(df, nomeFile, forceIt) 
 #---------------------------------------------------------------------
 # probably should be rewritten (to use a better subfunction I will
 # probably write soon)
+# return:
+# TRUE if it was or has bee filled
 {
+  if (missing(forceIt))
+    forceIt <- FALSE
+ 
+  ret <- FALSE
+   
   varName <- ""
   varName <- deparse(substitute(df))
   if (missing(nomeFile)) {
@@ -141,41 +169,24 @@ itaur_dir <- function() {
       df <- readRDS(nomeFile)
       #assign(varName,df,.GlobalEnv) # pass it outside
       assign(varName,df,parent.frame(n = 1)) # pass it outside
-      return(TRUE)
+      ret <- TRUE
     } else {
       print(paste(varName,"cannot read, no file: ", nomeFile))
+      ret <- FALSE
     }
   } else {
     print(paste(varName,"is alread filled","has rows", nrow(df)))
-    return(TRUE)
+    ret <- TRUE
   }
   # print(paste("exit",varName, ))
-  FALSE
-}
-
-
-
-#---------------------------------------------------------------------
-  serializeIfNeeded <- function(dfPar, forceIt, rdsFName) 
-#---------------------------------------------------------------------
-{
-  varName <- deparse(substitute(dfPar))
-  if (missing(rdsFName)) {
-    rdsFName <- paste0(varName,".rds")
-  }
-
-  rdsFName <- paste0(SERIAL_PREFIX,rdsFName)
   
-  if (!file.exists(rdsFName) || forceIt) {
-    # if(exists(varName)) {
-    if(TRUE) {
-      # print(paste("serializig to .rds var:",varName,"file:",rdsFName))
-      saveRDS(dfPar, file = rdsFName)
-    } else {
-      # print(paste("not serializing because not exists var: ",varName))
-    }
+  if (ret) {
+    serializeIfNeeded(df ,forceIt ,nomeFile)
   }
+  
+  ret
 }
+
 
 
 # --------------------------------------------------------------------
@@ -206,7 +217,7 @@ itaur_dir <- function() {
 
 
 # --------------------------------------------------------------------
-MiB <- function (x, digits)
+  MiB <- function (x, digits)
 # --------------------------------------------------------------------
 {
   if (missing(digits))
@@ -267,7 +278,9 @@ testAddToCoreDF <- function() {
   print(d)
 }
 
-testReadIfEmpty <- function() {
+
+  testReadIfEmpty <- function() 
+{
   
   mydf <- NULL
   if (readIfEmpty(mydf)) {
@@ -284,13 +297,11 @@ testReadIfEmpty <- function() {
 }
 
 
-test_Globals.R <- function() {
-  
+  test_Globals.R <- function() 
+{
   testRemoveAllVarExcept()
   testReadIfEmpty()
   testAddToCoreDF()
-
 }
 
-# 
-test_Globals.R()
+#  test_Globals.R()

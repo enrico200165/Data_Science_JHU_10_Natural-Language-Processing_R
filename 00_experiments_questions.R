@@ -12,5 +12,17 @@ require(spacyr)
 
 source("01_globals.R")
 
-methods(class = class(
-  data_corpus_inaugural)[1])
+dt <- data.table(
+  x =    1:3
+  ,y = 10*1:3)
+
+dt[ , sum(.SD)]
+# [1] 66
+
+dt[ , .(sum(.SD))]
+#    V1
+# 1: 66
+
+dt[ ,lapply(.SD,sum)]
+#    x  y   z
+# 1: 6 60 600

@@ -409,54 +409,51 @@ readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
 
 
 # --------------------------------------------------------------------
-  readInQCorp <- function(data_dir_corpus, subsetPar) 
+  readQCorpXXX <- function(data_dir_corpus, subsetPar) 
 # --------------------------------------------------------------------
 # lazy reads text files matching pattern into a single Quanteda corpus
 {    
-  print(paste("readInQCorp",data_dir_corpus))
+  print(paste("readQCorp",data_dir_corpus))
   stopifnot(dir.exists(data_dir_corpus))
   filesInDir <- list.files(data_dir_corpus,"*bset*"); print(filesInDir)
   
   en_US_blogs   <- readtextIfEmpty_Wrapper(en_US_blogs,data_dir_corpus,  "en_US.blogs")
-  texts_df <- en_US_blogs
   en_US_news    <- readtextIfEmpty_Wrapper(en_US_news,data_dir_corpus,   "en_US.news")
-  texts_df <- bind_rows(texts_df,en_US_news)
   en_US_twitter <- readtextIfEmpty_Wrapper(en_US_twitter,data_dir_corpus,"en_US.twitter")
-  texts_df <- bind_rows(texts_df,en_US_twitter)
   
   de_DE_blogs   <- readtextIfEmpty_Wrapper(de_DE_blogs,data_dir_corpus,  "de_DE.blogs")
-  texts_df <- bind_rows(texts_df, de_DE_blogs)
   de_DE_news    <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus,   "de_DE.news")
-  texts_df <- bind_rows(texts_df, de_DE_news)
   de_DE_twitter <- readtextIfEmpty_Wrapper(de_DE_twitter,data_dir_corpus,"de_DE.twitter")
-  texts_df <- bind_rows(texts_df, de_DE_twitter)
   
   fi_FI_blogs   <- readtextIfEmpty_Wrapper(fi_FI_blogs,data_dir_corpus,"fi_FI.blogs")
-  texts_df <- bind_rows(texts_df, fi_FI_blogs)
   fi_FI_news    <- readtextIfEmpty_Wrapper(fi_FI_news,data_dir_corpus, "fi_FI.news")
-  texts_df <- bind_rows(texts_df, fi_FI_news)
   fi_FI_twitter <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus, "fi_FI.twitter")
-  texts_df <- bind_rows(texts_df, fi_FI_twitter)
   
   ru_RU_blogs   <- readtextIfEmpty_Wrapper(ru_RU_blogs,data_dir_corpus,"ru_RU.blogs")
-  texts_df <- bind_rows(texts_df, ru_RU_blogs)
   ru_RU_news    <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus, "ru_RU.news")
-  texts_df <- bind_rows(texts_df, ru_RU_news)
   ru_RU_twitter <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus, "ru_RU.twitter")
-  texts_df <- bind_rows(texts_df, ru_RU_twitter)
+
   
+  texts_df <- bind_rows(
+   en_US_blogs, en_US_news, en_US_twitter
+  ,de_DE_blogs, de_DE_news, de_DE_twitter
+  ,fi_FI_blogs, fi_FI_news, fi_FI_twitter
+  ,ru_RU_blogs, ru_RU_news, ru_RU_twitter)
   
   corpus(texts_df)
 }
 
+
 # --------------------------------------------------------------------
-readInQCorp2 <- function(data_dir_corpus, subsetPar) 
-  # --------------------------------------------------------------------
+  readQCorp_HIDE_FOR_NOW <- function(data_dir_corpus, subsetPar) 
+# --------------------------------------------------------------------
 # lazy reads text files matching pattern into a single Quanteda corpus
 {    
   
-  print(paste("readInQCorp",data_dir_corpus))
+  print(paste("readQCorp",data_dir_corpus))
   stopifnot(dir.exists(data_dir_corpus))
+  
+  
   filesInDir <- list.files(data_dir_corpus,"*bset*"); print(filesInDir)
   
   en_US_blogs   <- readtextIfEmpty_Wrapper(en_US_blogs,data_dir_corpus,  "en_US.blogs")
@@ -487,32 +484,31 @@ readInQCorp2 <- function(data_dir_corpus, subsetPar)
   ru_RU_twitter <- readtextIfEmpty_Wrapper(ru_RU_twitter,data_dir_corpus, "ru_RU.twitter")
   qc <-qc+corpus(ru_RU_twitter);rm(ru_RU_twitter);gc();mem = pryr::object_size(qc)
   
-  print(paste("exiting readInQCorp2(), corpus size GiB: ", GiB(mem)))
+  print(paste("exiting readQCorp???(), corpus size GiB: ", GiB(mem)))
   
   qc  
 }
 
 
 
-# --------------------------------------------------------------------
+# ====================================================================
 #                         Unit Tests
+# ====================================================================
+
+
 # --------------------------------------------------------------------
-
-
-unitTests <- function() {
+  test_01_preprocess_libs.R <- function()
+# --------------------------------------------------------------------
+{
 
   print(" --- Unit Testing --- ")
     
-  #if (T) {
   if (F) {
-    subsetTextFilesByLines(data_dir_corpus_in
-                           ,data_dir_corpus_work
-                           ,5,1000, F)
+    subsetTextFilesByLines(data_dir_corpus_in ,data_dir_corpus_work ,5 ,1000 , F)
   }
 
   if (F) {
-    
-    qc_full <- readInQCorp2(data_dir_corpus_in, FALSE)
+    qc_full <- readQCorp(data_dir_corpus_in, FALSE)
     print("finished read the corpus, serializing it if needed")
     serializeIfNeeded(qc_full, FALSE) 
     print("finished serializing")
@@ -533,7 +529,7 @@ unitTests <- function() {
   if(F) {
     ptm <- proc.time()
     print(list.files(data_dir_corpus))
-    readInQCorp(data_dir_corpus, FALSE)
+    readQCorp(data_dir_corpus, FALSE)
     print(paste("exec time",paste(proc.time() - ptm,collapse = " ")))
     print(proc.time() - ptm)
   # print(docvars(qc_blogs))
@@ -552,13 +548,11 @@ unitTests <- function() {
 }
 
 
-# unitTests()
-# 
 
 if (!readIfEmpty(qc_full)) {
-  qc_full <- readInQCorp2(data_dir_corpus_in, FALSE)
+  qc_full <- readQCorp(data_dir_corpus_in, FALSE)
 }
-serializeIfNeeded(qc_full, FALSE) 
+serializeIfNeeded(qc_full, FALSE)
 
 ntypes <- ntype(qc_full)
 print(paste("nr types:"))
