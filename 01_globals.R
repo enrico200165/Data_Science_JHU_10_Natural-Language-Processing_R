@@ -186,24 +186,13 @@ itaur_dir <- function() {
     #e <- env_parent()
     e <- parent.frame()
   
-  names_initial <- env_names(e)
+  names_initial <- rlang::env_names(e)
 
-  victims <- setdiff(env_names(e),survivors)
-  env_unbind(e, victims)
+  victims <- setdiff(rlang::env_names(e),survivors)
+  rlang::env_unbind(e, victims)
 
-  names_removed <- setdiff(names_initial, env_names(e))
+  names_removed <- setdiff(names_initial, rlang::env_names(e))
 }
-
-
-
-
-testRemoveAllVarExcept <- function() {
-  a <- 1;  b <-2; c <- 3; d <- 4; e <- 99; f <- 5
-  removed <- removeAllVarExcept(c("d","previous_names"))
-  print(paste("vars removed: ",paste(removed,collapse = " ")))
-}
-# 
-testRemoveAllVarExcept()
 
 
 # --------------------------------------------------------------------
@@ -238,21 +227,11 @@ if (!exists("qc_twitts")) qc_twitts <- NA
 # ------------------------------------------
 #    Tests
 # ------------------------------------------
-# print(getDataDir(data_dir))
 
-testIt <- function() {
-  
-  if (readIfEmpty(mydf)) {
-    # print("ok, I could read it")
-  } else {
-    print("NO, I could NOT read it")
-    # mydf <- data.frame(a = 1:3,b = 11:13)
-  }
-  
-  serializeIfNeeded(mydf,FALSE)
-  mydf <<- NULL
-  readIfEmpty(mydf)
-  print(mydf)
+testRemoveAllVarExcept <- function() {
+  a <- 1;  b <-2; c <- 3; d <- 4; e <- 99; f <- 5
+  removed <- removeAllVarExcept(c("d","previous_names"))
+  print(paste("vars removed: ",paste(removed,collapse = " ")))
 }
 
 
@@ -283,16 +262,35 @@ testAddToCoreDF <- function() {
   setCoreDF(d,"FI",t,"value",i+2)
   setCoreDF(d,"RU",t,"value",(i+3),T)
 
-  upateCoreDF(d,"DE","news","value",99999)
+  setCoreDF(d,"DE","news","value",99999,T)
   
   print(d)
-  print("")
 }
-# testAddToCoreDF()
+
+testReadIfEmpty <- function() {
+  
+  mydf <- NULL
+  if (readIfEmpty(mydf)) {
+    # print("ok, I could read it")
+  } else {
+    print("NO, I could NOT read it")
+    # mydf <- data.frame(a = 1:3,b = 11:13)
+  }
+  
+  serializeIfNeeded(mydf,FALSE)
+  mydf <<- NULL
+  readIfEmpty(mydf)
+  print(mydf)
+}
 
 
+test_Globals.R <- function() {
+  
+  testRemoveAllVarExcept()
+  testReadIfEmpty()
+  testAddToCoreDF()
 
-#
-#
-# testIt()
-# print(mydf)
+}
+
+# 
+test_Globals.R()
