@@ -209,7 +209,7 @@ itaur_dir <- function() {
       ret <- FALSE
     }
   } else {
-    print(paste(varName,"alread filled, size:",pryr::object_size(df)))
+    print(paste(varName,"alread filled, size:",GiB(pryr::object_size(df))))
     ret <- TRUE
   }
   # print(paste("exit",varName, ))
