@@ -106,6 +106,7 @@ text3 <- "See you! Bye Bye."
 # textstat_frequency_basic()
 
 
+# 
 sc <- sample_corpus()
 #(freq_text1);sc <- c(freq_text1,freq_text1,freq_text1)
 (dfm_freq <- dfm(sc))
@@ -117,10 +118,17 @@ txt_freq_typ <- textstat_frequency(
 txt_freq_typ$frequency <- txt_freq_typ$frequency/ndoc(dfm_freq)
 sum(txt_freq_typ$frequency)
 
+# histogram(txt_freq_typ$frequency/length(txt_freq_typ$frequency),breaks = cutpoints)
+
 require(Hmisc)
-nbins <- 10 
-cutpoints <- seq(0,1,length.out = nbins+1)
-str(cut2(txt_freq_typ$frequency,g = 20))
+nbins <- 100 
+(cutpoints <- seq(0,1,length.out = nbins+1))
+cut2(txt_freq_typ$frequency,cutpoints)
+# histogram(txt_freq_typ$frequency,breaks = cutpoints)
+
+p <- ggplot(txt_freq_typ, aes(frequency)) 
+p <- p + geom_histogram(aes(y = (..count..)/sum(..count..)))
+print(p)
 
 
 w <- "sample"

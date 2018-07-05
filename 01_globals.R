@@ -25,10 +25,24 @@ LANGUAGES = c(LNG_DE, LNG_EN, LNG_FI, LNG_RU)
 TYPE_BLOG = "blog"
 TYPE_NEWS = "news"
 TYPE_TW = "twitter"
-TYPES = c(TYPE_BLOG, ,TYPE_NEWS, TYPE_TW)
+TYPES = c(TYPE_BLOG, TYPE_NEWS, TYPE_TW)
 
 
 SERIAL_PREFIX <- "SERIALIZATION_"
+
+
+
+# --------------------------------------------------------------------
+#                   Global Variables
+# --------------------------------------------------------------------
+# they are evil, but here they are not and save acrobacies
+
+# qc: quanteda corpus
+qc_full <- if (exists("qc_full")) qc_full else NULL
+qc_sub  <- if (exists("qc_sub"))  qc_sub else NULL
+# the var to use
+qc      <- if (exists("qc_sub"))  qc_sub else NULL
+use_full_corpus <- T
 
 
 # --------------------------------------------------------------------
@@ -71,9 +85,9 @@ data_dir <- dev_data_dir();
 dir.exists(data_dir)
 data_dir_cap <- file.path(data_dir,"capstone_data")
 dir.exists(data_dir_cap)
-data_dir_corpus_in <- file.path(data_dir_cap,"data_in","corpus")
-data_dir_corpus_work <- file.path(data_dir_cap,"data_work","corpus")
-dir.exists(data_dir_corpus_work)
+
+data_dir_corpus_full <-   file.path(data_dir_cap,"data_in","corpus_full")
+data_dir_corpus_subset <- file.path(data_dir_cap,"data_in","corpus_subset")
 
 
 itaur_dir <- function() {
@@ -130,8 +144,8 @@ itaur_dir <- function() {
 
 
 #---------------------------------------------------------------------
-serializeIfNeeded <- function(dfPar, forceIt, rdsFName) 
-  #---------------------------------------------------------------------
+  serializeIfNeeded <- function(dfPar, forceIt, rdsFName) 
+#---------------------------------------------------------------------
 {
   varName <- deparse(substitute(dfPar))
   if (missing(rdsFName)) {
@@ -178,7 +192,7 @@ serializeIfNeeded <- function(dfPar, forceIt, rdsFName)
       || (length(df) <= 0 && nrow(df) <= 0)) {
     print(paste(varName,"is empty", nomeFile))
     if (file.exists(nomeFile)) {
-      print(paste("found serialization for:",varName," file:", nomeFile))
+      # print(paste("found serialization for:",varName," file:", nomeFile))
       df <- readRDS(nomeFile)
       #assign(varName,df,.GlobalEnv) # pass it outside
       assign(varName,df,parent.frame(n = 1)) # pass it outside
@@ -238,14 +252,15 @@ serializeIfNeeded <- function(dfPar, forceIt, rdsFName)
   round(x/(2^20),digits)
 }
 
-
-
-# --- Corpuses ---
-# qc: quanteda corpus
-
-if (!exists("qc_news")) qc_news <- NA
-if (!exists("qc_blogs")) qc_blogs <- NA
-if (!exists("qc_twitts")) qc_twitts <- NA
+# --------------------------------------------------------------------
+  clean_rds <- function (patt)
+# --------------------------------------------------------------------
+{
+  patt = if(missing(patt)) ".*ubset.*" else patt
+  patt <- paste0(patt,".*.rds")
+  print(list.files(".",patt))
+  file.remove(list.files(".",patt))
+}
 
 
 # ------------------------------------------

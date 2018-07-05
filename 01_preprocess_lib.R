@@ -352,7 +352,7 @@ readtextIfEmpty_DELETE <- function(mydf, in_dir, nFile)
     rdsFName <- paste0(SERIAL_PREFIX,nFile,".rds")
     hasSerialization <- file.exists(rdsFName)
     if (hasSerialization) {
-      print(paste(varName,"reading serialization from:",rdsFName))
+      # print(paste(varName,"reading serialization from:",rdsFName))
       mydf <- readRDS(rdsFName)
       # assign(varName,mydf,.GlobalEnv) # pass it outside,
       assign(varName,mydf,envir=parent.frame(n = 1))
@@ -392,7 +392,7 @@ readtextIfEmpty_DELETE <- function(mydf, in_dir, nFile)
 
 # Reads a single file for pattern
 # --------------------------------------------------------------------
-readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
+  readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
                                     ,fnamePattern) 
 # --------------------------------------------------------------------
 {
@@ -409,7 +409,7 @@ readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
 
 
 # --------------------------------------------------------------------
-  readQCorpXXX <- function(data_dir_corpus, subsetPar) 
+  readQCorp <- function(data_dir_corpus, subsetPar) 
 # --------------------------------------------------------------------
 # lazy reads text files matching pattern into a single Quanteda corpus
 {    
@@ -441,6 +441,29 @@ readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
   ,ru_RU_blogs, ru_RU_news, ru_RU_twitter)
   
   corpus(texts_df)
+}
+
+
+# --------------------------------------------------------------------
+# GLOBAL CODE, must be so to keep things simple
+# --------------------------------------------------------------------
+# NB relies on global with fixed name
+
+# clean_rds()
+
+
+if (use_full_corpus) {
+  if (!readIfEmpty(qc_full)) {
+    qc_full <<- readQCorp(data_dir_corpus_full, FALSE)
+  }
+  serializeIfNeeded(qc_full, FALSE)
+  qc <- qc_full
+} else {
+  if (!readIfEmpty(qc_sub)) {
+    qc_sub <<- readQCorp(data_dir_corpus_subset, FALSE)
+  }
+  serializeIfNeeded(qc_sub, FALSE)
+  qc <- qc_sub
 }
 
 
@@ -496,6 +519,7 @@ readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
 # ====================================================================
 
 
+
 # --------------------------------------------------------------------
   test_01_preprocess_libs.R <- function()
 # --------------------------------------------------------------------
@@ -503,8 +527,11 @@ readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
 
   print(" --- Unit Testing --- ")
     
+  
+  test_read_corpuses()
+  
   if (F) {
-    subsetTextFilesByLines(data_dir_corpus_in ,data_dir_corpus_work ,5 ,1000 , F)
+    subsetTextFilesByLines(data_dir_corpus_full ,data_dir_corpus_subset ,5 ,1000 , F)
   }
 
   if (F) {
@@ -547,22 +574,7 @@ readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
   print(" --- Tests Completed --- ")
 }
 
+# test_01_preprocess_libs.R()
 
-
-if (!readIfEmpty(qc_full)) {
-  qc_full <- readQCorp(data_dir_corpus_in, FALSE)
-}
-serializeIfNeeded(qc_full, FALSE)
-
-ntypes <- ntype(qc_full)
-print(paste("nr types:"))
-z <- sapply(ntypes, function(x) { invisible(print(paste((x))))}  )
-
-print(paste("trying to calculate DFM, probably will crash"))
-
-if (!readIfEmpty(dfm_qc_full)) {
-  dfm_qc_full <-dfm(qc_full)
-  serializeIfNeeded(dfm_qc_full, FALSE) 
-}
 
 
