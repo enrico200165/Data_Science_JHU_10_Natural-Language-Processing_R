@@ -14,6 +14,19 @@ TXT_NCHAR = "n_char"
 TXT_NTOKENS = "n_token"
 TXT_NNLINES = "n_newline"
 
+# languages
+LNG_DE = "DE"
+LNG_EN = "EN"
+LNG_FI = "FI"
+LNG_RU = "RU"
+LANGUAGES = c(LNG_DE, LNG_EN, LNG_FI, LNG_RU)
+
+# text types
+TYPE_BLOG = "blog"
+TYPE_NEWS = "news"
+TYPE_TW = "twitter"
+TYPES = c(TYPE_BLOG, ,TYPE_NEWS, TYPE_TW)
+
 
 SERIAL_PREFIX <- "SERIALIZATION_"
 

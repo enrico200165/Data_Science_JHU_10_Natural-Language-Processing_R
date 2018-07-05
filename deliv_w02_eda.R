@@ -12,25 +12,18 @@ source("ev_nlp_eda_lib.R")
 # 
 
 
-
-corp <- NA
-
-fnames_pattern <- file.path(data_dir_corpus_in,"*subset*")
-texts <- readtext(fnames_pattern
-   ,docvarsfrom = "filenames", dvsep = "[_.]"
-   ,docvarnames = c("lang","dummy_1","title","dummy_2","nlines_kept","nlines_read"))
+#---------------------------------------------------------------------
+  distributionWordFrequencies <- function()
+#---------------------------------------------------------------------
+{
   
-corp <- corpus(texts)
-print(summary(corp))
-  
-corp_lines <- corpus_reshape(corp, to = c("paragraphs"))
-print(summary(corp_lines))
+}
 
 
 
 
 
-ignore <- function(data_dir) {
+recover_or_delete <- function(data_dir) {
 
 for(fname in file.path(data_dir,files)) {
   result <- enricoReadText(fname, -1)
@@ -50,4 +43,3 @@ for(fname in file.path(data_dir,files)) {
 }
 }
 
-ignore(data_dir_corpus_work)
