@@ -259,71 +259,6 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
   return(list(lines = lines, vars = dvars, dnames = docnames))
 }
 
-# --------------------------------------------------------------------
-readtextIfEmpty_DELETE <- function(mydf, in_dir, nFile)
-  # --------------------------------------------------------------------
-# 
-{
-  varName <- deparse(substitute(mydf))
-  
-  if ( missing(in_dir) || is.na(in_dir) || (nchar(in_dir) <= 0)
-  ) {
-    nomeFile <- nFile
-  } else {
-    stopifnot(dir.exists(in_dir))
-    nomeFile <- file.path(in_dir,nFile)
-  }
-  
-  exists <- exists(varName)
-  filled <- exists && (!is.null(nrow(mydf)) &&  nrow(mydf)> 0)
-  if (filled) {
-    print(paste(varName,"exists and is filled, do nothing"))
-    return(mydf)
-  }
-  
-  if (!exists || !filled) {
-    rdsFName <- paste0(SERIAL_PREFIX,nFile,".rds")
-    hasSerialization <- file.exists(rdsFName)
-    if (hasSerialization) {
-      print(paste(varName,"reading serialization from:",rdsFName))
-      mydf <- readRDS(rdsFName)
-      # assign(varName,mydf,.GlobalEnv) # pass it outside,
-      assign(varName,mydf,envir=parent.frame(n = 1))
-      return(mydf)
-    } 
-    if (is.null(nomeFile) || length(nomeFile) <= 0  || !file.exists(nomeFile)) {
-      print(paste("no files found for:",nomeFile))
-      return(NA)
-    }
-    
-    print(paste(varName,"reading file from",nomeFile," and writing serialization"))
-    my_rt <- readtext(nomeFile
-                      , docvarsfrom = "filenames", docvarnames = c("country","lng","type",
-                                                                   "dummy1", "lines_in", "lines_tot") ,dvsep = "[_.]"
-                      , encoding = "UTF-8"
-                      , verbosity = 1)
-    #docvars(my_rt) <- docv
-    # cannot set docvars like in a corpus with docvars(corpus) <- 
-    # this is not a corpus, is a df, more basically
-    print(head(my_rt,1))
-    sampled_pctg <- 100*docvars(my_rt)$lines_in/docvars(my_rt)$lines_tot
-    my_rt <- select(my_rt,-c(6:ncol(my_rt)))
-    my_rt$sample_pctg <- sampled_pctg
-    
-    # print(docvars(mydf))
-    # mydf <- corpus(my_rt)
-    # print(single Quanteda paste("blogs",format(text object.size(my_rt), units = "MiB")))text       
-  }
-  
-  nomeFile
-  if (!file.exists(rdsFName)) {
-    print(paste("saving serialization to: ",rdsFName))
-    saveRDS(my_rt, file = rdsFName)
-  }
-  
-  my_rt
-}
-
 
 
 # --------------------------------------------------------------------
@@ -369,10 +304,6 @@ readtextIfEmpty_DELETE <- function(mydf, in_dir, nFile)
                                                  "dummy1", "lines_in", "lines_tot") ,dvsep = "[_.]"
                       , encoding = "UTF-8"
                        , verbosity = 1)
-    #docvars(my_rt) <- docv
-    # cannot set docvars like in a corpus with docvars(corpus) <- 
-    # this is not a corpus, is a df, more basically
-    print(head(my_rt,1))
     sampled_pctg <- 100*docvars(my_rt)$lines_in/docvars(my_rt)$lines_tot
     my_rt <- select(my_rt,-c(6:ncol(my_rt)))
     my_rt$sample_pctg <- sampled_pctg
@@ -449,22 +380,22 @@ readtextIfEmpty_DELETE <- function(mydf, in_dir, nFile)
 # --------------------------------------------------------------------
 # NB relies on global with fixed name
 
-# clean_rds()
+# clean_rds(".*")
 
+read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
 
-if (use_full_corpus) {
-  if (!readIfEmpty(qc_full)) {
-    qc_full <<- readQCorp(data_dir_corpus_full, FALSE)
-  }
-  serializeIfNeeded(qc_full, FALSE)
-  qc <- qc_full
-} else {
-  if (!readIfEmpty(qc_sub)) {
-    qc_sub <<- readQCorp(data_dir_corpus_subset, FALSE)
-  }
-  serializeIfNeeded(qc_sub, FALSE)
-  qc <- qc_sub
+if (!readIfEmpty(qc_full)) {
+    print(paste("reading corpus from dir:",read_dir))
+    qc_full <- readQCorp(read_dir, FALSE)
+    serializeIfNeeded(qc_full, FALSE)
 }
+
+
+if (!readIfEmpty(dfm_full)) {
+  dfm_full <- dfm(qc_full)
+  serializeIfNeeded(dfm_full, FALSE)
+}
+
 
 
 # --------------------------------------------------------------------

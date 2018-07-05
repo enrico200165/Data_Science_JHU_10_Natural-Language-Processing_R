@@ -37,12 +37,12 @@ SERIAL_PREFIX <- "SERIALIZATION_"
 # --------------------------------------------------------------------
 # they are evil, but here they are not and save acrobacies
 
+use_full_corpus <- T
+
 # qc: quanteda corpus
 qc_full <- if (exists("qc_full")) qc_full else NULL
-qc_sub  <- if (exists("qc_sub"))  qc_sub else NULL
-# the var to use
-qc      <- if (exists("qc_sub"))  qc_sub else NULL
-use_full_corpus <- T
+
+dfm_full <- if (exists("dfm_full")) dfm_full else NULL
 
 
 # --------------------------------------------------------------------
@@ -147,18 +147,24 @@ itaur_dir <- function() {
   serializeIfNeeded <- function(dfPar, forceIt, rdsFName) 
 #---------------------------------------------------------------------
 {
+  
+  if (missing(forceIt))
+    forceIt <- FALSE
   varName <- deparse(substitute(dfPar))
   if (missing(rdsFName)) {
     rdsFName <- paste0(varName,".rds")
   }
   
-  rdsFName <- paste0(SERIAL_PREFIX,rdsFName)
+  if (!grepl(SERIAL_PREFIX, rdsFName))
+    rdsFName <- paste0(SERIAL_PREFIX,rdsFName)
   
   if (!file.exists(rdsFName) || forceIt) {
     # if(exists(varName)) {
     if(TRUE) {
-      # print(paste("serializig to .rds var:",varName,"file:",rdsFName))
+      # 
+      print(paste("serializing var:",varName,"to file:",rdsFName,"..."))
       saveRDS(dfPar, file = rdsFName)
+      print(paste("FINISHED serializing",varName))
     } else {
       # print(paste("not serializing because not exists var: ",varName))
     }
@@ -167,7 +173,7 @@ itaur_dir <- function() {
 
 
 #---------------------------------------------------------------------
-  readIfEmpty <- function(df, nomeFile, forceIt) 
+  readIfEmpty <- function(df, rdsFName, forceIt) 
 #---------------------------------------------------------------------
 # probably should be rewritten (to use a better subfunction I will
 # probably write soon)
@@ -181,38 +187,43 @@ itaur_dir <- function() {
    
   varName <- ""
   varName <- deparse(substitute(df))
-  if (missing(nomeFile)) {
-    nomeFile <- paste0(varName,".rds")
+  if (missing(rdsFName)) {
+    rdsFName <- paste0(varName,".rds")
   }
   
-  nomeFile <- paste0(SERIAL_PREFIX,nomeFile)
+  if (!grepl(SERIAL_PREFIX, rdsFName))
+    rdsFName <- paste0(SERIAL_PREFIX,rdsFName)
   
   if (!exists(varName)
       || is.null(df)
       || (length(df) <= 0 && nrow(df) <= 0)) {
-    print(paste(varName,"is empty", nomeFile))
-    if (file.exists(nomeFile)) {
-      # print(paste("found serialization for:",varName," file:", nomeFile))
-      df <- readRDS(nomeFile)
+    # print(paste(varName,"is empty", rdsFName))
+    if (file.exists(rdsFName)) {
+      print(paste("reading serialization for:",varName," file:", rdsFName))
+      df <- readRDS(rdsFName)
       #assign(varName,df,.GlobalEnv) # pass it outside
       assign(varName,df,parent.frame(n = 1)) # pass it outside
       ret <- TRUE
     } else {
-      print(paste(varName,"cannot read, no file: ", nomeFile))
+      print(paste(varName,"cannot read, no file: ", rdsFName))
       ret <- FALSE
     }
   } else {
-    print(paste(varName,"is alread filled","has rows", nrow(df)))
+    print(paste(varName,"alread filled, size:",pryr::object_size(df)))
     ret <- TRUE
   }
   # print(paste("exit",varName, ))
   
   if (ret) {
-    serializeIfNeeded(df ,forceIt ,nomeFile)
+    serializeIfNeeded(df ,forceIt,rdsFName)
   }
   
   ret
 }
+# pippo <- 1:10
+# serializeIfNeeded(pippo)
+# pippo <- NULL
+# readIfEmpty(pippo)
 
 
 
@@ -253,7 +264,7 @@ itaur_dir <- function() {
 }
 
 # --------------------------------------------------------------------
-  clean_rds <- function (patt)
+  clean_rds <- function(patt)
 # --------------------------------------------------------------------
 {
   patt = if(missing(patt)) ".*ubset.*" else patt
@@ -333,3 +344,4 @@ testAddToCoreDF <- function() {
 }
 
 #  test_Globals.R()
+  
