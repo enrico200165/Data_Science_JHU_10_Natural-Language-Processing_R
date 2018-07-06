@@ -106,11 +106,29 @@ text3 <- "See you! Bye Bye."
 # textstat_frequency_basic()
 
 
+ggplot2_bin_pars <- function() {
+
+  (vals <- unlist(sapply(seq(0,10,by = 2),function(x) rep(x,x))))
+  x <- data.frame(a = vals)
+  
+  p <- ggplot(x, aes(a)) 
+  
+  (p0 <- p + geom_histogram())
+  
+  (p1 <- p + geom_histogram(binwidth = 0.1))
+  (p2 <- p + geom_histogram(binwidth = 1))
+
+  (p3 <- p + geom_histogram(bins = 4))
+  (p4 <- p + geom_histogram(bins = 8))
+}
+
+
+
 # 
-sc <- sample_corpus()
+qc <- sample_corpus()
 #(freq_text1);sc <- c(freq_text1,freq_text1,freq_text1)
-(dfm_freq <- dfm(sc))
-(dfm_freq <- dfm_weight(dfm_freq,scheme = "prop"))
+dfm_tmp <- dfm(qc)
+dfm_freq <- dfm_weight(dfm_tmp,scheme = "prop")
 txt_freq_typ <- textstat_frequency(
   dfm_freq
   #,groups = TXT_TYP
@@ -201,3 +219,33 @@ ggplot(data = freq_weight, aes(x = nrow(freq_weight):1, y = frequency)) +
   scale_x_continuous(breaks = nrow(freq_weight):1,
                      labels = freq_weight$feature) +
   labs(x = NULL, y = "Relative frequency")
+
+
+# --------------------------------------------------------------------
+  stopwords_basics_explore <- function(){
+# --------------------------------------------------------------------
+    require(stopwords)
+    (head(stopwords("en")))
+    (str(stopwords("en")))
+    (length(stopwords("en")))
+    T
+  }
+#  stopwords_basics_explore()
+
+
+# --------------------------------------------------------------------
+  dictionary_basics_explore <- function()
+# --------------------------------------------------------------------
+{
+    require(stopwords)
+
+    dict_stopw <- dictionary(list(stopw = stopwords("en")))
+    
+    dict_simple <- dictionary(list(saluto = "ciao", altro = "*"))
+    
+    txt <- "Ciao ciao bambina, come stai"
+    tokens_lookup(tokens(txt), dictionary = stopwords("en"), exclusive = FALSE)
+    
+    T
+}
+
