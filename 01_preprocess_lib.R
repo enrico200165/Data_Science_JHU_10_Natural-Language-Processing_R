@@ -300,7 +300,7 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
 
     print(paste(varName,"reading file from",nomeFile," and writing serialization"))
     my_rt <- readtext(nomeFile
-    , docvarsfrom = "filenames", docvarnames = c("country","lng","type",
+    , docvarsfrom = "filenames", docvarnames = c(TXT_LNG,TXT_CTR, TXT_TYP,
                                                  "dummy1", "lines_in", "lines_tot") ,dvsep = "[_.]"
                       , encoding = "UTF-8"
                        , verbosity = 1)
@@ -371,13 +371,16 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
   ,fi_FI_blogs, fi_FI_news, fi_FI_twitter
   ,ru_RU_blogs, ru_RU_news, ru_RU_twitter)
   
-  corpus(texts_df)
+  qc <- corpus(texts_df)
+  docvars(qc,TXT_LNG) <- tolower(docvars(qc,TXT_LNG))
+  
+  qc
 }
 
 
-# --------------------------------------------------------------------
+# ====================================================================
 # GLOBAL CODE, must be so to keep things simple
-# --------------------------------------------------------------------
+# ====================================================================
 # NB relies on global with fixed name
 
 # clean_rds(".*")
@@ -401,50 +404,50 @@ rm(qc_full); gc() # > 1 GiB and should not need it
 
 
 
-# --------------------------------------------------------------------
-  readQCorp_HIDE_FOR_NOW <- function(data_dir_corpus, subsetPar) 
-# --------------------------------------------------------------------
-# lazy reads text files matching pattern into a single Quanteda corpus
-{    
-  
-  print(paste("readQCorp",data_dir_corpus))
-  stopifnot(dir.exists(data_dir_corpus))
-  
-  
-  filesInDir <- list.files(data_dir_corpus,"*bset*"); print(filesInDir)
-  
-  en_US_blogs   <- readtextIfEmpty_Wrapper(en_US_blogs,data_dir_corpus,  "en_US.blogs")
-  qc <- corpus(en_US_blogs); rm(en_US_blogs);gc(); mem = pryr::object_size(qc)
-  en_US_news    <- readtextIfEmpty_Wrapper(en_US_news,data_dir_corpus,   "en_US.news")
-  qc <-qc+corpus(en_US_news);rm(en_US_news);gc();mem = pryr::object_size(qc)
-  en_US_twitter <- readtextIfEmpty_Wrapper(en_US_twitter,data_dir_corpus,"en_US.twitter")
-  qc <-qc+corpus(en_US_twitter);rm(en_US_twitter);gc();mem = pryr::object_size(qc)
-  
-  de_DE_blogs   <- readtextIfEmpty_Wrapper(de_DE_blogs,data_dir_corpus,  "de_DE.blogs")
-  qc <-qc+corpus(de_DE_blogs);rm(de_DE_blogs);gc();mem = pryr::object_size(qc)
-  de_DE_news    <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus,   "de_DE.news")
-  qc <-qc+corpus(de_DE_news);rm(de_DE_news);gc();mem = pryr::object_size(qc)
-  de_DE_twitter <- readtextIfEmpty_Wrapper(de_DE_twitter,data_dir_corpus,"de_DE.twitter")
-  qc <-qc+corpus(de_DE_twitter);rm(de_DE_twitter);gc();mem = pryr::object_size(qc)
-  
-  fi_FI_blogs   <- readtextIfEmpty_Wrapper(fi_FI_blogs,data_dir_corpus,"fi_FI.blogs")
-  qc <-qc+corpus(fi_FI_blogs);rm(fi_FI_blogs);gc();mem = pryr::object_size(qc)
-  fi_FI_news    <- readtextIfEmpty_Wrapper(fi_FI_news,data_dir_corpus, "fi_FI.news")
-  qc <-qc+corpus(fi_FI_news);rm(fi_FI_news);gc();mem = pryr::object_size(qc)
-  fi_FI_twitter <- readtextIfEmpty_Wrapper(fi_FI_twitter,data_dir_corpus, "fi_FI.twitter")
-  qc <-qc+corpus(fi_FI_twitter);rm(fi_FI_twitter);gc();mem = pryr::object_size(qc)
-  
-  ru_RU_blogs   <- readtextIfEmpty_Wrapper(ru_RU_blogs,data_dir_corpus,"ru_RU.blogs")
-  qc <-qc+corpus(ru_RU_blogs);rm(ru_RU_blogs);gc();mem = pryr::object_size(qc)
-  ru_RU_news    <- readtextIfEmpty_Wrapper(ru_RU_news,data_dir_corpus, "ru_RU.news")
-  qc <-qc+corpus(ru_RU_news);rm(ru_RU_news);gc();mem = pryr::object_size(qc)
-  ru_RU_twitter <- readtextIfEmpty_Wrapper(ru_RU_twitter,data_dir_corpus, "ru_RU.twitter")
-  qc <-qc+corpus(ru_RU_twitter);rm(ru_RU_twitter);gc();mem = pryr::object_size(qc)
-  
-  print(paste("exiting readQCorp???(), corpus size GiB: ", GiB(mem)))
-  
-  qc  
-}
+# # --------------------------------------------------------------------
+#   readQCorp_HIDE_FOR_NOW <- function(data_dir_corpus, subsetPar) 
+# # --------------------------------------------------------------------
+# # lazy reads text files matching pattern into a single Quanteda corpus
+# {    
+#   
+#   print(paste("readQCorp",data_dir_corpus))
+#   stopifnot(dir.exists(data_dir_corpus))
+#   
+#   
+#   filesInDir <- list.files(data_dir_corpus,"*bset*"); print(filesInDir)
+#   
+#   en_US_blogs   <- readtextIfEmpty_Wrapper(en_US_blogs,data_dir_corpus,  "en_US.blogs")
+#   qc <- corpus(en_US_blogs); rm(en_US_blogs);gc(); mem = pryr::object_size(qc)
+#   en_US_news    <- readtextIfEmpty_Wrapper(en_US_news,data_dir_corpus,   "en_US.news")
+#   qc <-qc+corpus(en_US_news);rm(en_US_news);gc();mem = pryr::object_size(qc)
+#   en_US_twitter <- readtextIfEmpty_Wrapper(en_US_twitter,data_dir_corpus,"en_US.twitter")
+#   qc <-qc+corpus(en_US_twitter);rm(en_US_twitter);gc();mem = pryr::object_size(qc)
+#   
+#   de_DE_blogs   <- readtextIfEmpty_Wrapper(de_DE_blogs,data_dir_corpus,  "de_DE.blogs")
+#   qc <-qc+corpus(de_DE_blogs);rm(de_DE_blogs);gc();mem = pryr::object_size(qc)
+#   de_DE_news    <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus,   "de_DE.news")
+#   qc <-qc+corpus(de_DE_news);rm(de_DE_news);gc();mem = pryr::object_size(qc)
+#   de_DE_twitter <- readtextIfEmpty_Wrapper(de_DE_twitter,data_dir_corpus,"de_DE.twitter")
+#   qc <-qc+corpus(de_DE_twitter);rm(de_DE_twitter);gc();mem = pryr::object_size(qc)
+#   
+#   fi_FI_blogs   <- readtextIfEmpty_Wrapper(fi_FI_blogs,data_dir_corpus,"fi_FI.blogs")
+#   qc <-qc+corpus(fi_FI_blogs);rm(fi_FI_blogs);gc();mem = pryr::object_size(qc)
+#   fi_FI_news    <- readtextIfEmpty_Wrapper(fi_FI_news,data_dir_corpus, "fi_FI.news")
+#   qc <-qc+corpus(fi_FI_news);rm(fi_FI_news);gc();mem = pryr::object_size(qc)
+#   fi_FI_twitter <- readtextIfEmpty_Wrapper(fi_FI_twitter,data_dir_corpus, "fi_FI.twitter")
+#   qc <-qc+corpus(fi_FI_twitter);rm(fi_FI_twitter);gc();mem = pryr::object_size(qc)
+#   
+#   ru_RU_blogs   <- readtextIfEmpty_Wrapper(ru_RU_blogs,data_dir_corpus,"ru_RU.blogs")
+#   qc <-qc+corpus(ru_RU_blogs);rm(ru_RU_blogs);gc();mem = pryr::object_size(qc)
+#   ru_RU_news    <- readtextIfEmpty_Wrapper(ru_RU_news,data_dir_corpus, "ru_RU.news")
+#   qc <-qc+corpus(ru_RU_news);rm(ru_RU_news);gc();mem = pryr::object_size(qc)
+#   ru_RU_twitter <- readtextIfEmpty_Wrapper(ru_RU_twitter,data_dir_corpus, "ru_RU.twitter")
+#   qc <-qc+corpus(ru_RU_twitter);rm(ru_RU_twitter);gc();mem = pryr::object_size(qc)
+#   
+#   print(paste("exiting readQCorp???(), corpus size GiB: ", GiB(mem)))
+#   
+#   qc  
+# }
 
 
 

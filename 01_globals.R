@@ -31,13 +31,28 @@ TYPES = c(TYPE_BLOG, TYPE_NEWS, TYPE_TW)
 SERIAL_PREFIX <- "SERIALIZATION_"
 
 
+# ---------- mapping terms, for internal purposes --------------------
+
+..map_values = data.frame(
+  acronym = character(0)
+  ,full = character(0)
+  , stringsAsFactors = F
+)
+..map_values <- bind_rows(..map_values,
+  c(acronym = LNG_DE, full = "german")
+ ,c(acronym = LNG_EN,full = "english")
+ )
+map_acro <- function(x) ..map_values[..map_values$acronym == x,2]
+map_acro(LNG_EN )
+
+
 
 # --------------------------------------------------------------------
 #                   Global Variables
 # --------------------------------------------------------------------
 # they are evil, but here they are not and save acrobacies
 
-use_full_corpus <- T
+use_full_corpus <- F
 
 # qc: quanteda corpus
 qc_full <- if (exists("qc_full")) qc_full else NULL

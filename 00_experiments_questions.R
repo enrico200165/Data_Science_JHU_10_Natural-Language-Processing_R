@@ -1,4 +1,5 @@
 require(dplyr)
+require(ggplot2)
 require(quanteda)
 # help(package = "quanteda")
 #install.packages("readtext")
@@ -8,9 +9,9 @@ require(readtext)
 require(quanteda.corpora)
 #install.packages("spacyr")
 require(spacyr)
+require(stringr)
 
-
-source("01_globals.R")
+source("01_preprocess_lib.R")
 
 
 # --------------------------------------------------------------------
@@ -72,7 +73,7 @@ text3 <- "See you! Bye Bye."
   }
 
   sample_corpus <- corpus(sample_texts)
-  docvars(sample_corpus,TXT_LNG) <- rep(c(LNG_DE,LNG_EN, LNG_FI, LNG_RU),each = 3)
+  docvars(sample_corpus,TXT_LNG) <- rep(tolower(c(LNG_DE,LNG_EN, LNG_FI, LNG_RU)),each = 3)
   docvars(sample_corpus,TXT_TYP) <- rep(c(TYPE_BLOG,TYPE_NEWS, TYPE_TW),4)
   # (sample_corpus$documents)
   sample_corpus
@@ -121,60 +122,10 @@ ggplot2_bin_pars <- function() {
   (p3 <- p + geom_histogram(bins = 4))
   (p4 <- p + geom_histogram(bins = 8))
 }
-
+# ggplot2_bin_pars()
 
 
 # 
-qc <- sample_corpus()
-#(freq_text1);sc <- c(freq_text1,freq_text1,freq_text1)
-dfm_tmp <- dfm(qc)
-dfm_freq <- dfm_weight(dfm_tmp,scheme = "prop")
-txt_freq_typ <- textstat_frequency(
-  dfm_freq
-  #,groups = TXT_TYP
-  )
-txt_freq_typ$frequency <- txt_freq_typ$frequency/ndoc(dfm_freq)
-sum(txt_freq_typ$frequency)
-
-# histogram(txt_freq_typ$frequency/length(txt_freq_typ$frequency),breaks = cutpoints)
-
-require(Hmisc)
-nbins <- 100 
-(cutpoints <- seq(0,1,length.out = nbins+1))
-cut2(txt_freq_typ$frequency,cutpoints)
-# histogram(txt_freq_typ$frequency,breaks = cutpoints)
-
-p <- ggplot(txt_freq_typ, aes(frequency)) 
-p <- p + geom_histogram(aes(y = (..count..)/sum(..count..)))
-print(p)
-
-
-w <- "sample"
-
-# no grouping
-txt_freq <- textstat_frequency(dfm_freq)
-txt_freq[txt_freq$feature == w]
-
-# group by language
-txt_freq_lng <- textstat_frequency(
-  dfm_freq,groups = TXT_LNG)
-txt_freq_lng[txt_freq_lng$feature == w]
-
-# group by type
-txt_freq_typ <- textstat_frequency(
-  dfm_freq,groups = TXT_TYP)
-txt_freq_typ[txt_freq_typ$feature == w]
-
-
-
-(dfm_freq <- dfm(freq_text1))
-(dfm_weight(dfm_freq,scheme = "prop"))
-
-p <- ggplot(data = txt_freq, aes(x = feature
- ,y = frequency/sum(frequency)))
-p <-p + geom_bar(stat = "identity")
-print(p)
-
 
 # --------------------------------------------------------------------
 #   https://tutorials.quanteda.io/statistical-analysis/frequency/
@@ -183,42 +134,7 @@ print(p)
 
 # --------------------------------------------------------------------
 # https://rdrr.io/cran/quanteda/man/textstat_frequency.html
-dfm1 <- dfm(c("a a b b c d", "a d d d", "a a a"))
-textstat_frequency(dfm1)
-textstat_frequency(dfm1, groups = c("one", "two", "one"))
 
-obamadfm <- 
-  corpus_subset(data_corpus_inaugural, President == "Obama") %>%
-  dfm(remove_punct = TRUE, remove = stopwords("english"))
-freq <- textstat_frequency(obamadfm)
-head(freq, 10)
-
-
-# plot 20 most frequent words
-library("ggplot2")
-ggplot(freq[1:20, ], aes(x = reorder(feature, frequency), y = frequency)) +
-  geom_point() + 
-  coord_flip() +
-  labs(x = NULL, y = "Frequency")
-
-# plot relative frequencies by group
-dfm_weight_pres <- data_corpus_inaugural %>% 
-  corpus_subset(Year > 2000) %>% 
-  dfm(remove = stopwords("english"), remove_punct = TRUE) %>% 
-  dfm_weight(scheme = "prop")
-
-# calculate relative frequency by president
-freq_weight <- textstat_frequency(dfm_weight_pres, n = 10,
-                                  groups = "President")
-
-# plot frequencies
-ggplot(data = freq_weight, aes(x = nrow(freq_weight):1, y = frequency)) +
-  geom_point() +
-  facet_wrap(~ group, scales = "free") +
-  coord_flip() +
-  scale_x_continuous(breaks = nrow(freq_weight):1,
-                     labels = freq_weight$feature) +
-  labs(x = NULL, y = "Relative frequency")
 
 
 # --------------------------------------------------------------------
@@ -238,44 +154,141 @@ ggplot(data = freq_weight, aes(x = nrow(freq_weight):1, y = frequency)) +
 # --------------------------------------------------------------------
 {
     require(stopwords)
-
   
     txt <- "Hello honey How are you Hello darling"
 
-    dict_simple <- dictionary(list(greet = "hello", other = "*"))
-    tl1 <- tokens_lookup(tokens(txt), dictionary = dict_simple
-                         , exclusive = T)
-    print(str(tl1))
-    
-    dict_simple2 <- dictionary(list(other = "*", greet = "hello"))
-    tl2 <- tokens_lookup(tokens(txt), dictionary = dict_simple2
-                         , exclusive = T)
-    tl2bis <- tokens_lookup(tokens(txt), dictionary = dict_simple2
-                         , exclusive = F)
-    
-        
-    dict_simple3 <- dictionary(list(greet = "hello"))
-    tl3 <- tokens_lookup(tokens(txt), dictionary = dict_simple3
-                  , exclusive = T)
-
-    dict_simple <- dictionary(list(greet = "hello",
-                                   stop_word = stopwords("en")))
+    dict_simple <- dictionary(list(
+      greet = "hello"
+     ,stop_word = stopwords("en")))
     tl <- tokens_lookup(tokens(txt), dictionary = dict_simple
-                         , exclusive = T, nomatch = "ALL_OTHERS")
-    (d <- data.frame(x = factor(tl[[1]])))
-    ggplot(data_country, aes(x=country,y = conversion_rate)) +geom_bar(stat = "identity")
+      ,exclusive = T, nomatch = "ALL_OTHERS")
+    (d <- data.frame(categories = factor(tl[[1]])))
+    p <- ggplot(d, aes(x=categories)) 
+    p <- p + geom_bar()
+  (p)
         
-    dict_simple3 <- dictionary(list(other = "*"))
-    tl4 <- tokens_lookup(tokens(txt), dictionary = dict_simple3
-                         , exclusive = T)
-    
-
-    dict_stopw <- dictionary(list(
-      stopw = stopwords("en")
-     ,other_W = c("win","send","party","immigrant","immigration","")))
-    dfm_immig <- dfm(data_char_ukimmig2010[1], dictionary = dict_stopw)
-        
-    
-        T
+  T
 }
 
+
+# 
+sc <- sample_corpus()
+# sc <- corpus_subset(data_corpus_inaugural, President == "Trump")
+# sc <- dfm_full
+
+
+#--------------------------------------------------------------------
+  freq_distrib <- function(doc_fm, lang, faceted) 
+#--------------------------------------------------------------------
+{
+  # https://tutorials.quanteda.io/statistical-analysis/frequency/
+    # the dfm() function applies certain options by default, 
+    # such as tolower() – a separate function for lower-casing texts 
+    # – and removes punctuation. All of the options to tokens() can 
+    # be passed to dfm(), however.
+        
+  if (missing(faceted))
+    faceted <- FALSE
+  
+  stopw <- stopwords(tolower(lang))
+  
+  dfm_lang <- dfm_subset(doc_fm, language == tolower(lang))
+  stopifnot(ndoc(dfm_lang) == 3)
+  
+  frq_grp <- textstat_frequency(dfm_lang, groups = TXT_TYP)
+
+  require(Hmisc)
+
+  frequenza <- frq_grp$frequency
+  molt = 100*1000
+  frequenza <- frequenza*molt
+  frequenza <- frequenza/sum(frq_grp$frequency)
+  # frequenza <- frequenza/molt
+  # frequenza <- log10(frequenza)
+  frequenza <- round(frequenza,2)
+  frequenza <- cut2(frequenza,g=20)
+  
+  d <- data.frame(frequenza, gruppo = frq_grp$group)
+
+  p <- ggplot(d, aes(x = frequenza, fill = gruppo))
+  p <- p + ggtitle("Distribution of word *Frequencies*")
+  p <- p + geom_histogram(stat = "count")
+  p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 1))
+  if (faceted) {
+    p <- p + facet_grid(gruppo ~ .)
+  }
+  p <- p + xlab("Word Frequencies Ranges")
+  p <- p + scale_x_discrete(labels = NULL)
+  p <- p + scale_y_continuous(labels = NULL)
+  p <- p + ylab("Frequency (of word frequencies ranges)")
+  p <- p + guides(fill=guide_legend(title="Text Type"))
+  p
+}
+
+# d <- dfm(sc)
+d <- dfm_full
+# p <- freq_distrib(d,"en",T)
+p <- freq_distrib(d,"en",F)
+print(p)
+
+
+
+
+# plot 20 most frequent words
+# library("ggplot2")
+# ggplot(freq[1:20, ], aes(x = reorder(feature, frequency), y = frequency)) +
+#   geom_point() + 
+#   coord_flip() +
+#   labs(x = NULL, y = "Frequency")
+# 
+# # plot relative frequencies by group
+# dfm_weight_pres <- data_corpus_inaugural %>% 
+#   corpus_subset(Year > 2000) %>% 
+#   dfm(remove = stopwords("english"), remove_punct = TRUE) %>% 
+#   dfm_weight(scheme = "prop")
+# 
+# 
+# 
+# 
+# 
+# qc <- sample_corpus()
+# #(freq_text1);sc <- c(freq_text1,freq_text1,freq_text1)
+# dfm_tmp <- dfm(qc)
+# dfm_freq <- dfm_weight(dfm_tmp,scheme = "prop")
+# txt_freq_typ <- textstat_frequency(
+#   dfm_freq
+#   #,groups = TXT_TYP
+# )
+# txt_freq_typ$frequency <- txt_freq_typ$frequency/ndoc(dfm_freq)
+# sum(txt_freq_typ$frequency)
+# 
+# # histogram(txt_freq_typ$frequency/length(txt_freq_typ$frequency),breaks = cutpoints)
+# 
+# 
+# 
+# w <- "sample"
+# 
+# # no grouping
+# txt_freq <- textstat_frequency(dfm_freq)
+# txt_freq[txt_freq$feature == w]
+# 
+# # group by language
+# txt_freq_lng <- textstat_frequency(
+#   dfm_freq,groups = TXT_LNG)
+# txt_freq_lng[txt_freq_lng$feature == w]
+# 
+# # group by type
+# txt_freq_typ <- textstat_frequency(
+#   dfm_freq,groups = TXT_TYP)
+# txt_freq_typ[txt_freq_typ$feature == w]
+# 
+# 
+# 
+# (dfm_freq <- dfm(freq_text1))
+# (dfm_weight(dfm_freq,scheme = "prop"))
+# 
+# p <- ggplot(data = txt_freq, aes(x = feature
+#                                  ,y = frequency/sum(frequency)))
+# p <-p + geom_bar(stat = "identity")
+# print(p)
+# 
