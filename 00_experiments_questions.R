@@ -206,13 +206,16 @@ sc <- sample_corpus()
   # frequenza <- frequenza/molt
   # frequenza <- log10(frequenza)
   frequenza <- round(frequenza,2)
-  frequenza <- cut2(frequenza,g=20)
+  max_freq = max(frequenza)
+  avg_freq = mean(frequenza)
+  frequenza <- cut2(frequenza,seq(0,avg_freq,by = avg_freq/100))
   
   d <- data.frame(frequenza, gruppo = frq_grp$group)
 
   p <- ggplot(d, aes(x = frequenza, fill = gruppo))
   p <- p + ggtitle("Distribution of word *Frequencies*")
   p <- p + geom_histogram(stat = "count")
+  # p <- p + geom_density() 
   p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 1))
   if (faceted) {
     p <- p + facet_grid(gruppo ~ .)
@@ -228,7 +231,7 @@ sc <- sample_corpus()
 # d <- dfm(sc)
 d <- dfm_full
 # p <- freq_distrib(d,"en",T)
-p <- freq_distrib(d,"en",F)
+p <- freq_distrib(d,"en",T)
 print(p)
 
 
