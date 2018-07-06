@@ -239,13 +239,43 @@ ggplot(data = freq_weight, aes(x = nrow(freq_weight):1, y = frequency)) +
 {
     require(stopwords)
 
-    dict_stopw <- dictionary(list(stopw = stopwords("en")))
+  
+    txt <- "Hello honey How are you Hello darling"
+
+    dict_simple <- dictionary(list(greet = "hello", other = "*"))
+    tl1 <- tokens_lookup(tokens(txt), dictionary = dict_simple
+                         , exclusive = T)
+    print(str(tl1))
     
-    dict_simple <- dictionary(list(saluto = "ciao", altro = "*"))
+    dict_simple2 <- dictionary(list(other = "*", greet = "hello"))
+    tl2 <- tokens_lookup(tokens(txt), dictionary = dict_simple2
+                         , exclusive = T)
+    tl2bis <- tokens_lookup(tokens(txt), dictionary = dict_simple2
+                         , exclusive = F)
     
-    txt <- "Ciao ciao bambina, come stai"
-    tokens_lookup(tokens(txt), dictionary = stopwords("en"), exclusive = FALSE)
+        
+    dict_simple3 <- dictionary(list(greet = "hello"))
+    tl3 <- tokens_lookup(tokens(txt), dictionary = dict_simple3
+                  , exclusive = T)
+
+    dict_simple <- dictionary(list(greet = "hello",
+                                   stop_word = stopwords("en")))
+    tl <- tokens_lookup(tokens(txt), dictionary = dict_simple
+                         , exclusive = T, nomatch = "ALL_OTHERS")
+    (d <- data.frame(x = factor(tl[[1]])))
+    ggplot(data_country, aes(x=country,y = conversion_rate)) +geom_bar(stat = "identity")
+        
+    dict_simple3 <- dictionary(list(other = "*"))
+    tl4 <- tokens_lookup(tokens(txt), dictionary = dict_simple3
+                         , exclusive = T)
     
-    T
+
+    dict_stopw <- dictionary(list(
+      stopw = stopwords("en")
+     ,other_W = c("win","send","party","immigrant","immigration","")))
+    dfm_immig <- dfm(data_char_ukimmig2010[1], dictionary = dict_stopw)
+        
+    
+        T
 }
 
