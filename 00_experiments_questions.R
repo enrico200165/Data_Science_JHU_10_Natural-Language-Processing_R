@@ -199,23 +199,31 @@ sc <- sample_corpus()
 
   require(Hmisc)
 
-  frequenza <- frq_grp$frequency
-  molt = 100*1000
-  frequenza <- frequenza*molt
-  frequenza <- frequenza/sum(frq_grp$frequency)
-  # frequenza <- frequenza/molt
+  #molt = 100*1000
+  #frequenza <- frequenza*molt
+  frequenza <- frq_grp$frequency/sum(frq_grp$frequency)
+  #frequenza <- frequenza/molt
+  print(sum(frequenza))
+  if (!round(sum(frequenza),10) == 1) {
+    print("paste(sum(frequenza)",paste(sum(frequenza)))
+    stopifnot(sum(round(frequenza),10) == 1)
+  }
   # frequenza <- log10(frequenza)
-  frequenza <- round(frequenza,2)
-  max_freq = max(frequenza)
-  avg_freq = mean(frequenza)
-  frequenza <- cut2(frequenza,seq(0,avg_freq,by = avg_freq/100))
+  max_freq <- max(frequenza)
+  avg_freq <- mean(frequenza)
+  sd_freq <- sd(frequenza)
+  left_lim <- 0
+  right_lim <- avg_freq+0.2*sd_freq
+  cp <- seq(left_lim,right_lim
+              ,by = right_lim/99)
+  frequenza <- cut2(frequenza,cp)
   
-  d <- data.frame(frequenza, gruppo = frq_grp$group)
+  d <- data.frame(freq = frequenza, gruppo = frq_grp$group)
 
-  p <- ggplot(d, aes(x = frequenza, fill = gruppo))
+  p <- ggplot(d, aes(x = freq, fill = gruppo))
   p <- p + ggtitle("Distribution of word *Frequencies*")
   p <- p + geom_histogram(stat = "count")
-  # p <- p + geom_density() 
+  # p <- p + geom_line()
   p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 1))
   if (faceted) {
     p <- p + facet_grid(gruppo ~ .)
@@ -228,10 +236,11 @@ sc <- sample_corpus()
   p
 }
 
-# d <- dfm(sc)
+ # d <- dfm(sc)
+# 
 d <- dfm_full
 # p <- freq_distrib(d,"en",T)
-p <- freq_distrib(d,"en",T)
+p <- freq_distrib(d,"en",F)
 print(p)
 
 
