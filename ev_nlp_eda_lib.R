@@ -160,6 +160,78 @@ source("01_globals.R")
   # p <- p + facet_grid(~language)
   p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 }
+
+  
+#--------------------------------------------------------------------
+  freq_distrib <- function(doc_fm, lang, faceted, rem_stopw,
+                           title_par, x_axis_lab_par, y_axis_lab_par
+                           ,legend_title_par) 
+#--------------------------------------------------------------------
+  {
+    # https://tutorials.quanteda.io/statistical-analysis/frequency/
+    # the dfm() function applies certain options by default, 
+    # such as tolower() – a separate function for lower-casing texts 
+    # – and removes punctuation. All of the options to tokens() can 
+    # be passed to dfm(), however.
+    
+    if (missing(faceted))
+      faceted <- FALSE
+    if (missing(rem_stopw))
+      rem_stopw <- FALSE
+    
+    if (rem_stopw) {
+      stopw <- stopwords(tolower(lang))
+      doc_fm <- dfm(doc_fm, remove = stopw)
+      
+    }
+    
+    dfm_lang <- dfm_subset(doc_fm, language == tolower(lang))
+    stopifnot(ndoc(dfm_lang) == 3)
+    
+    frq_grp <- textstat_frequency(dfm_lang, groups = TXT_TYP)
+    
+    require(Hmisc)
+    
+    #molt = 100*1000
+    #frequenza <- frequenza*molt
+    frequenza <- frq_grp$frequency/sum(frq_grp$frequency)
+    #frequenza <- frequenza/molt
+    print(sum(frequenza))
+    if (!round(sum(frequenza),10) == 1) {
+      print("paste(sum(frequenza)",paste(sum(frequenza)))
+      stopifnot(sum(round(frequenza),10) == 1)
+    }
+    # frequenza <- log10(frequenza)
+    max_freq <- max(frequenza)
+    avg_freq <- mean(frequenza)
+    sd_freq <- sd(frequenza)
+    left_lim <- 0
+    right_lim <- avg_freq+0.2*sd_freq
+    cp <- seq(left_lim,right_lim
+              ,by = right_lim/99)
+    frequenza <- cut2(frequenza,cp)
+    
+    d <- data.frame(freq = frequenza, gruppo = frq_grp$group)
+    
+    p <- ggplot(d, aes(x = freq, fill = gruppo))
+    p <- p + geom_histogram(stat = "count")
+    # p <- p + geom_line()
+    p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 1))
+    if (faceted) {
+      p <- p + facet_grid(gruppo ~ .)
+    }
+    
+    p <- p + ggtitle(title_par)
+    p <- p + xlab(x_axis_lab_par)
+    p <- p + ylab(y_axis_lab_par)
+    p <- p + guides(fill=guide_legend(title=legend_title_par))
+    
+    p <- p + scale_x_discrete(labels = NULL)
+    p <- p + scale_y_continuous(labels = NULL)
+    p
+}
+  
+  
   
   
 
@@ -245,12 +317,31 @@ source("01_globals.R")
   
 }
 
-  
+
+# -------------------------------------------------------------------
+  test_freq_distrib <- function()
+# -------------------------------------------------------------------
+
+{
+  d <- dfm_full
+  # p <- freq_distrib(d,"en",T)
+  p <- freq_distrib(d,"en",T,T
+                    ,"Distribution of word *Frequencies*"
+                    ,"Word Frequencies Ranges","Frequency (of word frequencies ranges)"
+                    ,"Text Type")
+  print(p)
+}
+
 
 # -------------------------------------------------------------------
   test_ev_nlp_eda_lib.R <- function()
 # -------------------------------------------------------------------
 {
+  
+  test_freq_distrib()
+  
+  stop()
+  
   test_readIfEmpty_serializeIfNeeded()
   
   test_physicalAnalysis()
@@ -258,5 +349,6 @@ source("01_globals.R")
   test_basicPlot(physicalAnalysis())
 }
 
-# test_ev_nlp_eda_lib.R()
+# 
+  test_ev_nlp_eda_lib.R()
 

@@ -120,6 +120,22 @@ itaur_dir <- function() {
 }
 
 
+
+# --------------------------------------------------------------------
+  set_parallelism <- function(ncores, onLinux)
+# --------------------------------------------------------------------
+# stub to be developed later when implementing predictions
+{
+  require(parallel)
+  require(doParallel)
+  
+  ncores <- detectCores() - 1
+  # Initiate cluster
+  cl <- makeCluster(ncores)
+  registerDoParallel(cl)
+}
+
+
 # --------------------------------------------------------------------
   inc <- function(e1) eval.parent(substitute(e1 <- e1+1))
 # --------------------------------------------------------------------

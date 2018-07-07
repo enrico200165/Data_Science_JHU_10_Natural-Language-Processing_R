@@ -387,8 +387,6 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
 
 read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
 
-
-
 if (!readIfEmpty(dfm_full)) {
   
   # need the corpus
@@ -400,7 +398,7 @@ if (!readIfEmpty(dfm_full)) {
   dfm_full <- dfm(qc_full)
   serializeIfNeeded(dfm_full, FALSE)
 }
-rm(qc_full); gc() # > 1 GiB and should not need it
+# rm(qc_full); gc() # > 1 GiB and should not need it
 
 
 
