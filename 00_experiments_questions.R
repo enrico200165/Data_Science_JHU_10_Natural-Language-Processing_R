@@ -178,7 +178,8 @@ sc <- sample_corpus()
 
 
 #--------------------------------------------------------------------
-  freq_distrib <- function(doc_fm, lang, faceted) 
+  freq_distrib <- function(doc_fm, lang, faceted, rem_stopw,
+    title_par, x_axis_lab_par, y_axis_lab_par,legend_title_par) 
 #--------------------------------------------------------------------
 {
   # https://tutorials.quanteda.io/statistical-analysis/frequency/
@@ -189,8 +190,14 @@ sc <- sample_corpus()
         
   if (missing(faceted))
     faceted <- FALSE
+  if (missing(rem_stopw))
+    rem_stopw <- FALSE
   
-  stopw <- stopwords(tolower(lang))
+  if (rem_stopw) {
+    stopw <- stopwords(tolower(lang))
+    doc_fm <- dfm(doc_fm, remove = stopw)
+    
+  }
   
   dfm_lang <- dfm_subset(doc_fm, language == tolower(lang))
   stopifnot(ndoc(dfm_lang) == 3)
@@ -221,18 +228,20 @@ sc <- sample_corpus()
   d <- data.frame(freq = frequenza, gruppo = frq_grp$group)
 
   p <- ggplot(d, aes(x = freq, fill = gruppo))
-  p <- p + ggtitle("Distribution of word *Frequencies*")
   p <- p + geom_histogram(stat = "count")
   # p <- p + geom_line()
   p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 1))
   if (faceted) {
     p <- p + facet_grid(gruppo ~ .)
   }
-  p <- p + xlab("Word Frequencies Ranges")
+
+  p <- p + ggtitle(title_par)
+  p <- p + xlab(x_axis_lab_par)
+  p <- p + ylab(y_axis_lab_par)
+  p <- p + guides(fill=guide_legend(title=legend_title_par))
+  
   p <- p + scale_x_discrete(labels = NULL)
   p <- p + scale_y_continuous(labels = NULL)
-  p <- p + ylab("Frequency (of word frequencies ranges)")
-  p <- p + guides(fill=guide_legend(title="Text Type"))
   p
 }
 
@@ -240,7 +249,15 @@ sc <- sample_corpus()
 # 
 d <- dfm_full
 # p <- freq_distrib(d,"en",T)
-p <- freq_distrib(d,"en",F)
+p <- freq_distrib(d,"en",F,T
+ ,"Distribution of word *Frequencies*"
+ ,"Word Frequencies Ranges","Frequency (of word frequencies ranges)"
+ ,"Text Type")
+print(p)
+p <- freq_distrib(d,"en",F,T
+                  ,"Distribution of word *Frequencies*"
+                  ,"Word Frequencies Ranges","Frequency (of word frequencies ranges)"
+                  ,"Text Type")
 print(p)
 
 
