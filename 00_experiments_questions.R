@@ -172,77 +172,119 @@ ggplot2_bin_pars <- function() {
 
 
 
+
+explore_ngrams_punct <- function() {
+  
+  qc <- corpus("Hello, Hello. Bye, Bye")
+  #tokens(qc, ngrams = 2)
+  ntoken(tokens(qc, ngrams = 2))
+  qc_sent <- corpus_reshape(qc, to = "sentences")
+  texts(qc_sent)
+  ntoken(tokens(qc_sent, ngrams = 2))
+  ntoken(tokens(qc_sent, ngrams = 2
+    ,remove_punc = T))
+  
+  tokens(qc, ngrams = 2)
+  tokens(qc_sent, ngrams = 2)
+  tokens(qc_sent, ngrams = 2
+    ,remove_punc = T)
+}
+# explore_ngrams_punct()
+
+
 #--------------------------------------------------------------------
-  types_distrib <- function(qc_par, lng, ngram, faceted, rem_stopw,
-                           title_par, x_axis_lab_par, y_axis_lab_par
-                           ,legend_title_par) 
+types_distrib <- function(qc_par, lng, ngram, faceted
+  ,rem_stopw
+  ,title_par, x_axis_lab_par, y_axis_lab_par,legend_title_par) 
 #--------------------------------------------------------------------
-  {
-    # https://tutorials.quanteda.io/statistical-analysis/frequency/
-    # the dfm() function applies certain options by default, 
-    # such as tolower() – a separate function for lower-casing texts 
-    # – and removes punctuation. All of the options to tokens() can 
-    # be passed to dfm(), however.
-    
-    if (missing(faceted))
-      faceted <- FALSE
-    if (missing(rem_stopw))
-      rem_stopw <- FALSE
-    
-    
-    qc <- corpus_subset(qc_par, language == char_tolower(lng))
-    stopifnot(ndoc(qc) == 3)
-    
+{
+  # https://tutorials.quanteda.io/statistical-analysis/frequency/
+  # the dfm() function applies certain options by default, 
+  # such as tolower() – a separate function for lower-casing texts 
+  # – and removes punctuation. All of the options to tokens() can 
+  # be passed to dfm(), however.
+  
+  if (missing(faceted))
+    faceted <- FALSE
+  if (missing(rem_stopw))
+    rem_stopw <- FALSE
+  
+  qc <- corpus_subset(qc_par, language == char_tolower(lng))
+  stopifnot(ndoc(qc) == 3)
+
+  if (ngram == 1) { # can remove freely
     toks <- tokens(qc   
-                   ,remove_numbers = T,remove_punct = T
-                   ,remove_symbols = T, remove_twitter = FALSE , remove_url = T)
+      ,remove_numbers = T,remove_punct = T
+      ,remove_symbols = T, remove_twitter = T
+      ,remove_url = T)
     toks <- tokens_tolower(toks)
     if (rem_stopw) { # manage stopwords in/exclusion
       stopw <- stopwords(tolower(lng))
       toks <- tokens_remove(toks,stopw)
     }
-
-    # toks <- tokens(toks, ngrams = ngram)
-
-    dfm_lang <- dfm(toks,ngrams = ngram)
-
-    ntypes <- if (faceted) 5 else 25
-    grouping = if (faceted) TXT_TYP else NULL
-    # group by text type
-    frq_grp <- textstat_frequency(dfm_lang, n = ntypes
-                                  , groups = grouping
-                                  )
-
-    p <- ggplot(data = frq_grp, aes(x = reorder(feature, frequency)
-                    , y = frequency))
-    p <- p + geom_point()
-    p <- p + coord_flip() 
-    p <- p + labs(x = NULL, y = "Frequency") 
-    if (faceted) p <- p + facet_grid(group ~ .)
-    p <- p + theme_minimal()
-    print(p)
+  } else { # must not remove things
+    # sentence splitting avoid silly ngrams
+    # with it punct removal seems OK
+    qc <- corpus_reshape(qc, to = "sentences")
+    toks <- tokens(qc   
+      ,remove_numbers = F,remove_punct = T
+      ,remove_symbols = F, remove_twitter = T
+      ,remove_url = T)
+    toks <- tokens_tolower(toks)
+    if (rem_stopw) { # manage stopwords in/exclusion
+      stopw <- stopwords(tolower(lng))
+      toks <- tokens_remove(toks,stopw)
+    }
     
-    p
   }
+
+  dfm_lang <- dfm(toks,ngrams = ngram)
   
-
-
+  ntypes <- if (faceted) 4 else 24
+  grouping <- if (faceted) TXT_TYP else NULL
+  # group by text type
+  frq_grp <- textstat_frequency(dfm_lang, n = ntypes
+    , groups = grouping
+  )
+  
+  p <- ggplot(data = frq_grp, aes(x = reorder(feature, frequency)
+    , y = frequency))
+  p <- p + geom_point()
+  p <- p + coord_flip() 
+  p <- p + labs(x = NULL, y = "Frequency") 
+  if (faceted) p <- p + facet_grid(group ~ .)
+  p <- p + theme_minimal()
+  
+  p <- p + ggtitle(title_par)
+  p <- p + xlab(x_axis_lab_par)
+  p <- p + ylab(y_axis_lab_par)
+  p <- p + guides(fill=guide_legend(title=legend_title_par))
+  
+  print(p)
+  
+  p
+}
 # read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
-
-  if (!readIfEmpty(qc_full)) {
-    print(paste("reading corpus from dir:",read_dir))
-    qc_full <- readQCorp(read_dir, FALSE)
-    serializeIfNeeded(qc_full, FALSE)
-  }
-
-# qc_full <- qc_full <- readQCorp(read_dir, FALSE)
-# p <- freq_distrib(d,"en",T)
-p <- types_distrib(qc_full,"en",2,faceted = F, rem_stopw = T
-                  ,"Distribution of word *Frequencies*"
-                  ,"Word Frequencies Ranges","Frequency (of word frequencies ranges)"
-                  ,"Text Type")
+# readIfEmpty(qc_full) || readQCorp(read_dir, FALSE)
+# p <- types_distrib(qc_full,"en",2,faceted = T, rem_stopw = T
+#   ,"Most frequent words, ngrams"
+#   ,"Words"
+#   ,"Occurrences","")
 
 
 
 
+# frq <- textstat_frequency(dfm("z y c c b b b a a  a "))
+doc_fm <- dfm_subset(dfm_full,language == "en")
+frq <- textstat_frequency(doc_fm)
+frq$props <- frq$frequency/sum(frq$frequency)
+(frq$cumul <- cumsum(frq$props))
+idx <- which(frq$cumul >= 0.5)[1]
+pct_types_for_50pct_coverage <- idx/nrow(frq)
+(frq$feature[1:idx])
+
+prt("nr. for coverage:"
+  ,idx,"pct features for 50% coverage:"
+  ,pct_types_for_50pct_coverage
+  ,"last feature:",frq$feature[idx])
 

@@ -388,7 +388,6 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
 read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
 
 if (!readIfEmpty(dfm_full)) {
-  
   # need the corpus
   if (!readIfEmpty(qc_full)) {
     print(paste("reading corpus from dir:",read_dir))
