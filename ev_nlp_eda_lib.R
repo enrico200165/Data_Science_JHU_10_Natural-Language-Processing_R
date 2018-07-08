@@ -1,4 +1,5 @@
 require(dplyr)
+require(ggplot2)
 require(stringr)
 
 source("01_globals.R")
@@ -112,7 +113,7 @@ source("01_globals.R")
 
   
 # --------------------------------------------------------------------
-  physicalAnalysis <- function()
+  physicalAnalysis <- function(data_dir_corpus_in)
 #---------------------------------------------------------------------
 {
 
@@ -163,10 +164,92 @@ source("01_globals.R")
 
   
 #--------------------------------------------------------------------
-  freq_distrib <- function(doc_fm, lang, faceted, rem_stopw,
-                           title_par, x_axis_lab_par, y_axis_lab_par
-                           ,legend_title_par) 
+  freq_distrib <- function(doc_fm, lang, rem_stopw,
+    proportions) 
 #--------------------------------------------------------------------
+  {
+    # https://tutorials.quanteda.io/statistical-analysis/frequency/
+    # the dfm() function applies certain options by default, 
+    # such as tolower() – a separate function for lower-casing texts 
+    # – and removes punctuation. All of the options to tokens() can 
+    # be passed to dfm(), however.
+    
+    if (missing(rem_stopw))
+      rem_stopw <- FALSE
+    if (missing(proportions))
+      proportions = FALSE
+    
+    
+    if (rem_stopw) {
+      stopw <- stopwords(tolower(lang))
+      doc_fm <- dfm(doc_fm, remove = stopw)
+    }
+    
+    dfm_lang <- dfm_subset(doc_fm ,language == tolower(lang))
+    stopifnot(ndoc(dfm_lang) == 3)
+    
+    if(proportions)
+      dfm_lang <- dfm_weight(dfm_lang, scheme = "prop")
+
+    frq_grp <- textstat_frequency(dfm_lang
+      ,groups = TXT_TYP)
+    
+    frq_grp
+}
+
+
+#--------------------------------------------------------------------
+plot_freq_distrib_q <- function(frq_d,faceted
+    ,title_par, x_axis_lab_par, y_axis_lab_par
+    ,legend_title_par, no_ticks) 
+#--------------------------------------------------------------------
+{
+
+  frequenza <- frq_d$frequency
+
+  if(missing(no_ticks)) no_ticks <- FALSE
+  
+  max_freq <- max(frequenza)
+  avg_freq <- mean(frequenza)
+  sd_freq <- sd(frequenza)
+  left_lim <- 0
+  right_lim <- avg_freq+0.2*sd_freq
+  cp <- seq(left_lim,right_lim
+            ,by = right_lim/99)
+  frequenza <- cut(frequenza,cp)
+  
+  d <- data.frame(freq = frequenza, gruppo = frq_d$group)
+  
+  p <- ggplot(d, aes(x = freq, fill = gruppo))
+  p <- p + geom_histogram(stat = "count")
+  # p <- p + geom_line()
+  p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 1))
+  if (faceted) {
+    p <- p + facet_grid(gruppo ~ .)
+  }
+  
+  p <- p + ggtitle(title_par)
+  p <- p + xlab(x_axis_lab_par)
+  p <- p + ylab(y_axis_lab_par)
+  p <- p + guides(fill=guide_legend(title=legend_title_par))
+  
+  if (no_ticks) {
+    p <- p  + theme(# axis.title.x=element_blank(),
+      axis.text.x=element_blank() ,axis.ticks.x=element_blank()
+      ,axis.text.y=element_blank() ,axis.ticks.y=element_blank())
+    # p <- p + scale_x_discrete(labels = NULL)
+    # p <- p + scale_y_continuous(labels = NULL)
+  }
+  
+  p
+  }
+  
+  
+  
+  
+  #--------------------------------------------------------------------
+  types_distrib <- function(qc_par, lng, ngram ,rem_stopw, faceted) 
+    #--------------------------------------------------------------------
   {
     # https://tutorials.quanteda.io/statistical-analysis/frequency/
     # the dfm() function applies certain options by default, 
@@ -176,179 +259,265 @@ source("01_globals.R")
     
     if (missing(faceted))
       faceted <- FALSE
+    
     if (missing(rem_stopw))
       rem_stopw <- FALSE
     
-    if (rem_stopw) {
-      stopw <- stopwords(tolower(lang))
-      doc_fm <- dfm(doc_fm, remove = stopw)
+    qc <- corpus_subset(qc_par, language == char_tolower(lng))
+    stopifnot(ndoc(qc) == 3)
+    
+    if (ngram == 1) { # can remove freely
+      toks <- tokens(qc   
+                     ,remove_numbers = T,remove_punct = T
+                     ,remove_symbols = T, remove_twitter = T
+                     ,remove_url = T)
+      toks <- tokens_tolower(toks)
+      if (rem_stopw) { # manage stopwords in/exclusion
+        stopw <- stopwords(tolower(lng))
+        toks <- tokens_remove(toks,stopw)
+      }
+    } else { # must not remove things
+      # sentence splitting avoid silly ngrams
+      # with it punct removal seems OK
+      qc <- corpus_reshape(qc, to = "sentences")
+      toks <- tokens(qc   
+                     ,remove_numbers = F,remove_punct = T
+                     ,remove_symbols = F, remove_twitter = T
+                     ,remove_url = T)
+      toks <- tokens_tolower(toks)
+      if (rem_stopw) { # manage stopwords in/exclusion
+        stopw <- stopwords(tolower(lng))
+        toks <- tokens_remove(toks,stopw)
+      }
       
     }
     
-    dfm_lang <- dfm_subset(doc_fm, language == tolower(lang))
-    stopifnot(ndoc(dfm_lang) == 3)
+    dfm_lang <- dfm(toks,ngrams = ngram)
     
-    frq_grp <- textstat_frequency(dfm_lang, groups = TXT_TYP)
+    ntypes <- if (faceted) 4 else 24
+    grouping <- if (faceted) TXT_TYP else NULL
+    # group by text type
+    frq_grp <- textstat_frequency(dfm_lang, n = ntypes
+                                  , groups = grouping
+    )
     
-    require(Hmisc)
+    frq_grp    
+  }
+#--------------------------------------------------------------------
+  types_freq_plot_q <- function(frq_grp, faceted
+                                ,title_par, x_axis_lab_par, y_axis_lab_par,legend_title_par) 
+  #--------------------------------------------------------------------
+  {
+    if (missing(faceted))
+      faceted <- FALSE
     
-    #molt = 100*1000
-    #frequenza <- frequenza*molt
-    frequenza <- frq_grp$frequency/sum(frq_grp$frequency)
-    #frequenza <- frequenza/molt
-    print(sum(frequenza))
-    if (!round(sum(frequenza),10) == 1) {
-      print("paste(sum(frequenza)",paste(sum(frequenza)))
-      stopifnot(sum(round(frequenza),10) == 1)
-    }
-    # frequenza <- log10(frequenza)
-    max_freq <- max(frequenza)
-    avg_freq <- mean(frequenza)
-    sd_freq <- sd(frequenza)
-    left_lim <- 0
-    right_lim <- avg_freq+0.2*sd_freq
-    cp <- seq(left_lim,right_lim
-              ,by = right_lim/99)
-    frequenza <- cut2(frequenza,cp)
-    
-    d <- data.frame(freq = frequenza, gruppo = frq_grp$group)
-    
-    p <- ggplot(d, aes(x = freq, fill = gruppo))
-    p <- p + geom_histogram(stat = "count")
-    # p <- p + geom_line()
-    p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 1))
-    if (faceted) {
-      p <- p + facet_grid(gruppo ~ .)
-    }
+    p <- ggplot(data = frq_grp, aes(x = reorder(feature, frequency)
+                                    , y = frequency))
+    p <- p + geom_point()
+    p <- p + coord_flip() 
+    p <- p + labs(x = NULL, y = "Frequency") 
+    if (faceted) p <- p + facet_grid(group ~ .)
+    p <- p + theme_minimal()
     
     p <- p + ggtitle(title_par)
     p <- p + xlab(x_axis_lab_par)
     p <- p + ylab(y_axis_lab_par)
     p <- p + guides(fill=guide_legend(title=legend_title_par))
     
-    p <- p + scale_x_discrete(labels = NULL)
-    p <- p + scale_y_continuous(labels = NULL)
     p
-}
+  }
   
   
-  
-  
+# ------------------------------------------------------------------------ 
+  types_coverage <- function(qc, lng) 
+# ------------------------------------------------------------------------ 
+  {
+    tks  <- tokens(corpus_subset(qc,language == lng)
+                   ,remove_punct = T)
+    doc_fm <- dfm(tks, remove = stopwords(lng))
+    frq <- textstat_frequency(doc_fm)
+    frq$props <- frq$frequency/sum(frq$frequency)
+    frq$cumul <- cumsum(frq$props)
+    idx <- which(frq$cumul >= 0.5)[1]
+    pct_types_for_50pct_coverage <- idx/nrow(frq)
+    (frq$feature[1:idx])
+    
+    prt("nr. for coverage:",idx
+        ,"pct features for 50% coverage:",pct_types_for_50pct_coverage
+        ,"last feature:",frq$feature[idx])
+    
+    prt("vrification that we cover 50% summing simple probs",sum(frq$props[1:idx]))
+    
+    list(idx = idx,pct = pct_types_for_50pct_coverage)
+  }
 
-# ====================================================================
-#                   Tests (quick verification)
-# ====================================================================
   
-# -------------------------------------------------------------------
+  # ====================================================================
+  #                   Tests (quick verification)
+  # ====================================================================
+  
+  # -------------------------------------------------------------------
   test_basicPlot <- function(mydf) 
-# -------------------------------------------------------------------
-{
+    # -------------------------------------------------------------------
+  {
     if (!(missing(mydf)) && !is.null(mydf)) {
       print(basicPlot(mydf ,TXT_TYP,TXT_NTOKENS ,TXT_LNG))
       print(basicPlot(mydf ,TXT_LNG ,TXT_NTOKENS ,TXT_TYP))
     } else {
       print("test_basicPlot() did not receive a usable df")
     }
-}
+  }
   
-
-# -------------------------------------------------------------------
+  
+  # -------------------------------------------------------------------
   test_physicalAnalysis <- function() 
-# -------------------------------------------------------------------
-{
-  if (readIfEmpty(phys_df)) {
-  } else {
-    print("NO, I could NOT read it")
-    phys_df <- physicalAnalysis()
-    serializeIfNeeded(phys_df,FALSE)  
-  }
-  
-  p <- ggplot(data=phys_df, aes(x = type, y = n_token)) 
-  p <- p + geom_bar(stat="identity"
-                    ,aes(fill = language), position = "dodge")  
-  # p <- p + facet_grid(~language)
-  p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-  print(p)
-  
-  print(str(phys_df))
-  print(phys_df)
-}
-
-  
-# -------------------------------------------------------------------
-  test_readIfEmpty_serializeIfNeeded <- function()
-# -------------------------------------------------------------------
-{
+    # -------------------------------------------------------------------
+  {
+    if (readIfEmpty(phys_df)) {
+    } else {
+      print("NO, I could NOT read it")
+      phys_df <- physicalAnalysis(data_dir_corpus_subset)
+      serializeIfNeeded(phys_df,FALSE)  
+    }
     
-  if (readIfEmpty(linux_wc)) {
-  } else {
-    print("NO, I could NOT read serialization")
-    linux_wc <- function(x) wcForFile(data_dir_corpus_in,x)
-    wc_df <- getWCInfo(data_dir_corpus_in,"*.txt",linux_wc)
-    # print(wc_df)
-    serializeIfNeeded(linux_wc,FALSE)  
-  }
-  linux_wc <- NULL
-  if (readIfEmpty(linux_wc)) {
-  } else {
-    print("NO, I could NOT read serialization")
-    linux_wc <- function(x) wcForFile(data_dir_corpus_in,x)
-    wc_df <- getWCInfo(data_dir_corpus_in,"*.txt",linux_wc)
-    # print(wc_df)
-    serializeIfNeeded(linux_wc,FALSE)  
-  }
-
-  if (readIfEmpty(linux_ls)) {
-  } else {
-    print("NO, I could NOT read it")
-    linux_ls <- function(x) lsForFile(x,data_dir_corpus_in, "--block-size=M") 
-    wc_df <- getWCInfo(data_dir_corpus_in,"*.txt",linux_ls)
-    print(wc_df)
-    serializeIfNeeded(linux_ls,FALSE)  
-  }
-  if (readIfEmpty(linux_ls)) {
-  } else {
-    print("NO, I could NOT read it")
-    linux_ls <- function(x) lsForFile(x,data_dir_corpus_in, "--block-size=M") 
-    wc_df <- getWCInfo(data_dir_corpus_in,"*.txt",linux_ls)
-    print(wc_df)
-    serializeIfNeeded(linux_ls,FALSE)  
+    p <- ggplot(data=phys_df, aes(x = type, y = n_token)) 
+    p <- p + geom_bar(stat="identity"
+                      ,aes(fill = language), position = "dodge")  
+    # p <- p + facet_grid(~language)
+    p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    print(p)
+    
+    print(str(phys_df))
+    print(phys_df)
   }
   
-}
-
-
+  
+  # -------------------------------------------------------------------
+  test_readIfEmpty_serializeIfNeeded <- function(data_dir_corpus_in)
+    # -------------------------------------------------------------------
+  {
+    
+    if (readIfEmpty(linux_wc)) {
+    } else {
+      print("NO, I could NOT read serialization")
+      linux_wc <- function(x) wcForFile(data_dir_corpus_in,x)
+      wc_df <- getWCInfo(data_dir_corpus_in,"*.txt",linux_wc)
+      # print(wc_df)
+      serializeIfNeeded(linux_wc,FALSE)  
+    }
+    linux_wc <- NULL
+    if (readIfEmpty(linux_wc)) {
+    } else {
+      print("NO, I could NOT read serialization")
+      linux_wc <- function(x) wcForFile(data_dir_corpus_in,x)
+      wc_df <- getWCInfo(data_dir_corpus_in,"*.txt",linux_wc)
+      # print(wc_df)
+      serializeIfNeeded(linux_wc,FALSE)  
+    }
+    
+    if (readIfEmpty(linux_ls)) {
+    } else {
+      print("NO, I could NOT read it")
+      linux_ls <- function(x) lsForFile(x,data_dir_corpus_in, "--block-size=M") 
+      wc_df <- getWCInfo(data_dir_corpus_in,"*.txt",linux_ls)
+      print(wc_df)
+      serializeIfNeeded(linux_ls,FALSE)  
+    }
+    if (readIfEmpty(linux_ls)) {
+    } else {
+      print("NO, I could NOT read it")
+      linux_ls <- function(x) lsForFile(x,data_dir_corpus_in, "--block-size=M") 
+      wc_df <- getWCInfo(data_dir_corpus_in,"*.txt",linux_ls)
+      print(wc_df)
+      serializeIfNeeded(linux_ls,FALSE)  
+    }
+    
+  }
+  
+  
+  
+  
 # -------------------------------------------------------------------
   test_freq_distrib <- function()
 # -------------------------------------------------------------------
 
 {
-  d <- dfm_full
+  
   # p <- freq_distrib(d,"en",T)
-  p <- freq_distrib(d,"en",T,T
-                    ,"Distribution of word *Frequencies*"
-                    ,"Word Frequencies Ranges","Frequency (of word frequencies ranges)"
-                    ,"Text Type")
+  freq_d <- freq_distrib(dfm_full,"en" ,rem_stopw = T ,proportions = F)
+  print(freq_d)
+  freq_d
+}
+
+
+# -------------------------------------------------------------------
+test_plot_freq_distrib_q <- function()
+# -------------------------------------------------------------------
+{
+    freq_d <- freq_distrib(dfm_full,"en",rem_stopw = T 
+      ,proportions = F)
+    p <- plot_freq_distrib_q( freq_d,faceted = FALSE
+      ,"title write it"
+      ,"X "
+      ,"Y"
+      ,"Legend"
+      , no_ticks = F
+      )
+    print(p)
+}
+  
+# ---------------------------------------------------------------------  
+test_types_freq <- function() 
+  # ---------------------------------------------------------------------  
+{
+  read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
+  readIfEmpty(qc_full) || readQCorp(read_dir, FALSE)
+  fct = F
+  d <- types_distrib(qc_full,"en",2,rem_stopw = T, faceted = fct)
+  p <- types_freq_plot_q(d, faceted = fct
+                         ,"Most frequent words, ngrams"
+                         ,"Words"
+                         ,"Occurrences","")
   print(p)
 }
 
 
+test_types_coverage <- function(qc) 
+{
+  print(types_coverage(qc_full,"en"))
+}   
+
+  
 # -------------------------------------------------------------------
   test_ev_nlp_eda_lib.R <- function()
 # -------------------------------------------------------------------
 {
+  # read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
+  # readIfEmpty(qc_full) || readQCorp(read_dir, FALSE)
   
-  test_freq_distrib()
-  
-  stop()
-  
-  test_readIfEmpty_serializeIfNeeded()
+  test_readIfEmpty_serializeIfNeeded(data_dir_corpus_subset)
   
   test_physicalAnalysis()
-  
-  test_basicPlot(physicalAnalysis())
-}
+   
+  # test_basicPlot(need a plot)
 
-# 
-  test_ev_nlp_eda_lib.R()
+  test_freq_distrib()
+   
+  test_plot_freq_distrib_q()
+  
+  test_types_freq()
+  
+  test_types_coverage()
+  
+}
+#  
+test_ev_nlp_eda_lib.R()
+
+  
+  
+    
+  
+    
+
+
 
