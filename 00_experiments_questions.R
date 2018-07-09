@@ -17,8 +17,8 @@ source("01_preprocess_lib.R")
 # --------------------------------------------------------------------
 #                 minimal texts for experimentation
 # --------------------------------------------------------------------
-text1 <- "hello, how are you"
-text2 <- "good thanks, and you?"
+text1 <- "Hello. How are you?"
+text2 <- "One, two, three."
 text3 <- "See you! Bye Bye."
 
 
@@ -191,4 +191,11 @@ explore_ngrams_punct <- function() {
 }
 # explore_ngrams_punct()
 
+
+remove_punctuation <- function() {
+  qc <- corpus(c(text1,text2,text3))
+  print(texts(qc))
+  texts(qc) <- gsub("[[:punct:]]"," ",texts(qc))
+  print(texts(qc))
+}
 

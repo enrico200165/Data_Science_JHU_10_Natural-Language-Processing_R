@@ -286,10 +286,11 @@ itaur_dir <- function() {
 
 
 # --------------------------------------------------------------------
-keypress <- function ()
+keypress <- function (message)
 # --------------------------------------------------------------------
 {
-  invisible(readline(prompt="Press [enter] to continue"))
+  if (missing(message)) message <- "Press [enter] to continue"
+  invisible(readline(prompt=message))
 }
 
 

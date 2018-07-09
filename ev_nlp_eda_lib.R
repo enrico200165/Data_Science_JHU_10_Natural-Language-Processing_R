@@ -252,13 +252,12 @@ plot_freq_distrib_ggplot_managed <- function(frq_d,faceted
 {
   if(missing(no_ticks)) no_ticks <- FALSE
   
-  
   frq_d$freqsafe <- frq_d$frequency
-  p <- ggplot(data = frq_d, aes(freqsafe)
+  p <- ggplot(data = frq_d, aes(x = frq_d$freq_cut)
     , fill = group
     )
-  p <- p +  geom_histogram(bins =1000)
-  # p <- p + geom_histogram(stat="count")
+  # p <- p +  geom_histogram(bins= 1000)
+  p <- p + geom_histogram(stat="count")
   p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 0,
     vjust = 0))
   if (faceted) {
@@ -413,6 +412,8 @@ plot_freq_distrib_user_managed <- function(frq_d,faceted
                                     , y = frequency))
     p <- p + geom_point()
     p <- p + coord_flip() 
+    # p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 1))
+    
     p <- p + labs(x = NULL, y = "Frequency") 
     if (faceted) p <- p + facet_grid(group ~ .)
     p <- p + theme_minimal()
@@ -552,7 +553,7 @@ plot_freq_distrib_user_managed <- function(frq_d,faceted
 test_plot_freq_distrib_q <- function()
 # -------------------------------------------------------------------
 {
-    freq_d <- freq_distrib(dfm_full,"en",rem_stopw = T 
+    freq_d <- freq_distrib(dfm_full,"en",rem_stopw = F 
       ,proportions = F)
 
      # remove occasional words
@@ -572,19 +573,19 @@ test_plot_freq_distrib_q <- function()
        , no_ticks = F
        ,0
      )
-     print(p)
+     #print(p)
 
-    return(T)
-    # keypress()
+    # keypress("to show next plot")
     
-    # p <- plot_freq_distrib_ggplot_managed( freq_d,faceted = F
-    #   ,"title write it"
-    #   ,"X "
-    #   ,"Y"
-    #   ,"Legend"
-    #   , no_ticks = F
-    #   )
-    # print(p)
+    p <- plot_freq_distrib_ggplot_managed(freq_of_freq,faceted = F
+     ,"title write it"
+     ,"X "
+     ,"Y"
+     ,"Legend"
+     , no_ticks = F
+     )
+     print(p)
+     keypress("to show next plot")
 }
 
 
@@ -611,11 +612,30 @@ test_types_coverage <- function(qc)
   print(types_coverage(qc_full,"en"))
 }   
 
-  
+
+# ====================================================================
+#                     global initialization
+# ====================================================================
+
+if (!readIfEmpty(qc_full)) {
+  print(paste("reading corpus from dir:",read_dir))
+  qc_full <- readQCorp(read_dir, FALSE)
+}
+serializeIfNeeded(qc_full, FALSE)
+texts(qc_full) <- gsub("[[:punct:]]"," ",texts(qc_full))
+
+
+if (!readIfEmpty(dfm_full)) {
+  dfm_full <- dfm(qc_full)
+}
+serializeIfNeeded(dfm_full, FALSE)
+
+
 # -------------------------------------------------------------------
   test_ev_nlp_eda_lib.R <- function()
 # -------------------------------------------------------------------
 {
+ 
   # read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
   # readIfEmpty(qc_full) || readQCorp(read_dir, FALSE)
   
@@ -633,7 +653,7 @@ test_types_coverage <- function(qc)
   test_plot_freq_distrib_q()
   # keypress()
   # 
-  # test_types_freq()
+  test_types_freq()
   # keypress()
   # 
   # test_types_coverage()

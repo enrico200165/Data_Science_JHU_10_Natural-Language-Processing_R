@@ -385,18 +385,22 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
 
 # clean_rds(".*")
 
-read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
-
-if (!readIfEmpty(dfm_full)) {
-  # need the corpus
-  if (!readIfEmpty(qc_full)) {
-    print(paste("reading corpus from dir:",read_dir))
-    qc_full <- readQCorp(read_dir, FALSE)
-    serializeIfNeeded(qc_full, FALSE)
-  }
-  dfm_full <- dfm(qc_full)
-  serializeIfNeeded(dfm_full, FALSE)
+if (F) {
+  read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
+  if (!readIfEmpty(dfm_full)) {
+    # need the corpus
+    if (!readIfEmpty(qc_full)) {
+      print(paste("reading corpus from dir:",read_dir))
+      qc_full <- readQCorp(read_dir, FALSE)
+      serializeIfNeeded(qc_full, FALSE)
+    }
+    dfm_full <- dfm(qc_full)
+    serializeIfNeeded(dfm_full, FALSE)
+    }
 }
+
+# 
+initalize_vars()
 # rm(qc_full); gc() # > 1 GiB and should not need it
 
 
