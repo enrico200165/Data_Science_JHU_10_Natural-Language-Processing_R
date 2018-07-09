@@ -204,29 +204,42 @@ plot_freq_distrib_q <- function(frq_d,faceted
     ,legend_title_par, no_ticks) 
 #--------------------------------------------------------------------
 {
-
-  frequenza <- frq_d$frequency
-
   if(missing(no_ticks)) no_ticks <- FALSE
   
-  max_freq <- max(frequenza)
-  avg_freq <- mean(frequenza)
-  sd_freq <- sd(frequenza)
+  # move from frequencies to frequencies of frequencies
+  frequenze <- frq_d$frequency
+  # frequenze <- log10(frequenze)
+  frequenze <- frequenze/sum(frequenze)
+  max_freq <- max(frequenze)
+  avg_freq <- mean(frequenze)
+  sd_freq <- sd(frequenze)
   left_lim <- 0
-  right_lim <- avg_freq+0.2*sd_freq
+  right_lim <- max_freq
+  nr_cuts <- 200
   cp <- seq(left_lim,right_lim
-            ,by = right_lim/99)
-  frequenza <- cut(frequenza,cp)
+            ,by = (right_lim-left_lim)/(nr_cuts-1))
+  # labels
+  cut_labels  <- round(cp*100,2)
+  cut_labels  <- as.character(cut_labels)[-1]
+  cut_labels <- paste(cut_labels,"%",sep = "")
+
+  freq_cut <- cut(frequenze,breaks = cp, labels = cut_labels)
+
+  nr_plot <- nr_cuts*1
+  df_freq_cuts <- data.frame(frq = freq_cut[1:nr_plot]
+     ,gruppo = frq_d$group[1:nr_plot]
+    )
   
-  d <- data.frame(freq = frequenza, gruppo = frq_d$group)
+  p <- ggplot(data = df_freq_cuts, aes(x = frq)
+    #, fill = gruppo
+    )
   
-  p <- ggplot(d, aes(x = freq, fill = gruppo))
-  p <- p + geom_histogram(stat = "count")
-  # p <- p + geom_line()
-  p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 1))
-  if (faceted) {
-    p <- p + facet_grid(gruppo ~ .)
-  }
+  p <- p + geom_histogram(stat="count")
+  p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 0,
+    vjust = 0))
+  # if (faceted) {
+  #   p <- p + facet_grid(gruppo ~ .)
+  # }
   
   p <- p + ggtitle(title_par)
   p <- p + xlab(x_axis_lab_par)
@@ -495,19 +508,25 @@ test_types_coverage <- function(qc)
   # read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
   # readIfEmpty(qc_full) || readQCorp(read_dir, FALSE)
   
-  test_readIfEmpty_serializeIfNeeded(data_dir_corpus_subset)
+  # test_readIfEmpty_serializeIfNeeded(data_dir_corpus_subset)
+  # keypress()
   
-  test_physicalAnalysis()
-   
+  # test_physicalAnalysis()
+  # keypress()
+  
   # test_basicPlot(need a plot)
 
-  test_freq_distrib()
-   
+  # test_freq_distrib()
+  # keypress()
+  
   test_plot_freq_distrib_q()
-  
-  test_types_freq()
-  
-  test_types_coverage()
+  # keypress()
+  # 
+  # test_types_freq()
+  # keypress()
+  # 
+  # test_types_coverage()
+  # keypress()
   
 }
 #  
