@@ -197,49 +197,73 @@ source("01_globals.R")
     frq_grp
 }
 
+  
+  
+#--------------------------------------------------------------------
+  freq_of_freq_cutted <- function(frq_d, nr_cuts, remove_outliers) 
+#--------------------------------------------------------------------
+  {
+
+    if (missing(remove_outliers)) remove_outliers <- FALSE
+    if (missing(nr_cuts)) nr_cuts <- 1000
+    
+    
+    # move from frequencies to frequencies of frequencie
+    if (remove_outliers) {
+      qnt <- quantile(frq_d$frequency, probs=c(.25, .75), na.rm = FALSE)
+      H <- 1.5 * IQR(qnt, na.rm = FALSE)
+      l <- qnt[1] - H
+      r <- qnt[2] + H
+      frq_d <- frq_d[frq_d$frequency >= l & 
+          frq_d$frequency <= r, ] 
+    }
+     
+    frq_d$frequenze <- frq_d$frequency/sum(frq_d$frequency)
+    max_freq <- max(frq_d$frequenze)
+    avg_freq <- mean(frq_d$frequenze)
+    sd_freq <- sd(frq_d$frequenze)
+    
+    left_lim <- 0 # min(frq_d$frequenze)
+    right_lim <- max_freq
+    cp <- seq(left_lim,right_lim
+      ,by = (right_lim-left_lim)/nr_cuts)
+    # don't work well, bugs and number too small
+    # cut_labels  <- round(cp*100,2)
+    # cut_labels <- cut_labels[3:length(cut_labels)]
+    # cut_labels <- as.character(cut_labels)
+    # cut_labels  <- c("~0+",as.character(cut_labels))
+    # cut_labels <- paste(cut_labels,"%",sep = "")
+    
+    frq_d$freq_cut <- cut(frq_d$frequenze,breaks = cp
+      #,labels = cut_labels
+      )
+
+    frq_d    
+}
+  
+  
+  
 
 #--------------------------------------------------------------------
-plot_freq_distrib_q <- function(frq_d,faceted
+plot_freq_distrib_ggplot_managed <- function(frq_d,faceted
     ,title_par, x_axis_lab_par, y_axis_lab_par
     ,legend_title_par, no_ticks) 
 #--------------------------------------------------------------------
 {
   if(missing(no_ticks)) no_ticks <- FALSE
   
-  # move from frequencies to frequencies of frequencies
-  frequenze <- frq_d$frequency
-  # frequenze <- log10(frequenze)
-  frequenze <- frequenze/sum(frequenze)
-  max_freq <- max(frequenze)
-  avg_freq <- mean(frequenze)
-  sd_freq <- sd(frequenze)
-  left_lim <- 0
-  right_lim <- max_freq
-  nr_cuts <- 200
-  cp <- seq(left_lim,right_lim
-            ,by = (right_lim-left_lim)/(nr_cuts-1))
-  # labels
-  cut_labels  <- round(cp*100,2)
-  cut_labels  <- as.character(cut_labels)[-1]
-  cut_labels <- paste(cut_labels,"%",sep = "")
-
-  freq_cut <- cut(frequenze,breaks = cp, labels = cut_labels)
-
-  nr_plot <- nr_cuts*1
-  df_freq_cuts <- data.frame(frq = freq_cut[1:nr_plot]
-     ,gruppo = frq_d$group[1:nr_plot]
-    )
   
-  p <- ggplot(data = df_freq_cuts, aes(x = frq)
-    #, fill = gruppo
+  frq_d$freqsafe <- frq_d$frequency
+  p <- ggplot(data = frq_d, aes(freqsafe)
+    , fill = group
     )
-  
-  p <- p + geom_histogram(stat="count")
+  p <- p +  geom_histogram(bins =1000)
+  # p <- p + geom_histogram(stat="count")
   p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 0,
     vjust = 0))
-  # if (faceted) {
-  #   p <- p + facet_grid(gruppo ~ .)
-  # }
+  if (faceted) {
+   p <- p + facet_grid(group ~ .)
+  }
   
   p <- p + ggtitle(title_par)
   p <- p + xlab(x_axis_lab_par)
@@ -255,8 +279,69 @@ plot_freq_distrib_q <- function(frq_d,faceted
   }
   
   p
+}
+
+
+#--------------------------------------------------------------------
+plot_freq_distrib_user_managed <- function(frq_d,faceted
+  ,remove_outliars
+  ,title_par, x_axis_lab_par, y_axis_lab_par
+  ,legend_title_par
+  ,no_ticks
+  ,start_delta, end_delta
+) 
+#--------------------------------------------------------------------
+{
+  if(missing(remove_outliars)) remove_outliars <- TRUE
+  if(missing(no_ticks)) no_ticks <- FALSE
+  if(missing(start_delta)) start_delta <- 0
+  if(missing(end_delta)) end_delta <- 0
+  
+    
+  if (faceted)
+    counted_df <- group_by(frq_d, group) %>% count(freq_cut)
+  else 
+    counted_df <- frq_d %>% count(freq_cut)
+
+  if (remove_outliars) {
+    qnt <- quantile(counted_df$n, probs=c(.25, .75), na.rm = FALSE)
+    H <- 1.5 * IQR(qnt, na.rm = FALSE)
+    l <- qnt[1] - H
+    r <- qnt[2] + H
+    counted_df <- counted_df[counted_df$n >= l & 
+        counted_df$n <= r, ] 
+    title_par <- paste(title_par,"(Outlayers Removed)")
+  }
+
+  if (faceted)
+  p <- ggplot(counted_df[(1+start_delta):(nrow(counted_df)-end_delta),]
+    ,aes(x = freq_cut, y = n,fill = group))   
+  else
+    p <- ggplot(counted_df[(1+start_delta):(nrow(counted_df)-end_delta),]
+      ,aes(x = freq_cut, y = n))   
+  p <- p + geom_bar(stat="identity")
+  p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 0,
+    vjust = 0))
+  if (faceted) {
+    p <- p + facet_grid(group ~ .)
   }
   
+  p <- p + ggtitle(title_par)
+  p <- p + xlab(x_axis_lab_par)
+  p <- p + ylab(y_axis_lab_par)
+  p <- p + guides(fill=guide_legend(title=legend_title_par))
+  
+  if (no_ticks) {
+    p <- p  + theme(# axis.title.x=element_blank(),
+      axis.text.x=element_blank() ,axis.ticks.x=element_blank()
+      ,axis.text.y=element_blank() ,axis.ticks.y=element_blank())
+    # p <- p + scale_x_discrete(labels = NULL)
+    # p <- p + scale_y_continuous(labels = NULL)
+  }
+  
+  p
+}
+
   
   
   
@@ -469,23 +554,49 @@ test_plot_freq_distrib_q <- function()
 {
     freq_d <- freq_distrib(dfm_full,"en",rem_stopw = T 
       ,proportions = F)
-    p <- plot_freq_distrib_q( freq_d,faceted = FALSE
-      ,"title write it"
-      ,"X "
-      ,"Y"
-      ,"Legend"
-      , no_ticks = F
-      )
-    print(p)
+
+     # remove occasional words
+     # freq_d <- freq_d[freq_d$frequency > 1, ]
+
+     freq_of_freq <- freq_of_freq_cutted(freq_d,250,F)
+     
+     # freq_of_freq$frequenze <- log(freq_of_freq$frequenze)
+     
+     p <- plot_freq_distrib_user_managed(freq_of_freq
+       ,faceted = T
+       , remove_outliars = T
+       ,"title write it"
+       ,"X "
+       ,"Y"
+       ,"Text Type"
+       , no_ticks = F
+       ,0
+     )
+     print(p)
+
+    return(T)
+    # keypress()
+    
+    # p <- plot_freq_distrib_ggplot_managed( freq_d,faceted = F
+    #   ,"title write it"
+    #   ,"X "
+    #   ,"Y"
+    #   ,"Legend"
+    #   , no_ticks = F
+    #   )
+    # print(p)
 }
+
+
+
   
 # ---------------------------------------------------------------------  
 test_types_freq <- function() 
-  # ---------------------------------------------------------------------  
+# ---------------------------------------------------------------------  
 {
   read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
   readIfEmpty(qc_full) || readQCorp(read_dir, FALSE)
-  fct = F
+  fct = T
   d <- types_distrib(qc_full,"en",2,rem_stopw = T, faceted = fct)
   p <- types_freq_plot_q(d, faceted = fct
                          ,"Most frequent words, ngrams"
