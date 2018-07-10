@@ -384,9 +384,8 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
 # NB relies on global with fixed name
 
 # clean_rds(".*")
-
+read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
 if (F) {
-  read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
   if (!readIfEmpty(dfm_full)) {
     # need the corpus
     if (!readIfEmpty(qc_full)) {

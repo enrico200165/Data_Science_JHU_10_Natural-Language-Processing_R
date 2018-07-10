@@ -244,41 +244,6 @@ source("01_globals.R")
   
   
 
-#--------------------------------------------------------------------
-plot_freq_distrib_ggplot_managed <- function(frq_d,faceted
-    ,title_par, x_axis_lab_par, y_axis_lab_par
-    ,legend_title_par, no_ticks) 
-#--------------------------------------------------------------------
-{
-  if(missing(no_ticks)) no_ticks <- FALSE
-  
-  frq_d$freqsafe <- frq_d$frequency
-  p <- ggplot(data = frq_d, aes(x = frq_d$freq_cut)
-    , fill = group
-    )
-  # p <- p +  geom_histogram(bins= 1000)
-  p <- p + geom_histogram(stat="count")
-  p <- p + theme(axis.text.x = element_text(angle = -90, hjust = 0,
-    vjust = 0))
-  if (faceted) {
-   p <- p + facet_grid(group ~ .)
-  }
-  
-  p <- p + ggtitle(title_par)
-  p <- p + xlab(x_axis_lab_par)
-  p <- p + ylab(y_axis_lab_par)
-  p <- p + guides(fill=guide_legend(title=legend_title_par))
-  
-  if (no_ticks) {
-    p <- p  + theme(# axis.title.x=element_blank(),
-      axis.text.x=element_blank() ,axis.ticks.x=element_blank()
-      ,axis.text.y=element_blank() ,axis.ticks.y=element_blank())
-    # p <- p + scale_x_discrete(labels = NULL)
-    # p <- p + scale_y_continuous(labels = NULL)
-  }
-  
-  p
-}
 
 
 #--------------------------------------------------------------------
@@ -452,6 +417,26 @@ plot_freq_distrib_user_managed <- function(frq_d,faceted
 
   
   # ====================================================================
+  #                     global initialization
+  # ====================================================================
+  
+  if (!readIfEmpty(qc_full)) {
+    print(paste("reading corpus from dir:",read_dir))
+    qc_full <- readQCorp(read_dir, FALSE)
+  }
+  serializeIfNeeded(qc_full, FALSE)
+  texts(qc_full) <- gsub("[[:punct:]]"," ",texts(qc_full))
+  
+  
+  if (!readIfEmpty(dfm_full)) {
+    dfm_full <- dfm(qc_full)
+  }
+  serializeIfNeeded(dfm_full, FALSE)
+  
+  
+  
+  
+  # ====================================================================
   #                   Tests (quick verification)
   # ====================================================================
   
@@ -553,13 +538,56 @@ plot_freq_distrib_user_managed <- function(frq_d,faceted
 test_plot_freq_distrib_q <- function()
 # -------------------------------------------------------------------
 {
-    freq_d <- freq_distrib(dfm_full,"en",rem_stopw = F 
+  
+  # generate text with frequencies of frequencies 1
+  # ie. frequency 1 to 4 each once
+  freqcies_1 <- sapply(1:5, function(i) 
+    rep(paste0(letters[i],", ",collapse = ""),i))
+  freqcies_1 <- unlist(sapply(freqcies_1,function(x) paste(x, collapse = "")))
+  freqcies_1 <- paste0(freqcies_1, collapse = "")
+
+  # 10 frequencies ten, ie. ten letters/numbers each with frequency 10
+  freqcies_10 <-rep(paste0(letters[11:20],". ", collapse = ""),10)
+  freqcies_10 <- paste0(freqcies_10, collapse = "")
+  # 5 frequencies 11, ie. ten letters/numbers each with frequency 10
+  freqcies_5 <-rep(paste0(letters[21:25],". ", collapse = ""),11)
+  freqcies_5 <- paste0(freqcies_5, collapse = "")
+  
+  text_freq1 <- paste0(freqcies_1,freqcies_10, collapse = "")
+  text_freq2 <- paste0(freqcies_1,freqcies_5, collapse = "")
+  
+  qc_small <- corpus(c(text_freq1, text_freq2, ""))
+  docvars(qc_small) <- data.frame(language = c("en","en","en")
+    , type = c ("blog","news","blog"))
+  texts(qc_small) <- gsub("[[:punct:]]"," ",texts(qc_small))
+
+  ### caveat: frequencies occurring once are in TWO documents
+  dfm_small <- dfm(qc_small)
+  freq_small <- freq_distrib(dfm_small,"en",rem_stopw = F ,proportions = F)
+  (freq_small)
+  freq_of_freq_small <- freq_of_freq_cutted(freq_small,20,F)
+  
+  p <- plot_freq_distrib_user_managed(freq_of_freq_small
+    ,faceted = F
+    , remove_outliars = F
+    ,"title write it"
+    ,"X "
+    ,"Y"
+    ,"Text Type"
+    , no_ticks = F
+    ,0
+  )
+  print(p)
+  
+  keypress()
+  
+  freq_d <- freq_distrib(dfm_full,"en",rem_stopw = F 
       ,proportions = F)
 
      # remove occasional words
      # freq_d <- freq_d[freq_d$frequency > 1, ]
 
-     freq_of_freq <- freq_of_freq_cutted(freq_d,250,F)
+  freq_of_freq <- freq_of_freq_cutted(freq_d,250,F)
      
      # freq_of_freq$frequenze <- log(freq_of_freq$frequenze)
      
@@ -573,19 +601,9 @@ test_plot_freq_distrib_q <- function()
        , no_ticks = F
        ,0
      )
-     #print(p)
-
-    # keypress("to show next plot")
-    
-    p <- plot_freq_distrib_ggplot_managed(freq_of_freq,faceted = F
-     ,"title write it"
-     ,"X "
-     ,"Y"
-     ,"Legend"
-     , no_ticks = F
-     )
      print(p)
-     keypress("to show next plot")
+
+    keypress("to show next plot")
 }
 
 
@@ -612,23 +630,6 @@ test_types_coverage <- function(qc)
   print(types_coverage(qc_full,"en"))
 }   
 
-
-# ====================================================================
-#                     global initialization
-# ====================================================================
-
-if (!readIfEmpty(qc_full)) {
-  print(paste("reading corpus from dir:",read_dir))
-  qc_full <- readQCorp(read_dir, FALSE)
-}
-serializeIfNeeded(qc_full, FALSE)
-texts(qc_full) <- gsub("[[:punct:]]"," ",texts(qc_full))
-
-
-if (!readIfEmpty(dfm_full)) {
-  dfm_full <- dfm(qc_full)
-}
-serializeIfNeeded(dfm_full, FALSE)
 
 
 # -------------------------------------------------------------------
