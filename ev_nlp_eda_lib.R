@@ -137,6 +137,9 @@ source("01_globals.R")
   physical_analysis_plots <- function() 
 # -------------------------------------------------------------------
   {
+    x_label <- "Type Of Text"
+    legend_text <- "Language code"
+    
     if (readIfEmpty(phys_df)) {
     } else {
       print("NO, I could NOT read it")
@@ -146,34 +149,34 @@ source("01_globals.R")
 
     plot_phys_an_fsize <- basicPlot(phys_df
       ,"type","size",fillPar = "language"
-      , title_par = "File Sizes, in Gib (from Linux ls command)"
-      ,x_axis_lab_par = "Text Types (by language)"
-      ,y_axis_lab_par = "Size (GiB)"
-      ,"Language code")  
+      , title_par = "File Sizes, (from Linux ls command)"
+      ,x_axis_lab_par = x_label
+      ,y_axis_lab_par = "Size (rounded)"
+      ,lengend_text)  
     # print(plot_phys_an_fsize);keypress()
 
     plot_phys_an_ntokens <- basicPlot(phys_df
       ,"type","n_token",fillPar = "language"
       , title_par = "Tokens \n(rough, from Linux wc command)"
-      ,x_axis_lab_par = "Text Types (by language)"
+      ,x_axis_lab_par = x_label
       ,y_axis_lab_par = "Count"
-      ,"Language code")  
+      ,legend_text)  
     #print(plot_phys_an_ntokens);keypress()
 
     plot_phys_an_nlines <- basicPlot(phys_df
       ,"type","n_newline",fillPar = "language"
       ,title_par = "Text Lines (from Linux wc)"
-      ,x_axis_lab_par = "Text Types (by language)"
+      ,x_axis_lab_par = x_label
       ,y_axis_lab_par = "Count"
-      ,"Language code")  
+      ,legend_text)  
     #print(plot_phys_an_nlines);keypress()
 
     plot_phys_an_max_line_len <- basicPlot(phys_df
       ,"type","max_line_len",fillPar = "language"
       ,title_par = "Max Line Lengths (from Linux wc command)"
-      ,x_axis_lab_par = "Text Types (by language)"
+      ,x_axis_lab_par = x_label
       ,y_axis_lab_par = "Length"
-      ,"Language code")  
+      ,legend_text)  
     #print(plot_phys_an_max_line_len);keypress()
     
     
@@ -218,10 +221,10 @@ source("01_globals.R")
   p <- p + geom_bar(stat="identity"
                       ,aes_string(fill = fillPar), position = "dodge")
   # p <- p + facet_grid(~language)
-  p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  # p <- p + theme(axis.text.x = element_text(angle = 0, hjust = 1))
   
   # labels
-  p <- p + ggtitle(yPar)
+  p <- p + ggtitle(title_par)
   p <- p + xlab(x_axis_lab_par)
   p <- p + ylab(y_axis_lab_par)
   p <- p + guides(fill=guide_legend(title=legend_title_par))
@@ -547,10 +550,10 @@ plot_freq_distrib_user_managed <- function(frq_d,faceted
 
   ret <- physical_analysis_plots()
   grid.arrange(
-    ret$plot_phys_an_fsize 
-      ,ret$plot_phys_an_ntokens 
-      ,ret$plot_phys_an_nlines 
-      ,ret$plot_phys_an_max_line_len
+      ret[[1]]  # plot_phys_an_fsize 
+      ,ret[[2]] # plot_phys_an_ntokens 
+      ,ret[[3]] # plot_phys_an_nlines 
+      ,ret[[4]] # plot_phys_an_max_line_len
     )
 }
   
@@ -741,7 +744,7 @@ test_types_coverage <- function(qc)
   # test_readIfEmpty_serializeIfNeeded(data_dir_corpus_subset)
   # keypress()
   
-  test_physicalAnalysis()
+  test_physical_analysis_plots()
   # keypress()
   
   # test_basicPlot(need a plot)
