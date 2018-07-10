@@ -246,7 +246,7 @@ source("01_globals.R")
 
 
 
-#--------------------------------------------------------------------
+# --------------------------------------------------------------------
 plot_freq_distrib_user_managed <- function(frq_d,faceted
   ,remove_outliars
   ,title_par, x_axis_lab_par, y_axis_lab_par
@@ -254,7 +254,7 @@ plot_freq_distrib_user_managed <- function(frq_d,faceted
   ,no_ticks
   ,start_delta, end_delta
 ) 
-#--------------------------------------------------------------------
+# --------------------------------------------------------------------
 {
   if(missing(remove_outliars)) remove_outliars <- TRUE
   if(missing(no_ticks)) no_ticks <- FALSE
@@ -393,43 +393,62 @@ plot_freq_distrib_user_managed <- function(frq_d,faceted
   
   
 # ------------------------------------------------------------------------ 
-  types_coverage <- function(qc, lng) 
+  types_coverage <- function(qc, pct_to_cover, lng, remove_stopwords) 
 # ------------------------------------------------------------------------ 
   {
+    
+    if (missing(remove_stopwords)) remove_stopwords <- FALSE
+    if (missing(pct_to_cover)) pct_to_cover <- 0.95
+    
+    stopifnot( 0 < pct_to_cover && pct_to_cover < 1)
+    
+    # always remove punctuation
     tks  <- tokens(corpus_subset(qc,language == lng)
                    ,remove_punct = T)
-    doc_fm <- dfm(tks, remove = stopwords(lng))
+    
+    # normally should keep stopwords
+    remove_it <- if(remove_stopwords) stopwords(lng) else NULL
+    doc_fm <- dfm(tks, remove = remove_it)
+
+    # get frequencies    
     frq <- textstat_frequency(doc_fm)
-    frq$props <- frq$frequency/sum(frq$frequency)
+    # get proportions
+    frq$props <- frq$frequency/sum(frq$frequency) ;
+    stopifnot(round(sum(frq$props)-1,5) == 0)
+    # cumulative
     frq$cumul <- cumsum(frq$props)
-    idx <- which(frq$cumul >= 0.5)[1]
-    pct_types_for_50pct_coverage <- idx/nrow(frq)
-    (frq$feature[1:idx])
+    idx <- which(frq$cumul >= pct_to_cover)[1]
+    pct_types_for_coverage <- idx/nrow(frq)
     
     prt("nr. for coverage:",idx
-        ,"pct features for 50% coverage:",pct_types_for_50pct_coverage
+        ,"pct features for 50% coverage:",pct_types_for_coverage
         ,"last feature:",frq$feature[idx])
     
     prt("vrification that we cover 50% summing simple probs",sum(frq$props[1:idx]))
     
-    list(idx = idx,pct = pct_types_for_50pct_coverage)
+    list(idx = idx
+      ,pct_to_cover = pct_types_for_coverage
+      ,proportion = frq$props
+      ,freq_object = frq
+      )
   }
 
   
-  # ====================================================================
-  #                     global initialization
-  # ====================================================================
+
+  
+  
+# ====================================================================
+#                     global initialization
+# ====================================================================
   
   if (!readIfEmpty(qc_full)) {
     print(paste("reading corpus from dir:",read_dir))
     qc_full <- readQCorp(read_dir, FALSE)
   }
   serializeIfNeeded(qc_full, FALSE)
-  texts(qc_full) <- gsub("[[:punct:]]"," ",texts(qc_full))
-  
-  
+
   if (!readIfEmpty(dfm_full)) {
-    dfm_full <- dfm(qc_full)
+    dfm_full <- dfm(qc_full, remove_punct = T)
   }
   serializeIfNeeded(dfm_full, FALSE)
   
@@ -625,9 +644,28 @@ test_types_freq <- function()
 }
 
 
-test_types_coverage <- function(qc) 
+# --------------------------------------------------------------------
+test_types_coverage <- function(qc)
+# --------------------------------------------------------------------
+
 {
-  print(types_coverage(qc_full,"en"))
+  ret <- types_coverage(qc_full, pct_to_cover = 0.9
+    ,lng = "en", remove_stopwords = T) 
+
+  
+  mydf <- ret[["freq_object"]]
+  print("")
+  # ret$freq_object$props    $cuml
+  p <- ggplot(data=mydf, aes(x=seq_along(props)/length(props), y = props))
+  p <- p +geom_line()
+  print(p)
+  keypress()
+  p <- ggplot(data=mydf, aes(x=seq_along(cumul)/length(cumul), y = cumul))
+  p <- p +geom_line()
+  print(p)
+  
+  print("")
+  print("")
 }   
 
 
@@ -651,13 +689,13 @@ test_types_coverage <- function(qc)
   # test_freq_distrib()
   # keypress()
   
-  test_plot_freq_distrib_q()
+  # test_plot_freq_distrib_q()
   # keypress()
   # 
-  test_types_freq()
+  # test_types_freq()
   # keypress()
   # 
-  # test_types_coverage()
+  test_types_coverage() 
   # keypress()
   
 }

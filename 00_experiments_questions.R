@@ -193,9 +193,16 @@ explore_ngrams_punct <- function() {
 
 
 remove_punctuation <- function() {
-  qc <- corpus(c(text1,text2,text3))
-  print(texts(qc))
-  texts(qc) <- gsub("[[:punct:]]"," ",texts(qc))
-  print(texts(qc))
+  txt <- "I'm Enrico's, don't I? 100 times"
+
+  # bad
+  gsub("[[:punct:]]"," ",txt)
+  # great
+  tokens(txt, remove_numbers = TRUE,remove_punct = TRUE)
 }
+
+
+
+
+ gsub("[[:punct:]]"," ","don't I'm Enrico's")
 

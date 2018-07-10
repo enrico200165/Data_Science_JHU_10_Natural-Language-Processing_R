@@ -393,7 +393,9 @@ if (F) {
       qc_full <- readQCorp(read_dir, FALSE)
       serializeIfNeeded(qc_full, FALSE)
     }
-    dfm_full <- dfm(qc_full)
+    # choose one
+    dfm_full <- dfm(qc_full) 
+    dfm_full <- dfm(qc_full, remove_punct = T)
     serializeIfNeeded(dfm_full, FALSE)
     }
 }
