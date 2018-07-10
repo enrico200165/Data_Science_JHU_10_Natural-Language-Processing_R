@@ -1,5 +1,6 @@
 require(dplyr)
 require(ggplot2)
+require(gridExtra)
 require(stringr)
 
 source("01_globals.R")
@@ -38,14 +39,15 @@ source("01_globals.R")
   
   wcDfRow <- data.frame(
     TXT_FNAME = fname
-    ,TXT_BYTES = splNums[4]
-    ,TXT_NCHAR = splNums[3]
-    ,TXT_NTOKENS = splNums[1]
     ,TXT_NNLINES = splNums[1]
+    ,TXT_NTOKENS = splNums[2]
+    ,TXT_NCHAR = splNums[3]
+    ,TXT_BYTES = splNums[4]
     ,max_line_len = splNums[5]
     ,stringsAsFactors=FALSE
   )
-  names(wcDfRow) <- c(TXT_FNAME,TXT_BYTES,TXT_NCHAR,TXT_NTOKENS,TXT_NNLINES,"max_line_len")
+  names(wcDfRow) <- c(TXT_FNAME ,TXT_NNLINES ,TXT_NTOKENS 
+  ,TXT_NCHAR ,TXT_BYTES  ,"max_line_len")
   # print(wcDfRow)
 
   wcDfRow
@@ -130,6 +132,62 @@ source("01_globals.R")
   ret
 }
 
+  
+# -------------------------------------------------------------------
+  physical_analysis_plots <- function() 
+# -------------------------------------------------------------------
+  {
+    if (readIfEmpty(phys_df)) {
+    } else {
+      print("NO, I could NOT read it")
+      phys_df <- physicalAnalysis(data_dir_corpus_subset)
+      serializeIfNeeded(phys_df,FALSE)  
+    }
+
+    plot_phys_an_fsize <- basicPlot(phys_df
+      ,"type","size",fillPar = "language"
+      , title_par = "File Sizes, in Gib (from Linux ls command)"
+      ,x_axis_lab_par = "Text Types (by language)"
+      ,y_axis_lab_par = "Size (GiB)"
+      ,"Language code")  
+    # print(plot_phys_an_fsize);keypress()
+
+    plot_phys_an_ntokens <- basicPlot(phys_df
+      ,"type","n_token",fillPar = "language"
+      , title_par = "Tokens \n(rough, from Linux wc command)"
+      ,x_axis_lab_par = "Text Types (by language)"
+      ,y_axis_lab_par = "Count"
+      ,"Language code")  
+    #print(plot_phys_an_ntokens);keypress()
+
+    plot_phys_an_nlines <- basicPlot(phys_df
+      ,"type","n_newline",fillPar = "language"
+      ,title_par = "Text Lines (from Linux wc)"
+      ,x_axis_lab_par = "Text Types (by language)"
+      ,y_axis_lab_par = "Count"
+      ,"Language code")  
+    #print(plot_phys_an_nlines);keypress()
+
+    plot_phys_an_max_line_len <- basicPlot(phys_df
+      ,"type","max_line_len",fillPar = "language"
+      ,title_par = "Max Line Lengths (from Linux wc command)"
+      ,x_axis_lab_par = "Text Types (by language)"
+      ,y_axis_lab_par = "Length"
+      ,"Language code")  
+    #print(plot_phys_an_max_line_len);keypress()
+    
+    
+    phys_anal_plots <- list(      
+       plot_phys_an_fsize 
+      ,plot_phys_an_ntokens 
+      ,plot_phys_an_nlines 
+      ,plot_phys_an_max_line_len)
+    serializeIfNeeded(phys_anal_plots,FALSE)
+    
+    phys_anal_plots
+  }
+
+  
 
 #---------------------------------------------------------------------
   lngCountryTypeDF <- function(fnames) 
@@ -152,7 +210,8 @@ source("01_globals.R")
 
 
 # --------------------------------------------------------------------
-  basicPlot <- function(dfPar,xPar,yPar,fillPar)  
+  basicPlot <- function(dfPar,xPar,yPar,fillPar
+   ,title_par, x_axis_lab_par, y_axis_lab_par,legend_title_par) 
 # --------------------------------------------------------------------
 {
   p <- ggplot(data=dfPar, aes_string(x = xPar, y = yPar)) 
@@ -160,6 +219,13 @@ source("01_globals.R")
                       ,aes_string(fill = fillPar), position = "dodge")
   # p <- p + facet_grid(~language)
   p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  
+  # labels
+  p <- p + ggtitle(yPar)
+  p <- p + xlab(x_axis_lab_par)
+  p <- p + ylab(y_axis_lab_par)
+  p <- p + guides(fill=guide_legend(title=legend_title_par))
+
 }
 
   
@@ -367,8 +433,8 @@ plot_freq_distrib_user_managed <- function(frq_d,faceted
   }
 #--------------------------------------------------------------------
   types_freq_plot_q <- function(frq_grp, faceted
-                                ,title_par, x_axis_lab_par, y_axis_lab_par,legend_title_par) 
-  #--------------------------------------------------------------------
+ ,title_par, x_axis_lab_par, y_axis_lab_par,legend_title_par) 
+#--------------------------------------------------------------------
   {
     if (missing(faceted))
       faceted <- FALSE
@@ -459,9 +525,9 @@ plot_freq_distrib_user_managed <- function(frq_d,faceted
   #                   Tests (quick verification)
   # ====================================================================
   
-  # -------------------------------------------------------------------
+# -------------------------------------------------------------------
   test_basicPlot <- function(mydf) 
-    # -------------------------------------------------------------------
+# -------------------------------------------------------------------
   {
     if (!(missing(mydf)) && !is.null(mydf)) {
       print(basicPlot(mydf ,TXT_TYP,TXT_NTOKENS ,TXT_LNG))
@@ -472,32 +538,26 @@ plot_freq_distrib_user_managed <- function(frq_d,faceted
   }
   
   
-  # -------------------------------------------------------------------
-  test_physicalAnalysis <- function() 
-    # -------------------------------------------------------------------
-  {
-    if (readIfEmpty(phys_df)) {
-    } else {
-      print("NO, I could NOT read it")
-      phys_df <- physicalAnalysis(data_dir_corpus_subset)
-      serializeIfNeeded(phys_df,FALSE)  
-    }
-    
-    p <- ggplot(data=phys_df, aes(x = type, y = n_token)) 
-    p <- p + geom_bar(stat="identity"
-                      ,aes(fill = language), position = "dodge")  
-    # p <- p + facet_grid(~language)
-    p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-    print(p)
-    
-    print(str(phys_df))
-    print(phys_df)
-  }
   
   
-  # -------------------------------------------------------------------
+# -------------------------------------------------------------------
+  test_physical_analysis_plots <- function() 
+# -------------------------------------------------------------------
+{
+
+  ret <- physical_analysis_plots()
+  grid.arrange(
+    ret$plot_phys_an_fsize 
+      ,ret$plot_phys_an_ntokens 
+      ,ret$plot_phys_an_nlines 
+      ,ret$plot_phys_an_max_line_len
+    )
+}
+  
+  
+# -------------------------------------------------------------------
   test_readIfEmpty_serializeIfNeeded <- function(data_dir_corpus_in)
-    # -------------------------------------------------------------------
+# -------------------------------------------------------------------
   {
     
     if (readIfEmpty(linux_wc)) {
@@ -681,7 +741,7 @@ test_types_coverage <- function(qc)
   # test_readIfEmpty_serializeIfNeeded(data_dir_corpus_subset)
   # keypress()
   
-  # test_physicalAnalysis()
+  test_physicalAnalysis()
   # keypress()
   
   # test_basicPlot(need a plot)
@@ -695,7 +755,7 @@ test_types_coverage <- function(qc)
   # test_types_freq()
   # keypress()
   # 
-  test_types_coverage() 
+  # test_types_coverage() 
   # keypress()
   
 }
