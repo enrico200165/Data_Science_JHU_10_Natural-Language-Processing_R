@@ -58,8 +58,12 @@ map_acro(LNG_EN )
 # mostly to get a NULL (easily mangeable) instead of a non-existing 
 # variable (more laborious to manage)
 
-..use_full_corpus <- T
-use_full_corpus <- function(v) { if (missing(v)) ..use_full_corpus else ..use_full_corpus <<- v   }
+
+fulldata <- T
+data_type_prefix <- function() if (fulldata) "full" else "subs"
+
+
+use_full_corpus <- function(vPar) if (missing(vPar)) return(fulldata) else return(fulldata <<- vPar)
 
 # qc: quanteda corpus
 qc_full <- if (exists("qc_full")) qc_full else NULL
@@ -198,11 +202,7 @@ getSerializFName <- function(var_id, force_name)
   if (nchar(SERIAL_PREFIX) > 0 && !grepl(SERIAL_PREFIX, rds_fname))
     rds_fname <- paste0(SERIAL_PREFIX,rds_fname)
   
-  # full vs. subset prefix
-  prefix <- if (use_full_corpus()) "full"
-  else "subs"
-
-  rds_fname <- paste0(prefix,"_",rds_fname,".rds") 
+  rds_fname <- paste0(data_type_prefix(),"_",rds_fname,".rds") 
 }
 
 
@@ -249,7 +249,7 @@ getSerializFName <- function(var_id, force_name)
       || (length(df) <= 0 && nrow(df) <= 0)) {
     # print(paste(varName,"is empty", rdsFName))
     if (file.exists(rdsFName)) {
-      print(paste("reading serialization for:",varName," file:", rdsFName))
+      # print(paste("reading serialization for:",varName," file:", rdsFName))
       df <- readRDS(rdsFName)
       #assign(varName,df,.GlobalEnv) # pass it outside
       assign(varName,df,parent.frame(n = 1)) # pass it outside
@@ -291,6 +291,28 @@ getSerializFName <- function(var_id, force_name)
   rlang::env_unbind(e, victims)
 
   names_removed <- setdiff(names_initial, rlang::env_names(e))
+}
+
+
+# --------------------------------------------------------------------
+  zapVariables <- function (variablesPar, serializ)
+# --------------------------------------------------------------------
+{
+  if (missing(serializ)) serializ <- TRUE
+
+  e <- parent.frame()
+  varName <- deparse(substitute(variablesPar))
+  if ( exists(varName,e)) {
+    rlang::env_unbind(e, varName)
+    stopifnot(!exists(varName,e))
+  } else {
+    if (exists(varName,.GlobalEnv))
+      rlang::env_unbind(.GlobalEnv, varName)
+      stopifnot(!exists(varName,.GlobalEnv))
+  }
+  
+  if (serializ && file.exists(getSerializFName(varName)))
+    file.remove(getSerializFName(varName))
 }
 
 
@@ -407,8 +429,6 @@ testAddToCoreDF <- function() {
   
   test_getSerializeFName <- function()
   {
-    use_full_corpus(F)
-    
     name <- "pippo"
     prt(name,"->",getSerializFName(name))
 

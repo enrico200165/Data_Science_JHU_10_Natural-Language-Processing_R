@@ -321,57 +321,19 @@ if (F) {
     }
 }
 
-# 
-#initalize_vars()
-# rm(qc_full); gc() # > 1 GiB and should not need it
 
-
-
-# # --------------------------------------------------------------------
-#   readQCorp_HIDE_FOR_NOW <- function(data_dir_corpus, subsetPar) 
-# # --------------------------------------------------------------------
-# # lazy reads text files matching pattern into a single Quanteda corpus
-# {    
-#   
-#   print(paste("readQCorp",data_dir_corpus))
-#   stopifnot(dir.exists(data_dir_corpus))
-#   
-#   
-#   filesInDir <- list.files(data_dir_corpus,"*bset*"); print(filesInDir)
-#   
-#   en_US_blogs   <- readtextIfEmpty_Wrapper(en_US_blogs,data_dir_corpus,  "en_US.blogs")
-#   qc <- corpus(en_US_blogs); rm(en_US_blogs);gc(); mem = pryr::object_size(qc)
-#   en_US_news    <- readtextIfEmpty_Wrapper(en_US_news,data_dir_corpus,   "en_US.news")
-#   qc <-qc+corpus(en_US_news);rm(en_US_news);gc();mem = pryr::object_size(qc)
-#   en_US_twitter <- readtextIfEmpty_Wrapper(en_US_twitter,data_dir_corpus,"en_US.twitter")
-#   qc <-qc+corpus(en_US_twitter);rm(en_US_twitter);gc();mem = pryr::object_size(qc)
-#   
-#   de_DE_blogs   <- readtextIfEmpty_Wrapper(de_DE_blogs,data_dir_corpus,  "de_DE.blogs")
-#   qc <-qc+corpus(de_DE_blogs);rm(de_DE_blogs);gc();mem = pryr::object_size(qc)
-#   de_DE_news    <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus,   "de_DE.news")
-#   qc <-qc+corpus(de_DE_news);rm(de_DE_news);gc();mem = pryr::object_size(qc)
-#   de_DE_twitter <- readtextIfEmpty_Wrapper(de_DE_twitter,data_dir_corpus,"de_DE.twitter")
-#   qc <-qc+corpus(de_DE_twitter);rm(de_DE_twitter);gc();mem = pryr::object_size(qc)
-#   
-#   fi_FI_blogs   <- readtextIfEmpty_Wrapper(fi_FI_blogs,data_dir_corpus,"fi_FI.blogs")
-#   qc <-qc+corpus(fi_FI_blogs);rm(fi_FI_blogs);gc();mem = pryr::object_size(qc)
-#   fi_FI_news    <- readtextIfEmpty_Wrapper(fi_FI_news,data_dir_corpus, "fi_FI.news")
-#   qc <-qc+corpus(fi_FI_news);rm(fi_FI_news);gc();mem = pryr::object_size(qc)
-#   fi_FI_twitter <- readtextIfEmpty_Wrapper(fi_FI_twitter,data_dir_corpus, "fi_FI.twitter")
-#   qc <-qc+corpus(fi_FI_twitter);rm(fi_FI_twitter);gc();mem = pryr::object_size(qc)
-#   
-#   ru_RU_blogs   <- readtextIfEmpty_Wrapper(ru_RU_blogs,data_dir_corpus,"ru_RU.blogs")
-#   qc <-qc+corpus(ru_RU_blogs);rm(ru_RU_blogs);gc();mem = pryr::object_size(qc)
-#   ru_RU_news    <- readtextIfEmpty_Wrapper(ru_RU_news,data_dir_corpus, "ru_RU.news")
-#   qc <-qc+corpus(ru_RU_news);rm(ru_RU_news);gc();mem = pryr::object_size(qc)
-#   ru_RU_twitter <- readtextIfEmpty_Wrapper(ru_RU_twitter,data_dir_corpus, "ru_RU.twitter")
-#   qc <-qc+corpus(ru_RU_twitter);rm(ru_RU_twitter);gc();mem = pryr::object_size(qc)
-#   
-#   print(paste("exiting readQCorp???(), corpus size GiB: ", GiB(mem)))
-#   
-#   qc  
-# }
-
+# --------------------------------------------------------------------
+zap_files_serializations <- function(patternPar) 
+# --------------------------------------------------------------------
+{
+  
+  if (missing(patternPar)) patternPar <- "*txt*.rds"
+  
+  fnames_to_delete <- list.files(".", patternPar)
+  file.remove(fnames_to_delete)
+  length(fnames_to_delete)
+}
+zap_files_serializations()
 
 
 # ====================================================================
@@ -387,48 +349,18 @@ if (F) {
 
   print(" --- Unit Testing --- ")
 
-  T && subsetTextFilesByLines(data_dir_corpus_full 
+  F && subsetTextFilesByLines(data_dir_corpus_full 
       ,data_dir_corpus_subset ,50 ,1000 , forceIt = F)
 
-  
-  F && test_read_corpuses()
-  
 
-  if (F) {
-    qc_full <- readQCorp(data_dir_corpus_in, FALSE)
-    print("finished read the corpus, serializing it if needed")
-    serializeIfNeeded(qc_full, FALSE) 
-    print("finished serializing")
-    # saveRDS(qc,file = "qc.rds")
-    # print(gc())
-    # save.image(file="compact.RData") 
-    # rm(list=ls())
-    # print(gc())
-    # load(file="compact.RData")
-    # print(gc())
-    # qc <- readRDS(file = "qc.rds")
-    # smr <- summary(qc)
-    # print(smr)
-    # print(str(smr))
-  }  
-  
-#  if(T) {
   if(F) {
-    ptm <- proc.time()
-    print(list.files(data_dir_corpus))
-    readQCorp(data_dir_corpus, FALSE)
-    print(paste("exec time",paste(proc.time() - ptm,collapse = " ")))
-    print(proc.time() - ptm)
-  # print(docvars(qc_blogs))
-    print(paste("blogs",format(object.size(qc_blogs), units = "MiB")))
-    print(paste("news",format(object.size(qc_news), units = "MiB")))
-    print(paste("twitts",format(object.size(qc_twitts), units = "MiB")))
-  }
-  
-  
-  if (F) {
-    mydf <- NA
-    #readtextIfEmpty_Wrapper(mydf, data_dir_corpus_in,"")
+    print(list.files(data_dir_corpus_full))
+
+    start_time <- proc.time()
+    readQCorp(data_dir_corpus_full, FALSE)
+    end_time <- proc.time()
+    time_spent_with_serialization <- round(end_time - start_time,2)
+    print(paste("exec time",paste(time_spent_with_serialization ,collapse = " ")))
   }
   
   print(" --- Tests Completed --- ")

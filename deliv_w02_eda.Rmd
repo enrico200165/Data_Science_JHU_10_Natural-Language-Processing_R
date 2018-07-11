@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 # Foreword  
 ## Approach
 One of the key principles taught in the course is **"start/lead with the question"**.  
-This EDA (exploratory data analysis) is for a question very clearly 
+The is EDA (exploratory data analysis) is for a question very clearly 
 defined by the objective of the  capstone project: "next word prediction".  
 Along with the question we are also given some requirements, not reported 
 here  because too specialistic, from which is clear that size of data 
@@ -36,16 +36,18 @@ will also take into account what our question is and the point of
 attention about data sizes we have been provided.  
 
 ## Data Overview
-We are provided text in the following languages:
+We are provided texts in the following languages:
 - English
 - Finnish
 - German
 - Russian
-
+The tools for this EDA are able to work with any of the provided language; initially we will show info also for non English languages, then focus on English not to make things unnecessarily lengthy.
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
-                      echo=FALSE, warning=FALSE, message=FALSE)
+                      echo=FALSE, warning=FALSE, message=FALSE
+  ,results='hide')
+
 ```
 
 ```{r load_libraries, echo=FALSE}
@@ -53,47 +55,56 @@ require(dplyr)
 require(quanteda)
 require(readtext)
 require(knitr)
-```
-
-
-
-## Physical / Low Level Examination of data
-
-```{r load_files, echo = FALSE}
-require(kableExtra)
 
 source("01_globals.R")
 source("01_preprocess_lib.R")
 source("ev_nlp_eda_lib.R")
 
-read_dir <- data_dir_corpus_full #  data_dir_corpus_subset
-if (!readIfEmpty(dfm_full)) {
-    # need the corpus
-    if (!readIfEmpty(qc_full)) {
-      print(paste("reading corpus from dir:",read_dir))
-      qc_full <- readQCorp(read_dir, FALSE)
-      serializeIfNeeded(qc_full, FALSE)
-    }
-    # choose one
-    dfm_full <- dfm(qc_full, remove_punct = T)
-    serializeIfNeeded(dfm_full, FALSE)
-    }
 ```
 
-```{r start_anal, echo = FALSE}
+
+
+```{r source_files, echo=FALSE}
+
+source("01_globals.R")
+source("01_preprocess_lib.R")
+source("ev_nlp_eda_lib.R")
+
+```
+
+
+
+## Physical / Low Level Examination of data
+It is known that in the capstone project data size is a critical point,  
+so, without yet resorting to proper NLP tools, a quick look at some 
+basic size parameters using simple tools from Linux and combining their
+output (all done using R).  
+*(using MiB, not the smaller "marketing oriented" MB, so sizes are 
+slightl less than you would see them in Windows explorer)*
+```{r physical_analysis_ls, echo = FALSE, results ='markup'}
 require(kableExtra)
 
-# source("01_globals.R")
-# source("01_preprocess_lib.R")
-# source("ev_nlp_eda_lib.R")
-
-readIfEmpty(phys_an_df)
-if (!exists("phys_an_df") || nrow(phys_an_df) <= 0) {
+if (!readIfEmpty(phys_an_df)) {
   phys_an_df <- physicalAnalysis(data_dir_corpus_full)
   serializeIfNeeded(phys_an_df,FALSE)
 }
+
+phys_an_df$file <- gsub("_?subset.*\\.", ".", phys_an_df$file)
 row.names(phys_an_df) <- NULL
 phys_an_df %>%  kable(row.names = FALSE) %>% kable_styling()
+#phys_an_df[,c(1:6)] %>%  kable(row.names = FALSE) %>% kable_styling()
+```
+
+As a consequence of the fact that a blog, news item and tweets are all stored
+within a single line we notice some unsuale maximus for line lengths.
+Also, the originary files contained unsual characters not compatible 
+with the NLP tool and caused it to truncate some readings, a clean-up
+was necessary to remove such characters.
+<!--  A very naive look at lines, tokens and line legth, not yet into NLP -->
+```{r physical_analysis_wc, echo = FALSE, results='markup'}
+
+#phys_an_df[,c(1:4,7:11)] %>%  kable(row.names = FALSE) %>% kable_styling()
+
 ```
 
 
