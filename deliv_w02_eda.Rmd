@@ -95,16 +95,31 @@ phys_an_df %>%  kable(row.names = FALSE) %>% kable_styling()
 #phys_an_df[,c(1:6)] %>%  kable(row.names = FALSE) %>% kable_styling()
 ```
 
-As a consequence of the fact that a blog, news item and tweets are all stored
-within a single line we notice some unsuale maximus for line lengths.
-Also, the originary files contained unsual characters not compatible 
-with the NLP tool and caused it to truncate some readings, a clean-up
-was necessary to remove such characters.
 <!--  A very naive look at lines, tokens and line legth, not yet into NLP -->
 ```{r physical_analysis_wc, echo = FALSE, results='markup'}
 
 #phys_an_df[,c(1:4,7:11)] %>%  kable(row.names = FALSE) %>% kable_styling()
 
 ```
+
+
+After the quantitative table a visual look at how the parameters compare
+across text types and languages
+```{r physical_analysis_plots, echo = FALSE, results='markup'}
+
+if (!readIfEmpty(phys_an_plots)) {
+  phys_an_plots <- physical_analysis_plots(data_dir_corpus_full)
+  serializeIfNeeded(phys_an_plots,FALSE)
+}
+
+ grid.arrange(
+      phys_an_plots[[1]]  # plot_phys_an_fsize
+      ,phys_an_plots[[2]] # plot_phys_an_ntokens
+      ,phys_an_plots[[3]] # plot_phys_an_nlines
+      ,phys_an_plots[[4]] # plot_phys_an_max_line_len
+    )
+
+```
+
 
 

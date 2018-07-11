@@ -213,7 +213,12 @@ getSerializFName <- function(var_id, force_name)
   if (missing(forceIt)) forceIt <- FALSE
   
   varName <- deparse(substitute(dfPar))
-  rdsFName <- getSerializFName(varName,rdsFName)
+  if (missing(rdsFName) || is.null(rdsFName) || nchar(rdsFName) <= 0)
+    rdsFName <- getSerializFName(varName)
+  
+  if (grepl("full_full",rdsFName)) {
+    printf("asino")
+  }
   
   if (!file.exists(rdsFName) || forceIt) {
     # if(exists(varName)) {
@@ -265,7 +270,7 @@ getSerializFName <- function(var_id, force_name)
   # print(paste("exit",varName, ))
   
   if (ret) {
-    serializeIfNeeded(df ,forceIt,rdsFName)
+    serializeIfNeeded(df,forceIt)
   }
   
   ret

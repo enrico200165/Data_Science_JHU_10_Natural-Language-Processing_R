@@ -134,7 +134,7 @@ source("01_globals.R")
 
   
 # -------------------------------------------------------------------
-  physical_analysis_plots <- function() 
+  physical_analysis_plots <- function(input_data_dir) 
 # -------------------------------------------------------------------
   {
     x_label <- "Type Of Text"
@@ -142,22 +142,21 @@ source("01_globals.R")
     
     if (readIfEmpty(phys_df)) {
     } else {
-      print("NO, I could NOT read it")
-      phys_df <- physicalAnalysis(data_dir_corpus_subset)
+      phys_df <- physicalAnalysis(input_data_dir)
       serializeIfNeeded(phys_df,FALSE)  
     }
 
     plot_phys_an_fsize <- basicPlot(phys_df
       ,"type","size",fillPar = "language"
-      , title_par = "File Sizes, (from Linux ls command)"
+      , title_par = "File Sizes"
       ,x_axis_lab_par = x_label
-      ,y_axis_lab_par = "Size (rounded)"
-      ,lengend_text)  
+      ,y_axis_lab_par = "Size"
+      ,legend_text)  
     # print(plot_phys_an_fsize);keypress()
 
     plot_phys_an_ntokens <- basicPlot(phys_df
       ,"type","n_token",fillPar = "language"
-      , title_par = "Tokens \n(rough, from Linux wc command)"
+      , title_par = "Nr. Tokens"
       ,x_axis_lab_par = x_label
       ,y_axis_lab_par = "Count"
       ,legend_text)  
@@ -165,7 +164,7 @@ source("01_globals.R")
 
     plot_phys_an_nlines <- basicPlot(phys_df
       ,"type","n_newline",fillPar = "language"
-      ,title_par = "Text Lines (from Linux wc)"
+      ,title_par = "Nr. Text Lines"
       ,x_axis_lab_par = x_label
       ,y_axis_lab_par = "Count"
       ,legend_text)  
@@ -173,7 +172,7 @@ source("01_globals.R")
 
     plot_phys_an_max_line_len <- basicPlot(phys_df
       ,"type","max_line_len",fillPar = "language"
-      ,title_par = "Max Line Lengths (from Linux wc command)"
+      ,title_par = "Max Line Lengths"
       ,x_axis_lab_par = x_label
       ,y_axis_lab_par = "Length"
       ,legend_text)  
@@ -185,7 +184,7 @@ source("01_globals.R")
       ,plot_phys_an_ntokens 
       ,plot_phys_an_nlines 
       ,plot_phys_an_max_line_len)
-    serializeIfNeeded(phys_anal_plots,FALSE)
+    serializeIfNeeded(phys_an_plots,FALSE)
     
     phys_an_plots
   }
@@ -228,7 +227,14 @@ source("01_globals.R")
   p <- p + xlab(x_axis_lab_par)
   p <- p + ylab(y_axis_lab_par)
   p <- p + guides(fill=guide_legend(title=legend_title_par))
-
+  
+  # remove ticks
+  p <- p  + theme(# axis.title.x=element_blank(),
+    # axis.text.x=element_blank() ,axis.ticks.x=element_blank()
+    axis.text.y=element_blank() ,axis.ticks.y=element_blank()
+    )
+    # p <- p + scale_x_discrete(labels = NULL)
+    # p <- p + scale_y_continuous(labels = NULL)
 }
 
   
@@ -482,8 +488,8 @@ freq_of_freq_an <- function()
        , no_ticks = T
        ,0,0
      )
-   print(freq_of_freq_an_plot_outlayers_excl); keypress()
-     
+   print(freq_of_freq_an_plot_outlayers_excl); 
+
    freq_of_freq_an_plot_outlayers_incl <- plot_freq_distrib_user_managed(
     freq_of_freq
        ,faceted = T
@@ -595,17 +601,18 @@ freq_of_freq_an <- function()
   
   
 # -------------------------------------------------------------------
-  test_physical_analysis_plots <- function() 
+  test_physical_analysis_plots <- function(data_dir) 
 # -------------------------------------------------------------------
 {
 
-  ret <- physical_analysis_plots()
+  ret <- physical_analysis_plots(data_dir)
   grid.arrange(
       ret[[1]]  # plot_phys_an_fsize 
       ,ret[[2]] # plot_phys_an_ntokens 
       ,ret[[3]] # plot_phys_an_nlines 
       ,ret[[4]] # plot_phys_an_max_line_len
     )
+  # keypress()
 }
   
   
@@ -884,13 +891,14 @@ test_types_coverage <- function(qc)
   # test_readIfEmpty_serializeIfNeeded(data_dir_corpus_subset)
   # keypress()
   
-  # test_physical_analysis_plots()
+  # 
+  test_physical_analysis_plots(data_dir_corpus_full)
   # keypress()
   
   # test_freq_distrib()
   # keypress()
 
-  test_types_freq_an(qc_full)
+  # test_types_freq_an(qc_full)
 
     
   # keypress()
@@ -902,7 +910,6 @@ test_types_coverage <- function(qc)
   # keypress()
   
 }
-#  
 # test_ev_nlp_eda_lib.R()
 
   
