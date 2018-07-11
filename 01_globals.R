@@ -300,7 +300,7 @@ getSerializFName <- function(var_id, force_name)
 
 
 # --------------------------------------------------------------------
-  zapVariables <- function (variablesPar, serializ)
+  kill_var <- function (variablesPar, serializ)
 # --------------------------------------------------------------------
 {
   if (missing(serializ)) serializ <- TRUE
@@ -316,11 +316,13 @@ getSerializFName <- function(var_id, force_name)
       stopifnot(!exists(varName,.GlobalEnv))
   }
   
-  if (serializ && file.exists(getSerializFName(varName)))
-    file.remove(getSerializFName(varName))
+  fname <- getSerializFName(varName)
+  if (serializ && file.exists(fname)) {
+    ret <- file.remove(fname)
+  }
 }
 
-
+kill_var(freq_of_freq_plots)
 # --------------------------------------------------------------------
   GiB <- function (x, digits)
 # --------------------------------------------------------------------

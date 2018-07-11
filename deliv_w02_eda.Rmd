@@ -109,8 +109,8 @@ across text types and languages
 
 if (!readIfEmpty(phys_an_plots)) {
   phys_an_plots <- physical_analysis_plots(data_dir_corpus_full)
-  serializeIfNeeded(phys_an_plots,FALSE)
 }
+serializeIfNeeded(phys_an_plots,FALSE)
 
  grid.arrange(
       phys_an_plots[[1]]  # plot_phys_an_fsize
@@ -119,6 +119,34 @@ if (!readIfEmpty(phys_an_plots)) {
       ,phys_an_plots[[4]] # plot_phys_an_max_line_len
     )
 
+```
+
+As requested by the assignment description an analysis of the distribution of frequencies, ie. we plot the frequency of words/ngrams
+frequency range.   
+This might have direct practical usefulness for the prediction algorythm.
+```{r freq_distrib_an_plot_outlayers_yes, echo = FALSE, results='markup'}
+
+if (!readIfEmpty(freq_of_freq_plots)) {
+  freq_of_freq_plots <- freq_of_freq_an()
+}
+serializeIfNeeded(freq_of_freq_plots,FALSE)
+
+print(freq_of_freq_plots[[2]])
+
+# grid.arrange(
+#       freq_of_freq_plots[[1]]
+#      ,freq_of_freq_plots[[2]]
+#     ,ncol = 2
+#     )
+
+```
+We see that the very low frequencies are extremely frequent, to the 
+point that the plothardly shows other ranges.  
+Let's perform the analysis removing the outlayers (most of the very frequent small-frequency ranges) to be able to see the other frequency
+ ranges distribution
+```{r freq_distrib_an_plot_outlayers_no, echo = FALSE, results='markup'}
+
+print(freq_of_freq_plots[[1]])
 ```
 
 

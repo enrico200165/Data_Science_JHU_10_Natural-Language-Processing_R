@@ -4,6 +4,7 @@ require(gridExtra)
 require(stringr)
 
 source("01_globals.R")
+source("01_preprocess_lib.R")
 
 #---------------------------------------------------------------------
   wcForFile <- function(fdir,fname) 
@@ -472,36 +473,53 @@ plot_freq_distrib_user_managed <- function(frq_d,faceted
 freq_of_freq_an <- function()
 # -------------------------------------------------------------------
 {
+  ticks <- FALSE
   
-  freq_d <- freq_distrib(dfm_full,"en",rem_stopw = F,proportions = F)
-  freq_of_freq <- freq_of_freq_cutted(freq_d,250,F)
+  # freq_d <- freq_distrib(dfm_full,"en",rem_stopw = F,proportions = F)
+  # freq_of_freq <- freq_of_freq_cutted(freq_d,250,F)
 
+
+
+  if (!readIfEmpty(freq_of_freq)) {
+    
+    if (!readIfEmpty(freq_d)) {
+       freq_d <- freq_distrib(dfm_full,"en"
+         ,rem_stopw = F,proportions = F)
+    }
+    serializeIfNeeded(freq_d,FALSE)
+    
+    freq_of_freq <- freq_of_freq_cutted(freq_d,250,F)
+  }
+  serializeIfNeeded(freq_of_freq,FALSE)
+
+    
+  
   
   freq_of_freq_an_plot_outlayers_excl <- plot_freq_distrib_user_managed(
     freq_of_freq
-       ,faceted = T
+       ,faceted = F
        , remove_outliars = T
        ,"Frequency of Word Frequencies"
        ,"Frequency Ranges"
        ,"Frequency (of Frequency Range)"
        ,"Type of text"
-       , no_ticks = T
+       , no_ticks = ticks
        ,0,0
      )
-   print(freq_of_freq_an_plot_outlayers_excl); 
+   #print(freq_of_freq_an_plot_outlayers_excl); 
 
    freq_of_freq_an_plot_outlayers_incl <- plot_freq_distrib_user_managed(
     freq_of_freq
-       ,faceted = T
+       ,faceted = F
        , remove_outliars = F
        ,"Frequency of Word Frequencies"
        ,"Frequency Ranges"
        ,"Frequency (of Frequency Range)"
        ,"Type of text"
-       , no_ticks = T
+       , no_ticks = ticks
        ,0,0
      )
-   print(freq_of_freq_an_plot_outlayers_incl)
+   #print(freq_of_freq_an_plot_outlayers_incl)
 
    
    freq_of_freq_an_plots <- list(
@@ -509,6 +527,7 @@ freq_of_freq_an <- function()
      ,freq_of_freq_an_plot_outlayers_incl
    )
   serializeIfNeeded(freq_of_freq_an_plots)
+
   freq_of_freq_an_plots
 }
 
@@ -563,21 +582,20 @@ freq_of_freq_an <- function()
 #                     global initialization
 # ====================================================================
   
-  # read_dir = if (use_full_corpus()) data_dir_corpus_full else data_dir_corpus_subset
-  # readIfEmpty(qc_full) || readQCorp(read_dir, FALSE)
-  # 
-  # if (!readIfEmpty(qc_full)) {
-  #   print(paste("reading corpus from dir:",qc_full))
-  #   qc_full <- readQCorp(read_dir, FALSE)
-  # }
-  # serializeIfNeeded(qc_full, FALSE)
-  # 
-  # if (!readIfEmpty(dfm_full)) {
-  #   dfm_full <- dfm(qc_full, remove_punct = T)
-  #   dfm_sel <- dfm_select(dfm_full,pattern = ".")
-  # }
-  # serializeIfNeeded(dfm_full, FALSE)
-  
+read_dir = if (use_full_corpus()) data_dir_corpus_full else data_dir_corpus_subset
+
+if (!readIfEmpty(qc_full)) {
+   print(paste("reading corpus from dir:",qc_full))
+   qc_full <- readQCorp(read_dir, FALSE)
+}
+serializeIfNeeded(qc_full, FALSE)
+ 
+if (!readIfEmpty(dfm_full)) {
+   dfm_full <- dfm(qc_full, remove_punct = T)
+   dfm_sel <- dfm_select(dfm_full,pattern = ".")
+}
+serializeIfNeeded(dfm_full, FALSE)
+
   
   
   
@@ -664,16 +682,15 @@ freq_of_freq_an <- function()
 # -------------------------------------------------------------------
 
 {
-  
-  # p <- freq_distrib(d,"en",T)
-  freq_d <- freq_distrib(dfm_full,"en" ,rem_stopw = T ,proportions = F)
-  print(freq_d[1:5])
+  freq_d <- freq_distrib(dfm_full
+    ,"en" ,rem_stopw = T ,proportions = F)
+
   freq_d
 }
 
 
 # --------------------------------------------------------------------
-test_freq_of_freq_an <- function()
+test_freq_of_freq_an_simple <- function()
 # --------------------------------------------------------------------
 {
     # generate text with frequencies of frequencies 1
@@ -716,6 +733,21 @@ test_freq_of_freq_an <- function()
   )
   print(p)
 }  
+
+
+# --------------------------------------------------------------------
+test_freq_of_freq_an_realistic <- function()
+# --------------------------------------------------------------------
+{
+  freq_of_freq_plots <- freq_of_freq_an()
+  
+  print(freq_of_freq_plots[[1]])
+  Sys.sleep(4)
+  
+  print(freq_of_freq_plots[[2]])
+  Sys.sleep(4)
+}  
+
 
 
 # ---------------------------------------------------------------------  
@@ -892,14 +924,16 @@ test_types_coverage <- function(qc)
   # keypress()
   
   # 
-  test_physical_analysis_plots(data_dir_corpus_full)
+  # test_physical_analysis_plots(data_dir_corpus_full)
   # keypress()
   
+  # 
   # test_freq_distrib()
   # keypress()
 
+  # test_freq_of_freq_an_simple()
+  test_freq_of_freq_an_realistic()
   # test_types_freq_an(qc_full)
-
     
   # keypress()
   # 
