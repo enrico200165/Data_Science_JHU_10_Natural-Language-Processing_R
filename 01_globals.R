@@ -447,6 +447,5 @@ testAddToCoreDF <- function() {
   
 }
 
-#  
-  test_Globals.R()
+# test_Globals.R()
   

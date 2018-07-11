@@ -1,7 +1,3 @@
-# Sources
-# https://rpubs.com/lmullen/nlp-chapter
-# http://www.mjdenny.com/Text_Processing_In_R.html
-
 # install.packages("stringr", dependencies = TRUE)
 require(quanteda)
 require(stringr)
@@ -29,9 +25,6 @@ source("01_globals.R")
   buildWordsDBFromFile <- function(words_file, db_fname) {
 # ---------------------------------------------------------
 # reads text file and put words in an sqlite table
-    
-    
-# Write to DB EN word list
     
   words_table <- "words_en"
   words_col = "words"
@@ -77,64 +70,6 @@ source("01_globals.R")
 }
   
 
-# ---------------------------------------------------------
-  subsetTextFile <- function(fname, ndCharsToRead) {
-# ---------------------------------------------------------
-# abandoned for a simpler solution, for now    
-    fnameOut <- subsetFileName(fname)
-    print(paste("subsetting", fname, " to ", fnameOut))
-    fileDf <-
-      data.frame(
-        fname = c(
-          "./data_in/data-set/en_US/en_US.blogs.txt"
-          ,
-          "./data_in/data-set/en_US/en_US.news.txt"
-          ,
-          "./data_in/data-set/en_US/en_US.twitter.txt"
-        )
-      )
-    fileDf$fname <- as.character(fileDf$fname)
-    
-    fileDf$fsizes <- file.size(fileDf$fname)
-    totBytes <- sum(fileDf$fsizes)
-    fileDf$prop <- fileDf$fsizes / totBytes
-    totMB <- totBytes / (1024 * 1024)
-    print(paste("tot size: ", round(totMB, 0)))
-    bytesToReadTotal = 10 * 1024 * 1024
-    fileDf$bytesToRead = bytesToReadTotal * fileDf$prop
-    
-    # read contiguous blocks
-    NrContiguousLines = 100
-    
-    for (fi in 1:nrow(fileDf)) {
-      f <- fileDf[fi,]
-      con <- file(f$fname, "r")
-      # readLines(con, 5) ## Read in the next 5 lines of text
-      bytesRead = 0
-      finishedRead = FALSE
-      while (!finishedRead) {
-        linesRead = readLines(con, n = 100)
-        for (l in linesRead) {
-          if (finishedRead)
-            next
-          llen <- nchar(l)
-          if (llen == 0) {
-            close(con)
-            finishedRead = TRUE
-            next
-          }
-          if ((bytesRead = bytesRead + llen) >= f$bytesToRead) {
-            close(con)
-            print(paste("read enough bytes: ",bytesRead," planned: ",f$bytesToRead))
-            finishedRead = TRUE
-            next
-          }
-          # print(l)
-        }#for lines
-      } #while true
-    }#for f
-  }
-  
 
 # ---------------------------------------------------------
   subsetLines <- function(fname, in_dir, out_dir, nrLinesKept
@@ -144,10 +79,13 @@ source("01_globals.R")
     stopifnot(all(dir.exists(in_dir),dir.exists(out_dir)))
     
     descr <- paste0("_", nrLinesKept, "_", nrLinesRead)
+    # remove/clean up eventual prexisting subset
+    fnameOut <- gsub("_?subset.*\\.", ".", fname)
     fnameOut <- subsetFileName(fname, descr)
     fnameOut <- file.path(out_dir,fnameOut)
     fname <- file.path(in_dir,fname)
     stopifnot(file.exists(fname))
+    
     cat("subsetting\n", fname, " to\n", fnameOut)
     if (!forceIt && file.exists(fnameOut)) {
       print(paste("subset already exists, not overwriting it:",fnameOut))
@@ -217,47 +155,29 @@ source("01_globals.R")
 # --------------------------------------------------------------------
 {    
   print(paste("out dir:",out_dir," - in dir: ",in_dir))
+
   stopifnot(dir.exists(in_dir))
   stopifnot(dir.exists(out_dir))
+  
   textFiles <- list.files(in_dir)
   if (length(textFiles) <= 0) {
     print(paste("no files found in",in_dir))
     return(FALSE)
   }
-  # textFiles <- grep("en.*",textFiles,value = TRUE)
+  
+  # remove eventual subset string
+  # textFiles <- gsub("_?subset.*\\.", ".", textFiles)
   # textFiles <- grep(".*tw.*",textFiles,value = TRUE)
-  textFiles <- grep("subset",textFiles,value = TRUE,invert = T)
+  # textFiles <- grep("subset",textFiles,value = TRUE,invert = T)
   
   # textFiles <- file.path(data_dir_corpus, textFiles)
   sapply(textFiles, FUN = function(x) { 
     subsetLines(x, in_dir, out_dir,nrLinesKept, nrLinesRead, forceIt); TRUE
     } )
+  
+  T
 } 
     
-
-enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
-  # read
-  lines <- readTxtFileToStringVectors(fname,nrLinesToRead)
-  
-  # blocca il PC
-  # lines <- gsub("\n", "\r\n", lines)
-  
-  nrLines <- length(lines)
-  i <- 0
-  vars <- strsplit(basename(fname),"[_.]")[[1]]
-  lang <- rep(vars[inc(i)], nrLines)
-  source <- rep(vars[inc(i)], nrLines)
-  inc(i) # country code duplicates language???
-  inc(i) # subset
-  l1 <- vars[inc(i)]
-  l2  <- vars[inc(i)]
-  pctage <- rep(as.numeric(l1)*100/as.numeric(l2), nrLines)
-  dvars = data.frame(lang = lang, source = source,pctage = pctage)
-
-  docnames <- rep(basename(fname),nrLines)
-  
-  return(list(lines = lines, vars = dvars, dnames = docnames))
-}
 
 
 
@@ -321,11 +241,12 @@ enricoReadText <- function(fname, nrLinesToRead, replaceNewLine) {
   my_rt
 }
 
-# Reads a single file for pattern
+  
 # --------------------------------------------------------------------
   readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
                                     ,fnamePattern) 
 # --------------------------------------------------------------------
+# Reads a single file at a time even though we use a pattern
 {
   stopifnot(dir.exists(data_dir_corpus))
   
@@ -465,13 +386,13 @@ if (F) {
 {
 
   print(" --- Unit Testing --- ")
-    
+
+  T && subsetTextFilesByLines(data_dir_corpus_full 
+      ,data_dir_corpus_subset ,50 ,1000 , forceIt = F)
+
   
-  test_read_corpuses()
+  F && test_read_corpuses()
   
-  if (F) {
-    subsetTextFilesByLines(data_dir_corpus_full ,data_dir_corpus_subset ,5 ,1000 , F)
-  }
 
   if (F) {
     qc_full <- readQCorp(data_dir_corpus_in, FALSE)
@@ -513,7 +434,8 @@ if (F) {
   print(" --- Tests Completed --- ")
 }
 
-# test_01_preprocess_libs.R()
+# 
+  test_01_preprocess_libs.R()
 
 
 
