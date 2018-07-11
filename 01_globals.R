@@ -1,4 +1,6 @@
 
+require(dplyr)
+
 # --------------------------------------------------------------------
 #                   CONSTANTS
 # --------------------------------------------------------------------
@@ -28,7 +30,7 @@ TYPE_TW = "twitter"
 TYPES = c(TYPE_BLOG, TYPE_NEWS, TYPE_TW)
 
 
-SERIAL_PREFIX <- "SERIALIZATION_"
+SERIAL_PREFIX <- "" # "SERIALIZATION_"
 
 
 # ---------- mapping terms, for internal purposes --------------------
@@ -48,11 +50,16 @@ map_acro(LNG_EN )
 
 
 # --------------------------------------------------------------------
-#                   Global Variables
+#            Define Global Variables
 # --------------------------------------------------------------------
-# they are evil, but here they are not and save acrobacies
+# yes, globals  are evil 99% of the cases, these are the few that 
+# fall in the 1%, for my current goals.
+#
+# mostly to get a NULL (easily mangeable) instead of a non-existing 
+# variable (more laborious to manage)
 
-use_full_corpus <- F
+..use_full_corpus <- T
+use_full_corpus <- function(v) { if (missing(v)) ..use_full_corpus else ..use_full_corpus <<- v   }
 
 # qc: quanteda corpus
 qc_full <- if (exists("qc_full")) qc_full else NULL
@@ -104,8 +111,10 @@ dir.exists(data_dir_cap)
 data_dir_corpus_full <-   file.path(data_dir_cap,"data_in","corpus_full")
 data_dir_corpus_subset <- file.path(data_dir_cap,"data_in","corpus_subset")
 
-
-itaur_dir <- function() {
+# -------------------------------------------------------------------------
+itaur_dir <- function() 
+# -------------------------------------------------------------------------
+{
   if (Sys.info()["nodename"] == "LTPGJSDPX1") {
     "C:\\Users\\e_viali\\Documents\\dev\\ITAUR"
   } else {
@@ -139,12 +148,13 @@ itaur_dir <- function() {
 # --------------------------------------------------------------------
   inc <- function(e1) eval.parent(substitute(e1 <- e1+1))
 # --------------------------------------------------------------------
+# ot terribly necessary :-)
 
 
 #---------------------------------------------------------------------
   setCoreDF <- function(std_df, lng, ttype, name_col, value, set_it) 
 #---------------------------------------------------------------------
-# assumes a data frame with language and text type as ID columns
+# service function to easily update df based on  language column
 # adds value to a given column
 {
   stopifnot(c(TXT_LNG,TXT_TYP) %in% names(std_df))
@@ -175,19 +185,35 @@ itaur_dir <- function() {
 
 
 #---------------------------------------------------------------------
+getSerializFName <- function(var_id, force_name) 
+#---------------------------------------------------------------------
+{
+  if (missing(force_name) || is.null(force_name) || nchar(force_name) <= 0) {
+    stopifnot(!is.null(var_id) && nchar(var_id) > 0)
+    rds_fname <- var_id
+  } else  {
+    rds_fname <- force_name
+  } 
+  
+  if (nchar(SERIAL_PREFIX) > 0 && !grepl(SERIAL_PREFIX, rds_fname))
+    rds_fname <- paste0(SERIAL_PREFIX,rds_fname)
+  
+  # full vs. subset prefix
+  prefix <- if (use_full_corpus()) "full"
+  else "subs"
+
+  rds_fname <- paste0(prefix,"_",rds_fname,".rds") 
+}
+
+
+#---------------------------------------------------------------------
   serializeIfNeeded <- function(dfPar, forceIt, rdsFName) 
 #---------------------------------------------------------------------
 {
+  if (missing(forceIt)) forceIt <- FALSE
   
-  if (missing(forceIt))
-    forceIt <- FALSE
   varName <- deparse(substitute(dfPar))
-  if (missing(rdsFName)) {
-    rdsFName <- paste0(varName,".rds")
-  }
-  
-  if (!grepl(SERIAL_PREFIX, rdsFName))
-    rdsFName <- paste0(SERIAL_PREFIX,rdsFName)
+  rdsFName <- getSerializFName(varName,rdsFName)
   
   if (!file.exists(rdsFName) || forceIt) {
     # if(exists(varName)) {
@@ -211,19 +237,12 @@ itaur_dir <- function() {
 # return:
 # TRUE if it was or has bee filled
 {
-  if (missing(forceIt))
-    forceIt <- FALSE
+  if (missing(forceIt)) forceIt <- FALSE
  
   ret <- FALSE
    
-  varName <- ""
   varName <- deparse(substitute(df))
-  if (missing(rdsFName)) {
-    rdsFName <- paste0(varName,".rds")
-  }
-  
-  if (!grepl(SERIAL_PREFIX, rdsFName))
-    rdsFName <- paste0(SERIAL_PREFIX,rdsFName)
+  rdsFName <- getSerializFName(varName,rdsFName)
   
   if (!exists(varName)
       || is.null(df)
@@ -385,13 +404,49 @@ testAddToCoreDF <- function() {
   print(mydf)
 }
 
+  
+  test_getSerializeFName <- function()
+  {
+    use_full_corpus(F)
+    
+    name <- "pippo"
+    prt(name,"->",getSerializFName(name))
 
+    name <- "pluto"
+    prt(name,"->",getSerializFName(name,paste0("forcefile_",name)))
+
+    name <- ""
+    prt(name,"->",getSerializFName(name,paste0("forcefile_",name)))
+    
+    name <- NULL
+    prt(name,"->",getSerializFName(name,"forcefile_xxx"))
+
+            
+    # below here should stop/abort
+    
+    # name <- ""
+    # prt(name,"->",getSerializFName(name))
+    
+    
+    # name <- ""
+    # prt(name,"->",getSerializFName(name,""))
+    
+    # prt(name,"->",getSerializFName(NULL))
+    
+  }
+
+# -----------------------------------------------------------------------
   test_Globals.R <- function() 
+# -----------------------------------------------------------------------
+  
 {
-  testRemoveAllVarExcept()
-  testReadIfEmpty()
-  testAddToCoreDF()
+  # testRemoveAllVarExcept()
+  # testReadIfEmpty()
+  # testAddToCoreDF()
+  test_getSerializeFName()
+  
 }
 
-#  test_Globals.R()
+#  
+  test_Globals.R()
   

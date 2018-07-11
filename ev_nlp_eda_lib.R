@@ -557,17 +557,20 @@ freq_of_freq_an <- function()
 #                     global initialization
 # ====================================================================
   
-  if (!readIfEmpty(qc_full)) {
-    print(paste("reading corpus from dir:",read_dir))
-    qc_full <- readQCorp(read_dir, FALSE)
-  }
-  serializeIfNeeded(qc_full, FALSE)
-
-  if (!readIfEmpty(dfm_full)) {
-    dfm_full <- dfm(qc_full, remove_punct = T)
-    dfm_sel <- dfm_select(dfm_full,pattern = ".")
-  }
-  serializeIfNeeded(dfm_full, FALSE)
+  # read_dir = if (use_full_corpus()) data_dir_corpus_full else data_dir_corpus_subset
+  # readIfEmpty(qc_full) || readQCorp(read_dir, FALSE)
+  # 
+  # if (!readIfEmpty(qc_full)) {
+  #   print(paste("reading corpus from dir:",qc_full))
+  #   qc_full <- readQCorp(read_dir, FALSE)
+  # }
+  # serializeIfNeeded(qc_full, FALSE)
+  # 
+  # if (!readIfEmpty(dfm_full)) {
+  #   dfm_full <- dfm(qc_full, remove_punct = T)
+  #   dfm_sel <- dfm_select(dfm_full,pattern = ".")
+  # }
+  # serializeIfNeeded(dfm_full, FALSE)
   
   
   
@@ -875,7 +878,7 @@ test_types_coverage <- function(qc)
 # -------------------------------------------------------------------
 {
  
-  # read_dir = if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
+  # read_dir = if (use_full_corpus()) data_dir_corpus_full else data_dir_corpus_subset
   # readIfEmpty(qc_full) || readQCorp(read_dir, FALSE)
   
   # test_readIfEmpty_serializeIfNeeded(data_dir_corpus_subset)
@@ -900,7 +903,7 @@ test_types_coverage <- function(qc)
   
 }
 #  
-test_ev_nlp_eda_lib.R()
+# test_ev_nlp_eda_lib.R()
 
   
   

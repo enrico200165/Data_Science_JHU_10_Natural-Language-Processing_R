@@ -53,9 +53,6 @@ require(dplyr)
 require(quanteda)
 require(readtext)
 require(knitr)
-source("01_globals.R")
-source("ev_nlp_eda_lib.R")
-
 ```
 
 
@@ -64,14 +61,39 @@ source("ev_nlp_eda_lib.R")
 
 ```{r load_files, echo = FALSE}
 require(kableExtra)
+
+source("01_globals.R")
+source("01_preprocess_lib.R")
+source("ev_nlp_eda_lib.R")
+
+read_dir <- data_dir_corpus_full #  data_dir_corpus_subset
+if (!readIfEmpty(dfm_full)) {
+    # need the corpus
+    if (!readIfEmpty(qc_full)) {
+      print(paste("reading corpus from dir:",read_dir))
+      qc_full <- readQCorp(read_dir, FALSE)
+      serializeIfNeeded(qc_full, FALSE)
+    }
+    # choose one
+    dfm_full <- dfm(qc_full, remove_punct = T)
+    serializeIfNeeded(dfm_full, FALSE)
+    }
+```
+
+```{r start_anal, echo = FALSE}
+require(kableExtra)
+
+# source("01_globals.R")
+# source("01_preprocess_lib.R")
+# source("ev_nlp_eda_lib.R")
+
 readIfEmpty(phys_an_df)
 if (!exists("phys_an_df") || nrow(phys_an_df) <= 0) {
-  phys_an_df <- physicalAnalysis()
+  phys_an_df <- physicalAnalysis(data_dir_corpus_full)
   serializeIfNeeded(phys_an_df,FALSE)
 }
 row.names(phys_an_df) <- NULL
 phys_an_df %>%  kable(row.names = FALSE) %>% kable_styling()
 ```
-
 
 
