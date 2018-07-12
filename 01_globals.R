@@ -67,22 +67,16 @@ use_full_corpus <- function(vPar) if (missing(vPar)) return(fulldata) else retur
 
 # qc: quanteda corpus
 qc_full <- if (exists("qc_full")) qc_full else NULL
+qc_subs <- if (exists("qc_subs")) qc_full else NULL
+qc_auto <- function() {
+    if (use_full_corpus) qc_full else qc_subs
+}
 
 dfm_full <- if (exists("dfm_full")) dfm_full else NULL
-
-
-# --------------------------------------------------------------------
-#                   TO ORGANIZE
-# --------------------------------------------------------------------
-
-
-
-# orig_dir <- dirname(sys.frame(1)$ofile)
-orig_dir <- getwd()
-prj_dir <- function() setwd(orig_dir)
-
-db_fname <- "words_en.sqlite"
-
+dfm_subs <- if (exists("dfm_subs")) dfm_subs else NULL
+dfm_auto <- function() {
+    if (use_full_corpus) dfm_full else dfm_subs
+}
 
 
 # --------------------------------------------------------------------
@@ -112,8 +106,15 @@ dir.exists(data_dir)
 data_dir_cap <- file.path(data_dir,"capstone_data")
 dir.exists(data_dir_cap)
 
+
+
 data_dir_corpus_full <-   file.path(data_dir_cap,"data_in","corpus_full")
 data_dir_corpus_subset <- file.path(data_dir_cap,"data_in","corpus_subset")
+data_dir_corpus_in <- function() {
+    if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
+}
+
+
 
 # -------------------------------------------------------------------------
 itaur_dir <- function() 

@@ -387,9 +387,9 @@ plot_freq_distrib_user_managed <- function(frq_d,faceted
   
   
   
-  #--------------------------------------------------------------------
-  types_distrib <- function(qc_par, lng, ngram ,rem_stopw, faceted) 
-    #--------------------------------------------------------------------
+#--------------------------------------------------------------------
+types_distrib <- function(qc_par, lng, ngram ,rem_stopw, faceted) 
+#--------------------------------------------------------------------
   {
     # https://tutorials.quanteda.io/statistical-analysis/frequency/
     # the dfm() function applies certain options by default, 
@@ -796,14 +796,20 @@ types_freq_an_q <- function(qc, fct)
   if((missing(fct))) fct <- FALSE 
 
   # quanteda diagrams
-  
-  d <- types_distrib(qc,"de",1,rem_stopw = T, faceted = fct)
-  types_freq_an_de_plot_q <- types_freq_plot_q(d, faceted = fct
+  if (!readIfEmpty(types_freq_an_de)) {
+    types_freq_an_de <- types_distrib(qc,"de",1,rem_stopw = T, faceted = fct)
+  }
+  serializeIfNeeded(types_freq_an_de)
+  types_freq_an_de_plot_q <- types_freq_plot_q(types_freq_an_de, faceted = fct
                          ,"Most frequent words, ngrams"
                          ,"Words"
                          ,"Occurrences","")
-  d <- types_distrib(qc,"de",3,rem_stopw = T, faceted = fct)
-  types_freq_an_de_plot_3_q <- types_freq_plot_q(d, faceted = fct
+  if (!readIfEmpty(types_freq_an_de_3)) {
+    types_freq_an_de_3 <- types_distrib(qc,"de",3,rem_stopw = T, faceted = fct)
+  }
+  serializeIfNeeded(types_freq_an_de_3)
+  types_freq_an_de_plot_3_q <- types_freq_plot_q(types_freq_an_de_3
+    , faceted = fct
                          ,"Most frequent words, ngrams"
                          ,"Words"
                          ,"Occurrences","")
@@ -812,14 +818,22 @@ types_freq_an_q <- function(qc, fct)
   
   
    
-  d <- types_distrib(qc,"en",1,rem_stopw = T, faceted = fct)
-  types_freq_an_en_plot_q <- types_freq_plot_q(d, faceted = fct
-                         ,"Most frequent words, ngrams"
-                         ,"Words"
+  if (!readIfEmpty(types_freq_an_en)) {
+    types_freq_an_en <- types_distrib(qc,"en",1,rem_stopw = T, faceted = fct)
+  }
+  serializeIfNeeded(types_freq_an_en)
+  types_freq_an_en_plot_q <- types_freq_plot_q(types_freq_an_en
+    , faceted = fct
+    ,"Most frequent words, ngrams"
+    ,"Words"
                          ,"Occurrences","")
   # print(types_freq_en_plot_q) ;keypress()
-   d <- types_distrib(qc,"en",3,rem_stopw = T, faceted = fct)
-  types_freq_an_en_plot_3_q <- types_freq_plot_q(d, faceted = fct
+  if (!readIfEmpty(types_freq_an_en_3)) {
+    types_freq_an_en_3 <- types_distrib(qc,"en",3,rem_stopw = T, faceted = fct)
+  }
+  serializeIfNeeded(types_freq_an_en_3)
+  types_freq_an_en_plot_3_q <- types_freq_plot_q(types_freq_an_en_3
+    , faceted = fct
                          ,"Most frequent words, ngrams"
                          ,"Words"
                          ,"Occurrences","")
@@ -827,29 +841,44 @@ types_freq_an_q <- function(qc, fct)
 
   
   
-  d <- types_distrib(qc,"fi",1,rem_stopw = T, faceted = fct)
-  types_freq_an_fi_plot_q <- types_freq_plot_q(d, faceted = fct
+  if (!readIfEmpty(types_freq_an_fi)) {
+    types_freq_an_fi <- types_distrib(qc,"fi",1,rem_stopw = T, faceted = fct)
+  }
+  serializeIfNeeded(types_freq_an_fi)
+  types_freq_an_fi_plot_q <- types_freq_plot_q(types_freq_an_fi
+    , faceted = fct
                          ,"Most frequent words, ngrams"
                          ,"Words"
                          ,"Occurrences","")
   # print(types_freq_en_plot_q) ;keypress()
-   d <- types_distrib(qc,"fi",3,rem_stopw = T, faceted = fct)
-  types_freq_an_fi_plot_3_q <- types_freq_plot_q(d, faceted = fct
+  if (!readIfEmpty(types_freq_an_fi_3)) {
+    types_freq_an_fi_3 <- types_distrib(qc,"fi",3,rem_stopw = T, faceted = fct)
+  }
+  serializeIfNeeded(types_freq_an_fi_3)
+  types_freq_an_fi_plot_3_q <- types_freq_plot_q(types_freq_an_fi_3
+    , faceted = fct
                          ,"Most frequent words, ngrams"
                          ,"Words"
                          ,"Occurrences","")
   #print(types_freq_an_fi_plot_3_q) ;keypress("fatto 3grams?")
 
-  
-  
-  d <- types_distrib(qc,"ru",1,rem_stopw = T, faceted = fct)
-  types_freq_an_ru_plot_q <- types_freq_plot_q(d, faceted = fct
+
+  if (!readIfEmpty(types_freq_an_ru)) {
+    types_freq_an_ru <- types_distrib(qc,"ru",1,rem_stopw = T, faceted = fct)
+  }
+  serializeIfNeeded(types_freq_an_ru)
+  types_freq_an_ru_plot_q <- types_freq_plot_q(types_freq_an_ru
+    , faceted = fct
                          ,"Most frequent words, ngrams"
                          ,"Words"
                          ,"Occurrences","")
   # print(types_freq_en_plot_q) ;keypress()
-   d <- types_distrib(qc,"ru",3,rem_stopw = T, faceted = fct)
-  types_freq_an_ru_plot_3_q <- types_freq_plot_q(d, faceted = fct
+  if (!readIfEmpty(types_freq_an_ru_3)) {
+    types_freq_an_ru_3 <- types_distrib(qc,"ru",3,rem_stopw = T, faceted = fct)
+  }
+  serializeIfNeeded(types_freq_an_ru_3)
+  types_freq_an_ru_plot_3_q <- types_freq_plot_q(types_freq_an_ru_3
+    , faceted = fct
                          ,"Most frequent words, ngrams"
                          ,"Words"
                          ,"Occurrences","")
@@ -857,21 +886,18 @@ types_freq_an_q <- function(qc, fct)
 
 
 
-    grid.arrange(
-      types_freq_an_en_plot_q
-      ,types_freq_an_en_plot_3_q
-      ,ncol=2
-    )
-    keypress()
+    # grid.arrange(types_freq_an_en_plot_q ,types_freq_an_en_plot_3_q
+    #   ,ncol=2); keypress()
+    # 
+    # grid.arrange(types_freq_an_de_plot_q,types_freq_an_fi_plot_q
+    #   ,ncol=2); keypress()
 
-    grid.arrange(
-      types_freq_an_de_plot_q
-      ,types_freq_an_fi_plot_q
-      ,ncol=2
+    list(types_freq_an_en_plot_q
+    ,types_freq_an_de_plot_q
+    ,types_freq_an_fi_plot_q
+    ,types_freq_an_ru_plot_q
+    ,types_freq_an_en_plot_3_q
     )
-    keypress()
-
-  # list(types_freq_an_plot_q)
 }
 
 # ---------------------------------------------------------------------  
@@ -880,7 +906,11 @@ test_types_freq_an <- function(qc, fct)
 {
   if((missing(fct))) fct <- FALSE 
   
-  types_freq_an_q(qc, fct)
+  
+  plots <- types_freq_an_q(qc, fct)
+  grid.arrange(plots[[1]], plots[[2]],plots[[3]],plots[[4]])
+  keypress()
+  
   # types_freq_an_wordclouds(qc)
 }  
   
@@ -932,8 +962,9 @@ test_types_coverage <- function(qc)
   # keypress()
 
   # test_freq_of_freq_an_simple()
-  test_freq_of_freq_an_realistic()
-  # test_types_freq_an(qc_full)
+  # test_freq_of_freq_an_realistic()
+  # 
+  test_types_freq_an(qc_full)
     
   # keypress()
   # 
@@ -944,7 +975,8 @@ test_types_coverage <- function(qc)
   # keypress()
   
 }
-# test_ev_nlp_eda_lib.R()
+# 
+test_ev_nlp_eda_lib.R()
 
   
   
