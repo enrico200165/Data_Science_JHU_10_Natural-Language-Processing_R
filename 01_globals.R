@@ -231,6 +231,8 @@ getSerializFName <- function(var_id, force_name)
     } else {
       # print(paste("not serializing because not exists var: ",varName))
     }
+  } else {
+    dummy <- 3 # just to debug
   }
 }
 
@@ -281,6 +283,50 @@ getSerializFName <- function(var_id, force_name)
 # pippo <- NULL
 # readIfEmpty(pippo)
 
+
+#---------------------------------------------------------------------
+  rie <- function(df ,calc_function ,...) 
+#---------------------------------------------------------------------
+# trying to develop a more automated version of readIfENpty
+# TRUE if it was or has bee filled
+{
+  
+  args <- list(...)
+  
+  ret <- FALSE
+   
+  varName <- deparse(substitute(df))
+  rdsFName <- getSerializFName(varName)
+  
+  if (!exists(varName)
+      || is.null(df)
+      || (length(df) <= 0 && nrow(df) <= 0)) {
+    # print(paste(varName,"is empty", rdsFName))
+    if (file.exists(rdsFName)) {
+      # print(paste("reading serialization for:",varName," file:", rdsFName))
+      df <- readRDS(rdsFName)
+      #assign(varName,df,.GlobalEnv) # pass it outside
+    } else {
+      # must calculate it
+      prt(varName,"no" ,rdsFName,"file, calling function to calculate it: "
+        ,deparse(substitute(calc_function)) )
+      df <- do.call(calc_function, args) 
+    }
+    assign(varName,df,parent.frame(n = 1)) # pass it outside
+    ret <- TRUE
+  } else {
+    prt(varName,"alread filled, size GiB:"
+      ,GiB(pryr::object_size(df)), "size: ",pryr::object_size(df))
+    ret <- TRUE
+  }
+  # print(paste("exit",varName, ))
+  
+  if (ret) {
+    serializeIfNeeded(df,,rdsFName)
+  }
+  
+  ret
+}
 
 
 # --------------------------------------------------------------------
@@ -369,7 +415,7 @@ keypress <- function (message)
 # --------------------------------------------------------------------
 {
   pars <- list(...)
-  print(paste(pars))
+  print(paste(pars,collapse = " "))
 }
 
 
@@ -434,7 +480,24 @@ testAddToCoreDF <- function() {
   print(mydf)
 }
 
+
+
   
+  test_rie <- function() 
+{
+  # check if it serializes correctly
+  mydf <- data.frame(x = 1:3)
+  rie(mydf, function() data.frame(x = 1:3))
+
+  mydf <<- NULL
+  rie(mydf, function() data.frame(x = 1:3))
+  print(mydf)
+}
+
+
+  
+    
+
   test_getSerializeFName <- function()
   {
     name <- "pippo"
@@ -470,10 +533,11 @@ testAddToCoreDF <- function() {
 {
   # testRemoveAllVarExcept()
   # testReadIfEmpty()
+  test_rie()
   # testAddToCoreDF()
-  test_getSerializeFName()
+  # test_getSerializeFName()
   
 }
 
-# test_Globals.R()
+#   test_Globals.R()
   
