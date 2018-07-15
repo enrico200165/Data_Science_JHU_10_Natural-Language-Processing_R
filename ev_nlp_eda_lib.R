@@ -466,14 +466,14 @@ types_distrib <- function(qc_par, lng, ngram ,rem_stopw, faceted)
   # – and removes punctuation. All of the options to tokens() can 
   # be passed to dfm(), however.
   
-  print("types_distrib() just started")
+  prt("types_distrib() just started")
   if (missing(faceted))
     faceted <- FALSE
   
   if (missing(rem_stopw))
     rem_stopw <- FALSE
   
-  print("types_distrib() before subset")
+  prt("types_distrib() before subset")
   qc <- corpus_subset(qc_par, language == char_tolower(lng))
   stopifnot(ndoc(qc) == 3)
   
@@ -490,35 +490,35 @@ types_distrib <- function(qc_par, lng, ngram ,rem_stopw, faceted)
   } else { # must not remove things
     # sentence splitting avoid silly ngrams
     # with it punct removal seems OK
-    print("types_distrib() before corpus_reshape(qc, to = sentences)")
-    qc <- corpus_reshape(qc, to = "sentences")
-    print("types_distrib() before tokens")
+    # prt("types_distrib() before corpus_reshape(qc, to = sentences)")
+    # qc <- corpus_reshape(qc, to = "sentences")
+    prt("types_distrib() before tokens")
     toks <- tokens(qc   
                    ,remove_numbers = F,remove_punct = T
                    ,remove_symbols = F, remove_twitter = T
                    ,remove_url = T)
     toks <- tokens_tolower(toks)
     if (rem_stopw) { # manage stopwords in/exclusion
-      print("types_distrib() before removing stopwords")
+      prt("types_distrib() before removing stopwords")
       stopw <- stopwords(tolower(lng))
       toks <- tokens_remove(toks,stopw)
     }
     
   }
   
-  print("types_distrib() before dfm(toks,ngrams = ngram)")
+  prt("types_distrib() before dfm(toks,ngrams = ngram)")
   dfm_lang <- dfm(toks,ngrams = ngram)
   
   ntypes <- if (faceted) 4 else 24
   grouping <- if (faceted) TXT_TYP else NULL
   # group by text type
 
-  print("types_distrib() before textstat_frequency")
+  prt("types_distrib() before textstat_frequency")
   frq_grp <- textstat_frequency(dfm_lang, n = ntypes
                                 , groups = grouping
   )
   
-  print("types_distrib() before exiting")
+  prt("types_distrib() before exiting")
   list(dfm_lang,frq_grp)
 }
 
@@ -558,7 +558,7 @@ types_freq_plot_q <- function(frq_grp, faceted, lng
 
 # ---------------------------------------------------------------------  
 types_freq_an_q <- function(qc, fct) 
-  # ---------------------------------------------------------------------  
+# ---------------------------------------------------------------------  
 {
   if((missing(fct))) fct <- FALSE
   xlab <- "Frequency"
@@ -612,13 +612,19 @@ types_freq_an_q <- function(qc, fct)
 
 
 # ---------------------------------------------------------------------  
-types_freq_plot_wordcloud <- function(types_freq ,lng ,fct ,title ,words_nr)
+types_freq_plot_wordcloud <- function(types_freq_dfm ,lng ,fct ,title ,words_nr)
 # ---------------------------------------------------------------------  
 {
   if((missing(fct))) fct <- FALSE 
-  if((missing(words_nr))) words_nr <- 150
+  if((missing(words_nr))) words_nr <- 100
   if((missing(title))) title <- NULL
   
+  if (F) { # ggplot2 does NOT look good
+  types_freq <- types_freq_dfm[[2]] # frequencies for NON-quanteda wordcloud
+  if (!setequal(class(types_freq),c("frequency", "textstat" ,"data.frame") )) {
+    print(str(types_freq))
+    prt("existing, unexpected classes")
+  }
   p <- ggplot(data = types_freq 
     ,aes( x = 1, y = 1 ,size = frequency, label = feature
       ,color= cut2(frequency, g = 10)))
@@ -635,61 +641,71 @@ types_freq_plot_wordcloud <- function(types_freq ,lng ,fct ,title ,words_nr)
     ,legend.position="none"
     ,panel.border = element_blank() ,panel.background = element_blank())
   p <- p +  ggtitle(title)
-print(p)
-  
-  # -------- Quanteda wordcloud, not ggplo2 comp, not storeable /manageable-------------------
-  # cols <- c('red', 'pink', 'green', 'purple', 'orange', 'blue')
-  # word_cloud_en <- textplot_wordcloud(dfm_subset(dfm_full
-  #                                                ,language == lng)
-  #                                     ,min_size = 2 ,max_size = 4, min_count = 10,
-  #                                     max_words = words_nr, color = cols, font = NULL, adjust = 0,
-  #                                     rotation = 0.1, random_order = FALSE, random_color = T,
-  #                                     ordered_color = FALSE, labelcolor = "gray20", labelsize = 1.5,
-  #                                     labeloffset = 0, fixed_aspect = TRUE,comparison = FALSE)
-  # ---------------------------------------------------------------------------------------------
-  
   p
+  }
+  
+
+  # -- Quanteda, not ggplot2 comp, not storeable/manageable, looks ok
+  types_dfm <- types_freq_dfm[[1]] # dfm for quanteda wordcloud
+  cols <- c('red', 'pink', 'green', 'purple', 'orange', 'blue')
+  word_cloud_en <- textplot_wordcloud(types_dfm # dfm_subset(types_dfm,language == lng)
+    ,min_size = 2 ,max_size = 4, min_count = 0
+    ,max_words = words_nr, color = cols, font = NULL, adjust = 0
+    ,rotation = 0.1, random_order = FALSE, random_color = T
+    ,ordered_color = FALSE, labelcolor = "gray20", labelsize = 1.5
+    ,labeloffset = 0, fixed_aspect = TRUE,comparison = FALSE)
 }
 
 
 
 # ---------------------------------------------------------------------  
-types_freq_an_wcloud <- function(qc, fct) 
+types_freq_an_wcloud <- function(qc, fct ,nwords) 
 # ---------------------------------------------------------------------  
 {
   if((missing(fct))) fct <- FALSE
+  if((missing(nwords))) nwords <- 100
   
-  nwords <- 200
-  
+  # German
   rie(types_freq_an_de ,types_distrib ,qc ,"de",1,rem_stopw = T, faceted = fct)
   types_freq_an_de_plot_wcloud <- types_freq_plot_wordcloud(
     types_freq_an_de ,"de" ,fct , ,nwords)
+  keypress()
+
   rie(types_freq_an_de_3,types_distrib,qc,"de",3,rem_stopw = T, faceted = fct)
   types_freq_an_de_plot_3_wcloud <- types_freq_plot_wordcloud(
-    types_freq_an_de_3, "de" , fct , ,nwords)
+    types_freq_an_de_3, "de" , fct , ,nwords/3)
+  keypress()
   
   rie(types_freq_an_en ,types_distrib ,qc ,"en",1,rem_stopw = T, faceted = fct)
   types_freq_an_en_plot_wcloud <- types_freq_plot_wordcloud(
     types_freq_an_en ,"en" , fct, ,nwords)
+  keypress()
   rie(types_freq_an_en_3,types_distrib,qc,"en",3,rem_stopw = T, faceted = fct)
   types_freq_an_en_plot_3_wcloud <- types_freq_plot_wordcloud(
-    types_freq_an_en_3, "en" , fct , ,nwords)
+    types_freq_an_en_3, "en" , fct , ,nwords/3)
+  keypress()
 
   
   rie(types_freq_an_fi ,types_distrib ,qc ,"fi",1,rem_stopw = T, faceted = fct)
   types_freq_an_fi_plot_wcloud <- types_freq_plot_wordcloud(
     types_freq_an_fi ,"fi" , fct , ,nwords)
+  keypress()
   rie(types_freq_an_fi_3,types_distrib,qc,"fi",3,rem_stopw = T, faceted = fct)
   types_freq_an_fi_plot_3_wcloud <- types_freq_plot_wordcloud(
-    types_freq_an_fi_3, "fi" , fct , ,nwords)
+    types_freq_an_fi_3, "fi" , fct , ,nwords/3)
+  keypress()
   
   
   rie(types_freq_an_ru ,types_distrib ,qc ,"ru",1,rem_stopw = T, faceted = fct)
   types_freq_an_ru_plot_wcloud <- types_freq_plot_wordcloud(
-    types_freq_an_en ,"ru" , fct, ,nwords)
+    types_freq_an_ru ,"ru" , fct, ,nwords)
+  keypress()
   rie(types_freq_an_ru_3,types_distrib,qc,"ru",3,rem_stopw = T, faceted = fct)
   types_freq_an_ru_plot_3_wcloud <- types_freq_plot_wordcloud(
-    types_freq_an_ru_3, "ru" , fct , ,nwords)
+    types_freq_an_ru_3, "ru" , fct , ,nwords/3)
+  keypress()
+  
+  dummy <- "breakpoint"
   
   # grid.arrange(types_freq_an_en_plot_q ,types_freq_an_en_plot_3_q
   #   ,ncol=2); keypress()
@@ -697,13 +713,14 @@ types_freq_an_wcloud <- function(qc, fct)
   # grid.arrange(types_freq_an_de_plot_q,types_freq_an_fi_plot_q
   #   ,ncol=2); keypress()
   
-  list(
-      types_freq_an_de_plot_wcloud
-     ,types_freq_an_en_plot_wcloud
-     ,types_freq_an_fi_plot_wcloud
-     ,types_freq_an_ru_plot_wcloud
-     ,types_freq_an_en_plot_3_wcloud
-  )
+  # list(
+  #     types_freq_an_de_plot_wcloud
+  #    ,types_freq_an_en_plot_wcloud
+  #    ,types_freq_an_fi_plot_wcloud
+  #    ,types_freq_an_ru_plot_wcloud
+  #    ,types_freq_an_en_plot_3_wcloud
+  # )
+  T
 }
 
 
@@ -758,21 +775,31 @@ types_freq_an_wcloud <- function(qc, fct)
 #                     global initialization
 # ====================================================================
 
-print("start ev_nlp_lib.R global code")
-read_dir = if (use_full_corpus()) data_dir_corpus_full else data_dir_corpus_subset
+ev_init <- function() {
+  prt("start ev_nlp_lib.R global code")
+  read_dir = if (use_full_corpus()) data_dir_corpus_full else data_dir_corpus_subset
 
-if (!readIfEmpty(qc_full)) {
-   print(paste("reading corpus from dir:",qc_full))
-   qc_full <- readQCorp(read_dir, FALSE)
-}
-serializeIfNeeded(qc_full, FALSE)
+# if (!readIfEmpty(qc_full)) {
+#    print(paste("reading corpus from dir:",qc_full))
+#    qc_full <<- readQCorp(read_dir, FALSE)
+# }
+# serializeIfNeeded(qc_full, FALSE)
+  
+  rie(qc_full,readQCorp,read_dir, FALSE)
+  qc_full <<- qc_full
  
-if (!readIfEmpty(dfm_full)) {
-   dfm_full <- dfm(qc_full, remove_punct = T)
-   dfm_sel <- dfm_select(dfm_full,pattern = ".")
+# if (!readIfEmpty(dfm_full)) {
+#    dfm_full <<- dfm(qc_full, remove_punct = T)
+# }
+# serializeIfNeeded(dfm_full, FALSE)
+  
+  rie(dfm_full,dfm,qc_full, remove_punct = T)
+  dfm_full <<- dfm_full
+  
+prt("completed ev_nlp_lib.R global code")
+  
 }
-serializeIfNeeded(dfm_full, FALSE)
-print("completed ev_nlp_lib.R global code")
+  
 
   
   
@@ -954,16 +981,17 @@ test_types_freq_an_wordcloud <- function(qc, fct)
 {
   if((missing(fct))) fct <- FALSE 
 
-  plots <- types_freq_an_wcloud(qc, fct)
-  print(plots[[1]])
-  keypress()
-  print(plots[[2]])
-  keypress()
-  print(plots[[3]])
-  keypress()
-  print(plots[[4]])
-  keypress()
-  print(plots[[5]])
+  types_freq_an_wcloud(qc, fct)
+  # print(plots[[1]][[2]]);  
+  # keypress()
+  # 
+  # print(plots[[2]][[2]])
+  # keypress()
+  # print(plots[[3]][[2]])
+  # keypress()
+  # print(plots[[4]][[2]])
+  # keypress()
+  # print(plots[[5]][[2]])
 }
 
   
@@ -1000,8 +1028,11 @@ test_types_coverage <- function(qc)
 {
  
   # set_parallelism(6,NULL)
-  
+    
   use_full_corpus(TRUE)
+  
+  
+  ev_init()
   
   # read_dir = if (use_full_corpus()) data_dir_corpus_full else data_dir_corpus_subset
   # readIfEmpty(qc_full) || readQCorp(read_dir, FALSE)
@@ -1021,8 +1052,10 @@ test_types_coverage <- function(qc)
   # test_freq_of_freq_an_realistic()
   
   # full corpus still running after 2 days 
-  use_full_corpus(FALSE)
-  test_types_freq_an_q(qc_full, fct = F) 
+  # use_full_corpus(FALSE)
+  ev_init()
+  # test_types_freq_an_q(qc_full, fct = F) 
+  # 
   test_types_freq_an_wordcloud(qc_full, F)
     
   # keypress()

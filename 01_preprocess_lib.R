@@ -81,7 +81,7 @@ source("01_globals.R")
     descr <- paste0("_", nrLinesKept, "_", nrLinesRead)
     # remove/clean up eventual prexisting subset
     fnameOut <- gsub("_?subset.*\\.", ".", fname)
-    fnameOut <- subsetFileName(fname, descr)
+    fnameOut <- subsetFileName(fnameOut, descr)
     fnameOut <- file.path(out_dir,fnameOut)
     fname <- file.path(in_dir,fname)
     stopifnot(file.exists(fname))
@@ -349,7 +349,7 @@ zap_files_serializations <- function(patternPar)
 
   print(" --- Unit Testing --- ")
 
-  F && subsetTextFilesByLines(data_dir_corpus_full 
+  T && subsetTextFilesByLines(data_dir_corpus_full 
       ,data_dir_corpus_subset ,50 ,1000 , forceIt = F)
 
 

@@ -276,7 +276,7 @@ getSerializFName <- function(var_id, force_name)
   if (!exists(varName)
       || is.null(df)
       || (length(df) <= 0 && nrow(df) <= 0)) {
-    # print(paste(varName,"is empty", rdsFName))
+    prt(paste(varName,"is empty", rdsFName))
     if (file.exists(rdsFName)) {
       # print(paste("reading serialization for:",varName," file:", rdsFName))
       df <- readRDS(rdsFName)
@@ -288,7 +288,8 @@ getSerializFName <- function(var_id, force_name)
       ret <- FALSE
     }
   } else {
-    print(paste(varName,"alread filled, size:",GiB(pryr::object_size(df))))
+    prt(paste(varName,"alread filled, size:"
+      ,GiB(pryr::object_size(df))),"fulldata:",fulldata)
     ret <- TRUE
   }
   # print(paste("exit",varName, ))
@@ -391,7 +392,7 @@ getSerializFName <- function(var_id, force_name)
   }
 }
 
-kill_var(freq_of_freq_plots)
+# kill_var(freq_of_freq_plots)
 # --------------------------------------------------------------------
   GiB <- function (x, digits)
 # --------------------------------------------------------------------
@@ -407,7 +408,8 @@ keypress <- function (message)
 # --------------------------------------------------------------------
 {
   if (missing(message)) message <- "Press [enter] to continue"
-  invisible(readline(prompt=message))
+  # invisible(readline(prompt=message))
+  Sys.sleep(1)
 }
 
 
@@ -441,17 +443,21 @@ prt_last_call_time <- Sys.time()
   time_diff <- Sys.time() - prt_last_call_time
   pars <- list(...)
   print(paste(time_diff,paste(pars,collapse = " ")))
-  prt_last_call_time <- Sys.time()
+  prt_last_call_time <<- Sys.time()
   
 }
   test_prt <- function() 
 {
   # check if it serializes correctly
   prt("pippo", "pluto")
+  Sys.sleep(1)
   prt("")
+  Sys.sleep(2)
+  prt()
+  Sys.sleep(5)
   prt()
 }
-test_prt()
+# test_prt()
 
 
 
