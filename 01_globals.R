@@ -1,5 +1,23 @@
-
 require(dplyr)
+
+# illegal position, ease frequent access
+fulldata <- T
+use_full_corpus <- function(vPar) {
+
+  if (missing(vPar)) 
+    return(fulldata) 
+
+  previous <- fulldata
+  fulldata <<- vPar
+  if (previous != fulldata) {
+    qc_full <<- NULL
+    dfm_full <<- NULL
+    gc()
+  }
+  prt("fulldata:", previous,"->",fulldata)
+  NULL
+}
+
 
 # --------------------------------------------------------------------
 #                   CONSTANTS
@@ -41,11 +59,15 @@ SERIAL_PREFIX <- "" # "SERIALIZATION_"
   , stringsAsFactors = F
 )
 ..map_values <- bind_rows(..map_values,
-  c(acronym = LNG_DE, full = "german")
- ,c(acronym = LNG_EN,full = "english")
+  c(acronym = LNG_DE, full = "German")
+ ,c(acronym = LNG_EN,full = "English")
+ ,c(acronym = LNG_FI,full = "Finnish")
+ ,c(acronym = LNG_RU,full = "Russian")
+  
  )
-map_acro <- function(x) ..map_values[..map_values$acronym == x,2]
-map_acro(LNG_EN )
+map_acro <- function(x) ..map_values[
+  ..map_values$acronym == char_toupper(x),2]
+#map_acro(LNG_EN )
 
 
 
@@ -59,11 +81,10 @@ map_acro(LNG_EN )
 # variable (more laborious to manage)
 
 
-fulldata <- T
+
 data_type_prefix <- function() if (fulldata) "full" else "subs"
 
 
-use_full_corpus <- function(vPar) if (missing(vPar)) return(fulldata) else return(fulldata <<- vPar)
 
 # qc: quanteda corpus
 qc_full <- if (exists("qc_full")) qc_full else NULL
@@ -143,7 +164,7 @@ itaur_dir <- function()
   require(parallel)
   require(doParallel)
   
-  ncores <- detectCores() - 1
+  ncores <- 6 # detectCores() - 1
   # Initiate cluster
   cl <- makeCluster(ncores)
   registerDoParallel(cl)
@@ -273,7 +294,7 @@ getSerializFName <- function(var_id, force_name)
   # print(paste("exit",varName, ))
   
   if (ret) {
-    serializeIfNeeded(df,forceIt)
+    serializeIfNeeded(df,forceIt,rdsFName)
   }
   
   ret
@@ -311,6 +332,7 @@ getSerializFName <- function(var_id, force_name)
       prt(varName,"no" ,rdsFName,"file, calling function to calculate it: "
         ,deparse(substitute(calc_function)) )
       df <- do.call(calc_function, args) 
+      prt("completed call to",deparse(substitute(calc_function)))
     }
     assign(varName,df,parent.frame(n = 1)) # pass it outside
     ret <- TRUE
@@ -410,13 +432,27 @@ keypress <- function (message)
 }
 
 
+prt_last_call_time <- Sys.time()
 # --------------------------------------------------------------------
   prt <- function(...) 
 # --------------------------------------------------------------------
 {
+  
+  time_diff <- Sys.time() - prt_last_call_time
   pars <- list(...)
-  print(paste(pars,collapse = " "))
+  print(paste(time_diff,paste(pars,collapse = " ")))
+  prt_last_call_time <- Sys.time()
+  
 }
+  test_prt <- function() 
+{
+  # check if it serializes correctly
+  prt("pippo", "pluto")
+  prt("")
+  prt()
+}
+test_prt()
+
 
 
 # ------------------------------------------
@@ -495,7 +531,6 @@ testAddToCoreDF <- function() {
 }
 
 
-  
     
 
   test_getSerializeFName <- function()
@@ -540,4 +575,3 @@ testAddToCoreDF <- function() {
 }
 
 #   test_Globals.R()
-  

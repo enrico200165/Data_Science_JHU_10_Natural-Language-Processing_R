@@ -333,7 +333,7 @@ zap_files_serializations <- function(patternPar)
   file.remove(fnames_to_delete)
   length(fnames_to_delete)
 }
-zap_files_serializations()
+# zap_files_serializations()
 
 
 # ====================================================================
