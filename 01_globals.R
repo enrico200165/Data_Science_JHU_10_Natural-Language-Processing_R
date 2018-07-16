@@ -2,6 +2,7 @@ require(dplyr)
 require(beepr)
 
 # illegal position, ease frequent access
+silent <- T
 fulldata <- T
 use_full_corpus <- function(vPar) {
 
@@ -408,11 +409,14 @@ getSerializFName <- function(var_id, force_name)
 keypress <- function (message, sound_nr = 1)
 # --------------------------------------------------------------------
 {
-  if (missing(message)) message <- "Press [enter] to continue"
-  # invisible(readline(prompt=message))
-  prt(message)
   beep(sound = sound_nr, expr = NULL)
   Sys.sleep(1)
+  if (!silent) {
+  if (missing(message)) message <- "Press [enter] to continue"
+    invisible(readline(prompt=message))
+  # prt(message)
+  }
+  invisible(T)
 }
 
 
@@ -442,12 +446,14 @@ prt_last_call_time <- Sys.time()
   prt <- function(...) 
 # --------------------------------------------------------------------
 {
-  
+  if (silent) {
+    invisible("")
+  } else {
   time_diff <- Sys.time() - prt_last_call_time
   pars <- list(...)
   print(paste(time_diff,paste(pars,collapse = " ")))
   prt_last_call_time <<- Sys.time()
-  
+  }
 }
   test_prt <- function() 
 {

@@ -563,9 +563,9 @@ types_freq_an_q <- function(qc, fct)
   if((missing(fct))) fct <- FALSE
   xlab <- "Frequency"
   
-  rie(types_freq_an_de ,types_distrib ,qc,"de",1,rem_stopw = T, faceted = fct)
-  types_freq_an_de_plot_q <- types_freq_plot_q(types_freq_an_de[[2]], faceted = fct
-                                               ,"de" , ,xlab, ,"",1)
+  # rie(types_freq_an_de ,types_distrib ,qc,"de",1,rem_stopw = T, faceted = fct)
+  # types_freq_an_de_plot_q <- types_freq_plot_q(types_freq_an_de[[2]], faceted = fct
+  #                                              ,"de" , ,xlab, ,"",1)
   # rie(types_freq_an_de_3,types_distrib,qc,"de",3,rem_stopw = T, faceted = fct)
   # types_freq_an_de_plot_3_q <- types_freq_plot_q(types_freq_an_de_3[[2]],faceted = fct 
   #                                                ,"de" , ,xlab, ,"",3)
@@ -574,23 +574,26 @@ types_freq_an_q <- function(qc, fct)
   rie(types_freq_an_en ,types_distrib ,qc ,"en" ,1,rem_stopw = T, faceted = fct)  
   types_freq_an_en_plot_q <- types_freq_plot_q(types_freq_an_en[[2]] ,faceted = fct 
                                                ,"en" , ,xlab, ,"",1)
+  rie(types_freq_an_en_2 ,types_distrib ,qc,"en",2,rem_stopw = T, faceted = fct)
+  types_freq_an_en_plot_2_q <- types_freq_plot_q(types_freq_an_en_2[[2]] ,faceted = fct
+                                                ,"en" , ,xlab, ,"",2)
   rie(types_freq_an_en_3 ,types_distrib ,qc,"en",3,rem_stopw = T, faceted = fct)
   types_freq_an_en_plot_3_q <- types_freq_plot_q(types_freq_an_en_3[[2]] ,faceted = fct
                                                 ,"en" , ,xlab, ,"",3)
   
   
-  rie(types_freq_an_fi ,types_distrib ,qc ,"fi" ,1,rem_stopw = T, faceted = fct)
-  types_freq_an_fi_plot_q <- types_freq_plot_q(types_freq_an_fi[[2]] ,faceted = fct 
-                                               ,"fi" , ,xlab, ,"",1)
+  # rie(types_freq_an_fi ,types_distrib ,qc ,"fi" ,1,rem_stopw = T, faceted = fct)
+  # types_freq_an_fi_plot_q <- types_freq_plot_q(types_freq_an_fi[[2]] ,faceted = fct 
+                                               # ,"fi" , ,xlab, ,"",1)
   
   # rie(types_freq_an_fi_3 ,types_distrib ,qc,"fi",3,rem_stopw = T, faceted = fct)
   # types_freq_an_fi_plot_3_q <- types_freq_plot_q(types_freq_an_fi_3 ,faceted = fct 
   #                                                ,"fi" , ,xlab, ,"",3)
   
   
-  rie(types_freq_an_ru ,types_distrib ,qc ,"ru" ,1,rem_stopw = T, faceted = fct)
-  types_freq_an_ru_plot_q <- types_freq_plot_q(types_freq_an_ru[[2]] ,faceted = fct 
-                                               ,"ru" , ,xlab, ,"",1)
+  # rie(types_freq_an_ru ,types_distrib ,qc ,"ru" ,1,rem_stopw = T, faceted = fct)
+  # types_freq_an_ru_plot_q <- types_freq_plot_q(types_freq_an_ru[[2]] ,faceted = fct 
+  #                                              ,"ru" , ,xlab, ,"",1)
   # rie(types_freq_an_ru_3 ,types_distrib ,qc,"ru",3,rem_stopw = T, faceted = fct)
   # types_freq_an_ru_plot_3_q <- types_freq_plot_q(types_freq_an_ru_3, faceted = fct 
   #                                                ,"ru" , ,xlab, ,"",3)
@@ -603,9 +606,10 @@ types_freq_an_q <- function(qc, fct)
   
   gc()
   list(types_freq_an_en_plot_q
-       ,types_freq_an_de_plot_q
-       ,types_freq_an_fi_plot_q
-       ,types_freq_an_ru_plot_q
+       # ,types_freq_an_de_plot_q
+       # ,types_freq_an_fi_plot_q
+       # ,types_freq_an_ru_plot_q
+       ,types_freq_an_en_plot_2_q
        ,types_freq_an_en_plot_3_q
   )
 }
@@ -974,9 +978,9 @@ test_types_freq_an_q <- function(qc, fct)
   keypress()
   print(types_freq_an_q_plots[[3]])
   keypress()
-  print(types_freq_an_q_plots[[4]])
-  keypress()
-  print(types_freq_an_q_plots[[5]])
+  # print(types_freq_an_q_plots[[4]])
+  # keypress()
+  # print(types_freq_an_q_plots[[5]])
 }
 
 
@@ -1004,7 +1008,7 @@ test_types_freq_an_wordcloud <- function(qc, fct)
   
 
 # --------------------------------------------------------------------
-test_types_coverage <- function(qc , to_cover = 0.9)
+types_coverage_an <- function(qc , to_cover = 0.9)
 # --------------------------------------------------------------------
 
 {
@@ -1013,22 +1017,25 @@ test_types_coverage <- function(qc , to_cover = 0.9)
     ,pct_to_cover = to_cover ,lng = "en", remove_stopwords = T) 
 
   orig_rows <- nrow(types_coverage_data[["freq_object"]])
+  
   nr_displayed<- types_coverage_data$idx*0.2
   nr_displayed <- as.integer(nr_displayed)
   mydf <- types_coverage_data[["freq_object"]][1:nr_displayed, ]
-  
   # ret$freq_object$props    $cuml
-  p <- ggplot(data=mydf, aes(x=(1:nr_displayed)/orig_rows, y = props))
-  p <- p +geom_line()
+  p <- ggplot(data=mydf, aes(x=(1:nr_displayed), y = props))
+  p <- p + geom_line()
+  p <- p + ggtitle("Words Probability Mass Function (Subset)")
+  p <- p + xlab("Words ('Types'), Ordered By Decr. Freq.") # for the x axis label
+  p <- p + ylab("Frequency (Relative)") # for the y axis label
   print(p)
   keypress()
-
+  
   nr_displayed<- orig_rows *2*types_coverage_data$pct_to_cover
   nr_displayed <- as.integer(nr_displayed)
   mydf <- types_coverage_data[["freq_object"]][1:nr_displayed, ]
   
   coverage_label <- paste(round(types_coverage_data$pct_to_cover,4)
-    ,"Elements Provide",to_cover,"Coverage")
+    ,"Words 'Cover'",to_cover,"of Token Occurrences")
   p <- ggplot(data=mydf, aes(x=1:nr_displayed/orig_rows
     ,y = cumul))
   p <- p + ylim(0, 1)
@@ -1037,12 +1044,20 @@ test_types_coverage <- function(qc , to_cover = 0.9)
   p <- p + geom_vline(xintercept=types_coverage_data$pct_to_cover 
     ,linetype="dashed", color = "blue")
   p <- p + ggtitle(coverage_label)
+  p <- p + xlab("Words Positions, Proportions, By Decr. Freq.") # for the x axis label
+  p <- p + ylab("Cumul. Frequency (Relative)")
+  # 
   print(p)
-  
-  print("")
-  print("")
+
 }   
 
+
+#---------------------------------------------------------------------
+ test_types_coverage <- function()  
+#---------------------------------------------------------------------
+{
+  rie(types_coverage_plots, types_coverage_an ,qc_full , to_cover = 0.9)
+}
 
 
 # -------------------------------------------------------------------
@@ -1076,7 +1091,8 @@ test_types_coverage <- function(qc , to_cover = 0.9)
   # full corpus still running after 2 days 
   # use_full_corpus(FALSE)
   # 
-  # test_types_freq_an_q(qc_full, fct = F) 
+  # 
+  test_types_freq_an_q(qc_full, fct = F) 
   # 
   # test_types_freq_an_wordcloud(qc_full, F)
     
@@ -1090,8 +1106,7 @@ test_types_coverage <- function(qc , to_cover = 0.9)
   # keypress()
   
 }
-# 
-  test_ev_nlp_eda_lib.R()
+# test_ev_nlp_eda_lib.R()
 
   
   
