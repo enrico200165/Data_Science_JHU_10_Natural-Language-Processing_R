@@ -1008,27 +1008,34 @@ test_types_coverage <- function(qc , to_cover = 0.9)
 # --------------------------------------------------------------------
 
 {
-  # types_coverage_data <- types_coverage(qc_full, pct_to_cover = 0.9
-  #   ,lng = "en", remove_stopwords = T) 
-
+  gc()
   rie(types_coverage_data ,types_coverage ,qc_full
     ,pct_to_cover = to_cover ,lng = "en", remove_stopwords = T) 
-    
-  mydf <- types_coverage_data[["freq_object"]]
-  print("")
+
+  orig_rows <- nrow(types_coverage_data[["freq_object"]])
+  nr_displayed<- types_coverage_data$idx*0.2
+  nr_displayed <- as.integer(nr_displayed)
+  mydf <- types_coverage_data[["freq_object"]][1:nr_displayed, ]
+  
   # ret$freq_object$props    $cuml
-  p <- ggplot(data=mydf[1:1000], aes(x=seq_along(props)/length(props), y = props))
+  p <- ggplot(data=mydf, aes(x=(1:nr_displayed)/orig_rows, y = props))
   p <- p +geom_line()
   print(p)
   keypress()
+
+  nr_displayed<- orig_rows *2*types_coverage_data$pct_to_cover
+  nr_displayed <- as.integer(nr_displayed)
+  mydf <- types_coverage_data[["freq_object"]][1:nr_displayed, ]
   
-  coverage_label <- paste(round(types_coverage_data$idx/nrow(mydf),2)
+  coverage_label <- paste(round(types_coverage_data$pct_to_cover,4)
     ,"Elements Provide",to_cover,"Coverage")
-  p <- ggplot(data=mydf, aes(x=1:length(cumul)/length(cumul), y = cumul))
+  p <- ggplot(data=mydf, aes(x=1:nr_displayed/orig_rows
+    ,y = cumul))
+  p <- p + ylim(0, 1)
   p <- p + geom_line()
-  p <- p + geom_hline(yintercept=to_cover , linetype="dashed", color = "grey")
-  p <- p + geom_vline(xintercept=types_coverage_data$idx/nrow(mydf) 
-    ,linetype="dashed", color = "grey")
+  p <- p + geom_hline(yintercept=to_cover , linetype="dashed", color = "blue")
+  p <- p + geom_vline(xintercept=types_coverage_data$pct_to_cover 
+    ,linetype="dashed", color = "blue")
   p <- p + ggtitle(coverage_label)
   print(p)
   
