@@ -93,14 +93,15 @@ source("01_globals.R")
     }
 
     # enc <- iconvlist()[309] # utf8
-    enc <- getOption("encoding")
+    enc <- "UTF-8" # getOption("encoding")
     con <- file(fname, "rt", encoding = enc)
     out <- file(fnameOut, "wt",encoding = enc)
     
     tryCatch({
     finishedRead = FALSE
     while (!finishedRead) {
-      linesRead = readLines(con, nrLinesRead, skipNul = T)
+      linesRead = readLines(con, nrLinesRead, skipNul = T
+        ,encoding=enc)
       i = 1
       for (l in linesRead) {
         writeLines(l, out)

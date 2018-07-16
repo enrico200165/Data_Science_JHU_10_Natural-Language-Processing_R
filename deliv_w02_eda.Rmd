@@ -41,6 +41,11 @@ We are provided texts in the following languages:
 - Finnish
 - German
 - Russian
+For each language texts come from 3 types of source:  
+- news  
+- blog posts  
+- Twitter  
+
 The tools for this EDA are able to work with any of the provided language; initially we will show info also for non English languages, then focus on English not to make things unnecessarily lengthy.
 
 ```{r global_options, include=FALSE}
@@ -56,10 +61,6 @@ require(quanteda)
 require(readtext)
 require(knitr)
 
-source("01_globals.R")
-source("01_preprocess_lib.R")
-source("ev_nlp_eda_lib.R")
-
 ```
 
 
@@ -70,6 +71,7 @@ source("01_globals.R")
 source("01_preprocess_lib.R")
 source("ev_nlp_eda_lib.R")
 
+ev_init()
 ```
 
 
@@ -84,10 +86,12 @@ slightl less than you would see them in Windows explorer)*
 ```{r physical_analysis_ls, echo = FALSE, results ='markup'}
 require(kableExtra)
 
-if (!readIfEmpty(phys_an_df)) {
-  phys_an_df <- physicalAnalysis(data_dir_corpus_full)
-  serializeIfNeeded(phys_an_df,FALSE)
-}
+# if (!readIfEmpty(phys_an_df)) {
+#   phys_an_df <- physicalAnalysis(data_dir_corpus_full)
+#   serializeIfNeeded(phys_an_df,FALSE)
+# }
+
+rie(phys_an_df,physicalAnalysis,data_dir_corpus_full)
 
 phys_an_df$file <- gsub("_?subset.*\\.", ".", phys_an_df$file)
 row.names(phys_an_df) <- NULL
@@ -121,33 +125,87 @@ serializeIfNeeded(phys_an_plots,FALSE)
 
 ```
 
-As requested by the assignment description an analysis of the distribution of frequencies, ie. we plot the frequency of words/ngrams
-frequency range.   
-This might have direct practical usefulness for the prediction algorythm.
+
+## Frequencies of (term) Frequencies  
+As requested by the assignment description an analysis of the distribution 
+of frequencies, ie. we plot the frequency of words/ngrams frequency range. 
+This might have direct practical usefulness for the implementation of the prediction algorythm.
 ```{r freq_distrib_an_plot_outlayers_yes, echo = FALSE, results='markup'}
 
-if (!readIfEmpty(freq_of_freq_plots)) {
-  freq_of_freq_plots <- freq_of_freq_an()
-}
-serializeIfNeeded(freq_of_freq_plots,FALSE)
+ rie(freq_of_freq_plots,freq_of_freq_an)
 
-print(freq_of_freq_plots[[2]])
-
-# grid.arrange(
-#       freq_of_freq_plots[[1]]
-#      ,freq_of_freq_plots[[2]]
-#     ,ncol = 2
-#     )
-
+ print(freq_of_freq_plots[[2]])
 ```
-We see that the very low frequencies are extremely frequent, to the 
-point that the plothardly shows other ranges.  
-Let's perform the analysis removing the outlayers (most of the very frequent small-frequency ranges) to be able to see the other frequency
+We see that the very low frequencies are extremely frequent, to the point that the plot hardly shows other ranges.  
+Let's perform again the analysis __removing the outlayers__ (ie. most of the very frequent small-frequency ranges) to be able to see the other frequency
  ranges distribution
 ```{r freq_distrib_an_plot_outlayers_no, echo = FALSE, results='markup'}
 
 print(freq_of_freq_plots[[1]])
+gc()
 ```
 
 
+## Words/n-grams Frequencies
+Let's examine the most frequent words The diagrams provided by quanteda
+ seem more user friendly than histograms, so we use the former.  
+```{r types_distrib_an_q_de, echo = FALSE, results='markup'}
+
+  # if((missing(fct))) fct <- FALSE 
+  fct <- FALSE
+  rie(types_freq_an_q_plots , types_freq_an_q ,qc_full ,fct)
+  print(types_freq_an_q_plots[[1]])
+```
+
+```{r types_distrib_an_q_en, echo = FALSE, results='markup'}
+
+  print(types_freq_an_q_plots[[2]])
+
+```
+
+```{r types_distrib_an_q_fi, echo = FALSE, results='markup'}
+
+  print(types_freq_an_q_plots[[3]])
+```
+
+```{r types_distrib_an_q_ru, echo = FALSE, results='markup'}
+
+  print(types_freq_an_q_plots[[4]])
+
+```
+
+With the same code we can manage different languages and ngrams, let's
+have a look at the frequency of trigrams:
+```{r types_distrib_an_q_en3, echo = FALSE, results='markup'}
+  print(types_freq_an_q_plots[[5]])
+gc()
+```
+
+
+Let's see the same info in wordcloud format
+```{r types_distrib_an_wordcloud_en, echo = FALSE, results='markup'}
+gc()
+
+  fct <- FALSE
+  nwords <- 100
+
+  rie(types_freq_an_en ,types_distrib ,qc_full ,"en",1,rem_stopw = T
+    , faceted = fct)
+  invisible(types_freq_plot_wordcloud(types_freq_an_en ,"en" 
+    ,fct, ,nwords))
+```
+
+Wordcloud for 3grams:
+```{r types_distrib_an_wordcloud_en3, echo = FALSE, results='markup'}
+gc()
+
+  fct <- FALSE
+  nwords <- 100
+
+  rie(types_freq_an_en_3,types_distrib,qc_full,"en",3,rem_stopw = T
+    ,faceted = fct)
+  invisible(types_freq_plot_wordcloud(types_freq_an_en_3, "en" 
+    ,fct , ,as.integer(nwords/3)))
+
+```
 

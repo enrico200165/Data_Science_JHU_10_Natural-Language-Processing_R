@@ -494,8 +494,8 @@ types_distrib <- function(qc_par, lng, ngram ,rem_stopw, faceted)
     # qc <- corpus_reshape(qc, to = "sentences")
     prt("types_distrib() before tokens")
     toks <- tokens(qc   
-                   ,remove_numbers = F,remove_punct = T
-                   ,remove_symbols = F, remove_twitter = T
+                   ,remove_numbers = T,remove_punct = T
+                   ,remove_symbols = T, remove_twitter = T
                    ,remove_url = T)
     toks <- tokens_tolower(toks)
     if (rem_stopw) { # manage stopwords in/exclusion
@@ -568,7 +568,7 @@ types_freq_an_q <- function(qc, fct)
                                                ,"de" , ,xlab, ,"",1)
   # rie(types_freq_an_de_3,types_distrib,qc,"de",3,rem_stopw = T, faceted = fct)
   # types_freq_an_de_plot_3_q <- types_freq_plot_q(types_freq_an_de_3[[2]],faceted = fct 
-  #                                               ,"de" , ,xlab, ,"",3)
+  #                                                ,"de" , ,xlab, ,"",3)
   
   
   rie(types_freq_an_en ,types_distrib ,qc ,"en" ,1,rem_stopw = T, faceted = fct)  
@@ -601,6 +601,7 @@ types_freq_an_q <- function(qc, fct)
   # grid.arrange(types_freq_an_de_plot_q,types_freq_an_fi_plot_q
   #   ,ncol=2); keypress()
   
+  gc()
   list(types_freq_an_en_plot_q
        ,types_freq_an_de_plot_q
        ,types_freq_an_fi_plot_q
@@ -608,6 +609,7 @@ types_freq_an_q <- function(qc, fct)
        ,types_freq_an_en_plot_3_q
   )
 }
+
 
 
 
@@ -619,30 +621,30 @@ types_freq_plot_wordcloud <- function(types_freq_dfm ,lng ,fct ,title ,words_nr)
   if((missing(words_nr))) words_nr <- 100
   if((missing(title))) title <- NULL
   
-  if (F) { # ggplot2 does NOT look good
-  types_freq <- types_freq_dfm[[2]] # frequencies for NON-quanteda wordcloud
-  if (!setequal(class(types_freq),c("frequency", "textstat" ,"data.frame") )) {
-    print(str(types_freq))
-    prt("existing, unexpected classes")
-  }
-  p <- ggplot(data = types_freq 
-    ,aes( x = 1, y = 1 ,size = frequency, label = feature
-      ,color= cut2(frequency, g = 10)))
-  p <- p + geom_text_repel(segment.size = 0, force = 100, segment.color = "white") 
-  p <- p + scale_size(range = c(2, 15), guide = FALSE)
-  p <- p + scale_y_continuous(breaks = NULL)
-  p <- p + scale_x_continuous(breaks = NULL)
-  p <- p + labs(x = '', y = '')
-    # p <- p + facet_wrap(~ type)
-  # p <- p + theme_solarized()
-  p <- p + theme_classic() 
-  p <- p + theme(strip.text = element_text(color="red", size=16, lineheight=5.0)
-    ,plot.title = element_text(colour = "blue" ,size = 18, hjust = 0.5, vjust = 0.8, angle = 0)
-    ,legend.position="none"
-    ,panel.border = element_blank() ,panel.background = element_blank())
-  p <- p +  ggtitle(title)
-  p
-  }
+  # if (F) { # ggplot2 does NOT look good
+  #   types_freq <- types_freq_dfm[[2]] # frequencies for NON-quanteda wordcloud
+  #   if (!setequal(class(types_freq),c("frequency", "textstat" ,"data.frame") )) {
+  #     print(str(types_freq))
+  #     prt("existing, unexpected classes")
+  #   }
+  #   p <- ggplot(data = types_freq 
+  #     ,aes( x = 1, y = 1 ,size = frequency, label = feature
+  #       ,color= cut2(frequency, g = 10)))
+  #   p <- p + geom_text_repel(segment.size = 0, force = 100, segment.color = "white") 
+  #   p <- p + scale_size(range = c(2, 15), guide = FALSE)
+  #   p <- p + scale_y_continuous(breaks = NULL)
+  #   p <- p + scale_x_continuous(breaks = NULL)
+  #   p <- p + labs(x = '', y = '')
+  #   # p <- p + facet_wrap(~ type)
+  # # p <- p + theme_solarized()
+  #   p <- p + theme_classic() 
+  #   p <- p + theme(strip.text = element_text(color="red", size=16, lineheight=5.0)
+  #   ,plot.title = element_text(colour = "blue" ,size = 18, hjust = 0.5, vjust = 0.8, angle = 0)
+  #   ,legend.position="none"
+  #   ,panel.border = element_blank() ,panel.background = element_blank())
+  #   p <- p +  ggtitle(title)
+  #   p
+  #   }
   
 
   # -- Quanteda, not ggplot2 comp, not storeable/manageable, looks ok
@@ -666,15 +668,15 @@ types_freq_an_wcloud <- function(qc, fct ,nwords)
   if((missing(nwords))) nwords <- 100
   
   # German
-  rie(types_freq_an_de ,types_distrib ,qc ,"de",1,rem_stopw = T, faceted = fct)
-  types_freq_an_de_plot_wcloud <- types_freq_plot_wordcloud(
-    types_freq_an_de ,"de" ,fct , ,nwords)
-  keypress()
-
-  rie(types_freq_an_de_3,types_distrib,qc,"de",3,rem_stopw = T, faceted = fct)
-  types_freq_an_de_plot_3_wcloud <- types_freq_plot_wordcloud(
-    types_freq_an_de_3, "de" , fct , ,nwords/3)
-  keypress()
+  # rie(types_freq_an_de ,types_distrib ,qc ,"de",1,rem_stopw = T, faceted = fct)
+  # types_freq_an_de_plot_wcloud <- types_freq_plot_wordcloud(
+  #   types_freq_an_de ,"de" ,fct , ,nwords)
+  # keypress()
+  # 
+  # rie(types_freq_an_de_3,types_distrib,qc,"de",3,rem_stopw = T, faceted = fct)
+  # types_freq_an_de_plot_3_wcloud <- types_freq_plot_wordcloud(
+  #   types_freq_an_de_3, "de" , fct , ,nwords/3)
+  # keypress()
   
   rie(types_freq_an_en ,types_distrib ,qc ,"en",1,rem_stopw = T, faceted = fct)
   types_freq_an_en_plot_wcloud <- types_freq_plot_wordcloud(
@@ -686,24 +688,24 @@ types_freq_an_wcloud <- function(qc, fct ,nwords)
   keypress()
 
   
-  rie(types_freq_an_fi ,types_distrib ,qc ,"fi",1,rem_stopw = T, faceted = fct)
-  types_freq_an_fi_plot_wcloud <- types_freq_plot_wordcloud(
-    types_freq_an_fi ,"fi" , fct , ,nwords)
-  keypress()
-  rie(types_freq_an_fi_3,types_distrib,qc,"fi",3,rem_stopw = T, faceted = fct)
-  types_freq_an_fi_plot_3_wcloud <- types_freq_plot_wordcloud(
-    types_freq_an_fi_3, "fi" , fct , ,nwords/3)
-  keypress()
-  
-  
-  rie(types_freq_an_ru ,types_distrib ,qc ,"ru",1,rem_stopw = T, faceted = fct)
-  types_freq_an_ru_plot_wcloud <- types_freq_plot_wordcloud(
-    types_freq_an_ru ,"ru" , fct, ,nwords)
-  keypress()
-  rie(types_freq_an_ru_3,types_distrib,qc,"ru",3,rem_stopw = T, faceted = fct)
-  types_freq_an_ru_plot_3_wcloud <- types_freq_plot_wordcloud(
-    types_freq_an_ru_3, "ru" , fct , ,nwords/3)
-  keypress()
+  # rie(types_freq_an_fi ,types_distrib ,qc ,"fi",1,rem_stopw = T, faceted = fct)
+  # types_freq_an_fi_plot_wcloud <- types_freq_plot_wordcloud(
+  #   types_freq_an_fi ,"fi" , fct , ,nwords)
+  # keypress()
+  # rie(types_freq_an_fi_3,types_distrib,qc,"fi",3,rem_stopw = T, faceted = fct)
+  # types_freq_an_fi_plot_3_wcloud <- types_freq_plot_wordcloud(
+  #   types_freq_an_fi_3, "fi" , fct , ,nwords/3)
+  # keypress()
+  # 
+  # 
+  # rie(types_freq_an_ru ,types_distrib ,qc ,"ru",1,rem_stopw = T, faceted = fct)
+  # types_freq_an_ru_plot_wcloud <- types_freq_plot_wordcloud(
+  #   types_freq_an_ru ,"ru" , fct, ,nwords)
+  # keypress()
+  # rie(types_freq_an_ru_3,types_distrib,qc,"ru",3,rem_stopw = T, faceted = fct)
+  # types_freq_an_ru_plot_3_wcloud <- types_freq_plot_wordcloud(
+  #   types_freq_an_ru_3, "ru" , fct , ,nwords/3)
+  # keypress()
   
   dummy <- "breakpoint"
   
@@ -758,7 +760,8 @@ types_freq_an_wcloud <- function(qc, fct ,nwords)
         ,"pct features for 50% coverage:",pct_types_for_coverage
         ,"last feature:",frq$feature[idx])
     
-    prt("vrification that we cover 50% summing simple probs",sum(frq$props[1:idx]))
+    prt("vrification that we cover 50% summing simple probs"
+      ,sum(frq$props[1:idx]))
     
     list(idx = idx
       ,pct_to_cover = pct_types_for_coverage
@@ -944,13 +947,16 @@ test_freq_of_freq_an_simple <- function()
 test_freq_of_freq_an_realistic <- function()
   # --------------------------------------------------------------------
 {
-  freq_of_freq_plots <- freq_of_freq_an()
   
-  print(freq_of_freq_plots[[1]])
-  Sys.sleep(4)
+  rie(freq_of_freq_plots,freq_of_freq_an)
+  
+  # freq_of_freq_plots <- freq_of_freq_an()
   
   print(freq_of_freq_plots[[2]])
-  Sys.sleep(4)
+  keypress()
+  
+  print(freq_of_freq_plots[[1]])
+  keypress()
 }  
 
 
@@ -960,16 +966,17 @@ test_types_freq_an_q <- function(qc, fct)
 {
   if((missing(fct))) fct <- FALSE 
 
-  plots <- types_freq_an_q(qc, fct)
-  print(plots[[1]])
+  # types_freq_an_q_plots <- types_freq_an_q(qc, fct)
+  rie(types_freq_an_q_plots , types_freq_an_q ,qc ,fct)
+  print(types_freq_an_q_plots[[1]])
   keypress()
-  print(plots[[2]])
+  print(types_freq_an_q_plots[[2]])
   keypress()
-  print(plots[[3]])
+  print(types_freq_an_q_plots[[3]])
   keypress()
-  print(plots[[4]])
+  print(types_freq_an_q_plots[[4]])
   keypress()
-  print(plots[[5]])
+  print(types_freq_an_q_plots[[5]])
 }
 
 
@@ -997,23 +1004,32 @@ test_types_freq_an_wordcloud <- function(qc, fct)
   
 
 # --------------------------------------------------------------------
-test_types_coverage <- function(qc)
+test_types_coverage <- function(qc , to_cover = 0.9)
 # --------------------------------------------------------------------
 
 {
-  ret <- types_coverage(qc_full, pct_to_cover = 0.9
-    ,lng = "en", remove_stopwords = T) 
+  # types_coverage_data <- types_coverage(qc_full, pct_to_cover = 0.9
+  #   ,lng = "en", remove_stopwords = T) 
 
-  
-  mydf <- ret[["freq_object"]]
+  rie(types_coverage_data ,types_coverage ,qc_full
+    ,pct_to_cover = to_cover ,lng = "en", remove_stopwords = T) 
+    
+  mydf <- types_coverage_data[["freq_object"]]
   print("")
   # ret$freq_object$props    $cuml
-  p <- ggplot(data=mydf, aes(x=seq_along(props)/length(props), y = props))
+  p <- ggplot(data=mydf[1:1000], aes(x=seq_along(props)/length(props), y = props))
   p <- p +geom_line()
   print(p)
   keypress()
-  p <- ggplot(data=mydf, aes(x=seq_along(cumul)/length(cumul), y = cumul))
-  p <- p +geom_line()
+  
+  coverage_label <- paste(round(types_coverage_data$idx/nrow(mydf),2)
+    ,"Elements Provide",to_cover,"Coverage")
+  p <- ggplot(data=mydf, aes(x=1:length(cumul)/length(cumul), y = cumul))
+  p <- p + geom_line()
+  p <- p + geom_hline(yintercept=to_cover , linetype="dashed", color = "grey")
+  p <- p + geom_vline(xintercept=types_coverage_data$idx/nrow(mydf) 
+    ,linetype="dashed", color = "grey")
+  p <- p + ggtitle(coverage_label)
   print(p)
   
   print("")
@@ -1044,31 +1060,31 @@ test_types_coverage <- function(qc)
   # test_physical_analysis_plots(data_dir_corpus_full)
   # keypress()
   
-  # 
   # test_freq_distrib()
   # keypress()
 
-  # test_freq_of_freq_an_simple()
+  # test_freq_of_freq_an_simple();   keypress()
   # test_freq_of_freq_an_realistic()
   
   # full corpus still running after 2 days 
   # use_full_corpus(FALSE)
-  ev_init()
+  # 
   # test_types_freq_an_q(qc_full, fct = F) 
   # 
-  test_types_freq_an_wordcloud(qc_full, F)
+  # test_types_freq_an_wordcloud(qc_full, F)
     
   # keypress()
   # 
   # test_types_freq()
   # keypress()
   # 
-  # test_types_coverage() 
+  # 
+  test_types_coverage() 
   # keypress()
   
 }
 # 
-test_ev_nlp_eda_lib.R()
+  test_ev_nlp_eda_lib.R()
 
   
   

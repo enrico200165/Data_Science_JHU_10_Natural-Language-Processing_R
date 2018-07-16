@@ -1,4 +1,5 @@
 require(dplyr)
+require(beepr)
 
 # illegal position, ease frequent access
 fulldata <- T
@@ -11,7 +12,7 @@ use_full_corpus <- function(vPar) {
   fulldata <<- vPar
   if (previous != fulldata) {
     qc_full <<- NULL
-    dfm_full <<- NULL
+    dfm_full <<- NULLinstall
     gc()
   }
   prt("fulldata:", previous,"->",fulldata)
@@ -404,11 +405,13 @@ getSerializFName <- function(var_id, force_name)
 
 
 # --------------------------------------------------------------------
-keypress <- function (message)
+keypress <- function (message, sound_nr = 1)
 # --------------------------------------------------------------------
 {
   if (missing(message)) message <- "Press [enter] to continue"
   # invisible(readline(prompt=message))
+  prt(message)
+  beep(sound = sound_nr, expr = NULL)
   Sys.sleep(1)
 }
 
