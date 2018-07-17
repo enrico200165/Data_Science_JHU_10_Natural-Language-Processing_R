@@ -13,14 +13,12 @@ knitr::opts_chunk$set(
 
 # Foreword  
 ## Approach
-One of the key principles taught in the course is **"start/lead with the question"**. The is EDA (exploratory data analysis) is for a question very clearly defined by the objective of the  capstone project: "next word prediction".  
+One of the key principles taught in the course is **"start/lead with the question"**.  
+This EDA (exploratory data analysis) is for a question very clearly defined by the objective of the  capstone project: "next word prediction".  
 We are also told that size of data might be important for our implementation. 
 
-Our question/goals is different from text analysis examples often found
-in other books, for instance different from the common example of 
-predicting whether  an email is spam or not.
-For that "question" stopwords are not very useful and probably are better excluded, for our "question" probably they  should be included, so they 
-are included in this analysis.
+Our "question"(goal) is different from text analysis examples often found in books or trainings, for instance different from the common example of predicting whether an email is spam or not.
+For that "question" stopwords are not very useful and probably are better excluded, for our "question" probably they  should be included, so they are included in this analysis.
 
 EDA (exploratory Data Analysis) is meant to provide an initial and 
 global  understanding of the data, it is not a place to draw final 
@@ -29,15 +27,14 @@ accordingly this EDA tries not to sacrifice  generality or plunge into
 details that belong to later stages, on the other hand it does not ignore 
 what our "question" is and the point of attention about data size.
 
-### Terminology and Approach 
-The term "type" is used as synonym of distinct word, so, for instance,
-the sentence "Bye Bye darling" has 3 tokens and two types ("Bye", "darling). The terms "word" and "type" are used interchangeably.  
-On the numeric side in most cases we use "proportions" (relative 
-frequencies, so numbers in the range 0-1). In few cases we use percentages. 
-Proportions and percentages are totally equivalent within this EDA, 
-choice of one or the other has no particular meaning in this EDA.  
-_"Quanteda"_ is the main tool used for this analyisis. Kowledge of what 
-it is not necessary to understand this analysis.
+### Terminology  
+The term "type" is used as synonym of distinct word; so, for instance,
+the sentence "Bye Bye darling" has 3 tokens and two types ("Bye", "darling). The terms "word" and "type" are used interchangeably in this EDA.  
+On the numeric side in some cases we use "proportions" (relative 
+frequencies, so numbers in the range 0-1), in some cases we use percentages; proportions and percentages are  equivalent 
+within this EDA, so choice of one or the other has no particular meaning in this EDA.  
+_"Quanteda"_ is the main tool used for this analyisis. Knowledge of 
+Quanteda  is not necessary to understand this analysis.  
 
 ## Data Overview
 We are provided texts in the following languages:   
@@ -54,11 +51,10 @@ dedicated file:
 
 While 3 languages are provided the assignment description reads:   
 *"Has the data scientist done basic summaries of the **three** files?"*    
-ie.it implies usage of a single language as we have 3 files for each 
-language.  
+i.e. it implies usage of a single language as we have 3 files for each 
+language (one for blogs, one for news, one for tweets, see below exact file names).  
 The tools for this EDA are able to work with any of the provided 
-language, so initially we will show info also for non English languages, 
-then focus on English not to make things unnecessarily lengthy.
+language, so initially we will show info also for non English languages, then we will focus on English only not to make things unnecessarily lengthy.
 
 
 ```{r global_options, include=FALSE}
@@ -90,10 +86,9 @@ ev_init()
 
 
 ## Physical / Low Level Examination of data
-It is known that in the capstone project data size is a critical point,  
-so, without yet resorting to proper NLP tools, a quick look at some 
-basic size parameters using simple tools from Linux and combining their
-output (all done in code, using R).  
+It is known that in the capstone project data size is a critical point,
+ so, without resorting __yet__ to proper Natural Language Processing 
+ tools, a quick look at some basic size parameters using simple tools from Linux and combining their output.  
 *(using MiB, not the smaller "marketing oriented" MB, so sizes are 
 slightly less than you would see them in Windows explorer)*
 ```{r physical_analysis_ls, echo = FALSE, results ='markup'}
@@ -104,7 +99,7 @@ require(kableExtra)
 #   serializeIfNeeded(phys_an_df,FALSE)
 # }
 
-rie(phys_an_df,physicalAnalysis,data_dir_corpus_full)
+invisible(rie(phys_an_df,physicalAnalysis,data_dir_corpus_full))
 
 phys_an_df$file <- gsub("_?subset.*\\.", ".", phys_an_df$file)
 row.names(phys_an_df) <- NULL
@@ -148,9 +143,7 @@ optimization.
 We see that the very low frequencies are extremely frequent, to the 
 point that the plot hardly shows valeus for frequency ranges other 
 than the first one.  
-Let's perform again this analysis __but removing the outlayers__ (ie. 
-most of the very frequent small-frequency ranges) to be able to see 
-the other frequency ranges distribution
+Let's perform __again__ this __same__ analysis __but removing the outlayers__ (ie. most of the very frequent small-frequency ranges) to be able to see the other frequency ranges distribution
 ```{r freq_distrib_an_plot_outlayers_no, echo = FALSE, results='markup'}
 print(freq_of_freq_plots[[1]])
 invisible(gc())
@@ -186,10 +179,7 @@ Trigrams
   print(types_freq_an_q_plots[[3]])
 ```
 
-Though it's not required and does not provide new practical info mostly
-for practise with quanteda let's see some of the same info in wordcloud 
-format. (GGPLOT2 also provides tools for wordclouds via additional 
-packages)
+Though it's not required and it does not provide new practical info,  mostly for practise with quanteda, let's see some of the same info in wordcloud format. *(GGPLOT2 also provides tools for wordclouds via additional packages)*
 ```{r types_distrib_an_wordcloud_en, echo = FALSE, results='markup'}
 invisible(gc())
 
@@ -230,67 +220,75 @@ higher frequencies.
 The diagram of the PMF confirms the expectation.  
 ```{r types_frequencies, echo = FALSE, results='markup'}
   invisible(gc())
-  to_cover <- 0.5
+
+  to_cover_par <- 0.5
+  
   rie(types_coverage_data ,types_coverage ,qc_full
-    ,pct_to_cover = to_cover ,lng = "en", remove_stopwords = T) 
+    ,pct_to_cover = to_cover_par,lng = "en", remove_stopwords = T) 
 
   orig_rows <- nrow(types_coverage_data[["freq_object"]])
   
+  # -- PMF plot ---  
   nr_displayed<- types_coverage_data$idx*0.2
   nr_displayed <- as.integer(nr_displayed)
+  prop <- nr_displayed/orig_rows
   mydf <- types_coverage_data[["freq_object"]][1:nr_displayed, ]
-  # ret$freq_object$props    $cuml
-  p <- ggplot(data=mydf, aes(x=(1:nr_displayed), y = props))
+  p <- ggplot(data=mydf, aes(x=(1:nr_displayed)/ orig_rows # nr_displayed
+    , y = props))
   p <- p + geom_line()
   p <- p + ggtitle("Words Probability Mass Function (Subset)")
-  p <- p + xlab("Words ('Types'), Ordered By Decr. Freq.") # for the x axis label
-  p <- p + ylab("Frequency (Relative)") # for the y axis label
+  p <- p + xlab("Word ('Type') Data Points, Ordered By Decr. Freq.") # for the x axis label
+  p <- p + scale_x_continuous(labels = scales::percent) # xxx
+  p <- p + scale_y_continuous(labels = scales::percent) # xxx
+  p <- p + ylab("Frequency") # for the y axis label
   print(p)
-```
+  rm(mydf); 
 
-So coverage of `r paste0(to_cover*100,"%")` of tokens is provided by
-`r paste0(types_coverage_data$pct_to_cover*100,"%")` of the types, 
-let's visualize this in the cumulative relative frequencies, using
-proportions rather than percentages.
-```{r types_cumuul_frequencies, echo = FALSE, results='markup'}
+```
+  
+  
+   
+  
+Now using Quanteda we calculate that __coverage of `r paste0(to_cover_par*100,"%")` of tokens is provided by `r paste0(round(types_coverage_data$pct_to_cover*100,2),"%")` of the types__, let's also visualize the cumulative frequencies looking at the
+ subset of data that is most interesting.
+```{r types_cumul_frequencies, echo = FALSE, results='markup'}
+
+  # --- cumulative plot
   nr_displayed<- orig_rows *2*types_coverage_data$pct_to_cover
   nr_displayed <- as.integer(nr_displayed)
   mydf <- types_coverage_data[["freq_object"]][1:nr_displayed, ]
   
-  coverage_label <- paste(round(types_coverage_data$pct_to_cover,4)
-    ,"Words 'Cover'",to_cover,"of Token Occurrences")
+  coverage_label <- paste0(round(types_coverage_data$pct_to_cover*100,2)
+    ,"% Words 'Cover' ",to_cover_par*100,"% of Token Occurrences")
   p <- ggplot(data=mydf, aes(x=1:nr_displayed/orig_rows
     ,y = cumul))
-  p <- p + ylim(0, 1)
+  # p <- p + ylim(0, 1)
   p <- p + geom_line()
-  p <- p + geom_hline(yintercept=to_cover , linetype="dashed", color = "blue")
-  p <- p + geom_vline(xintercept=types_coverage_data$pct_to_cover 
-    ,linetype="dashed", color = "blue")
+  # p <- p + geom_hline(yintercept=to_cover , linetype="dashed", color = "blue")
+  # p <- p + geom_vline(xintercept=types_coverage_data$pct_to_cover 
+  #  ,linetype="dashed", color = "blue")
   p <- p + ggtitle(coverage_label)
-  p <- p + xlab("Words Positions, Proportions, By Decr. Freq.") # for the x axis label
+  p <- p + xlab("Word Data Point, Proportions, Ordered By Decr. Freq.") # for the x axis label
   p <- p + ylab("Cumul. Frequency (Relative)")
-  # 
+  p <- p + scale_x_continuous(labels = scales::percent) # xxx
+  p <- p + scale_y_continuous(labels = scales::percent) # xxx
   print(p)
+
 ```
 
 
 ## Assignment Question 4 - Foreign Languages
-*"How do you evaluate how many of the words come from foreign languages?"*
+*"How do you evaluate how many of the words come from foreign languages?"*  
 In theory and taken in the most general way the question is not simple
-because some languages have some words in common, in some cases several
-(Italian and Spanish) and some foreign words are sometimes "adopted"
-by other languages. A precise and general solution (general = not 
-working only for a  specific corpus)  would require:   
-- dictionary lookup for all the tokens on reasonably complete electronic *dictionaries.   
-- context analysis (for words common to both languages)
+because some languages have some words in common, in some cases languages may have several words in common (ex. Italian and Spanish) and some foreign words are sometimes "adopted" by other languages. A precise and general solution (general = not 
+working only for a  specific corpus or  only for some languages)  would seem to require at least:   
+- dictionary lookup for all the tokens (on reasonably complete electronic *dictionaries).   
+- context analysis  
 
-For solutions limited to a specific corpora and languages simpler 
-solutions are possible as vocabulary is limited and we know that the
-languages are not those very few that have some words in common. 
-In most cases looking up single words rather than examining the context 
-should be enough. For predictions based on n-grams foreign words that
-are really foreign (and not expression de fact become part of your 
-language) should be dealt implicitly by the fact that they will not
+For solutions limited to a specific corpora and some languages simpler 
+solutions are possible as vocabulary is limited and we know whether the languages are those few that have several words in common (few, so not frequent).   
+In some cases looking up single words rather than examining the context  could be enough. For predictions based on n-grams foreign words that
+are really foreign (rather than expression de facto become part of your  language) should be dealt implicitly by the fact that they will not
 be frequent.  
 
 ## Assignment Question 5 - Increasing Coverage  
@@ -318,29 +316,84 @@ Yes, table at the beginning of the analysis and additional data within the analy
 - *"Has the data scientist made basic plots, such as histograms to 
 illustrate features of the data?"*  
 Yes, several histograms are present, both "classical" histograms, at 
-the beginning (sizes, nr lines ..., freequency of types frequencies), 
-and histogram info with quanteda. Some histograms are faceted.  
+the beginning (sizes, nr lines ..., frequency of types frequencies), 
+and histogram info with quanteda. Some histograms are faceted on 
+language and/or text type.  
 
 - *"Was the report written in a brief, concise style, in a way that a non-data scientist manager could appreciate?"*"  
 The report is visual, non-verbose, it avoids technical jargon and 
-explains the couple of unavoidable words that are a bit specialistic (type, 
-proportions). It does NOT show code.
+explains the couple of unavoidable words that are a bit specialistic.   It does NOT show code (but see code appendix at end for fellow students).  
 
-# Off The Record - __only for technical people__ 
-This report does not show code, this not only because the report was
-required to be understandable to non technical people, but also because
-the code producing analysis and plots is far more structured than usual.
+
+# Conclusion(s)  
+## Main findings
+The relevant findings are two, one statistical one computational:   
+- __Distribution of frequencies__:  the fact that may words (types) have 
+very low frequencies. This emerges in several ways across the analysis. It is important 
+for practical purposes as it may (to be verified when designing the algorithm) allow 
+optimization in computing resources, which we are told might be a key point.  
+
+- __Data Size vs. Processing Resources__: The size of data provided is managed by R with difficulty even in a relatively resource rich environment (Intel I7 4 cores, 8 threads, 16GB RAM). Using all the data with a naive approach causes the computation to last for hours, hang, crash (often for inability to allocate RAM).  
+  
+  
+Both findings seem extremely important and related; the first might help workaround the problem indentified by the second  
+
+## Planning  
+The description of the
+*"briefly summarize your plans for creating the prediction algorithm and Shiny app."*  
+Plans for the prediction algorithms are the following:  
+
+- Review prediction theory, i.e.. the main prediction techniques that are available about ngrams bsed prediction on academic publications and training  
+
+- Verify limitations of the environment where the prediction application is required to run. We already know one limitation about RAM memory, but also other limitations may be important, for instance eventual limitation on size or number of files that can be uploaded to the web site on which the application will run  
+
+- Review medium and advanced R programming techniques, including techniques to monitor manage and optimize resource usages. (this means studying again https://adv-r.hadley.nz/ , looking at https://csgillespie.github.io/efficientR/ and similar sources  
+
+- Choose an implementation comparing the two informations above (choose the best algorithm among those that are likely to run within the technical/resource constraints and design how to implement it). This is likely to require some experimentation/prototyping  
+- Implement the chosen algorithm focusing mostly on accuracy and clean implementation    
+- Look for eventual optimizations  
+
+
+# Off The Record - __only for technical people__  
+This report so far did not show code, this not only because the report is required to be understandable to non technical people, but also because the code producing analysis and plots is far more structured than usual.
 I took the opportunity of this EDA to experiment using R to produce 
 general reusable components encapsulated in very general functions.  
 I also took the opportunity to explore systematically how to use 
 serialization and lazy calculations to optimize speed (read stored 
 calculated data rather than recalculating them each time) and memory 
 (removing large data from RAM after the plots have been produced).  
-This allowed me to analyze the data without subsetting them. 
+This allowed me also to analyze the data without subsetting them. 
 I did develop a framework to subset data in a very flexible way and 
 used it at the beginning. The analytic code can use both subsetted 
 data or full data, just by changing a boolean flag.  
 In the end the performance and memory benefits of the lazy-calculation/serialization mechanism  allowed  me to use full data 
-in this analysis, thing that seemed impossible at the beginning when simple/direct calcutations were taking hours or hanging and crashing the machine.
+in this analysis (though producing this report still takes about 20 minutes), thing that seemed impossible at the beginning when simple/direct calcutations were taking hours or hanging and crashing the machine.  
+Code is on github, distributed over servera files, the core file providing the functions reused by this report.
+The most frequen piece of code in this report is of the form  
 
+    rie(datum_lazily_managed ,calculation_function 
+      ,parameters for the calculation function)
+
+rie means: "read if empty", this is the function that 
+if the datum is not empty (calculation performed) does nothing
+if empty and a serialization is available reads the serialization from 
+disk, if no serialization is available calls the calculation function
+
+ex. of real call that lazy-manages the datum types_freq_an_en_3 that contains the 
+frequency of trigrams for english language.  
+
+    rie(types_freq_an_en_3,types_distrib,qc_full,"en",3,rem_stopw = T  
+      ,faceted = fct)
+the calculation function is types_distrib() that takes as parameters;  
+- qc_full:  a (quanteda) corpus  
+
+- "en" to subset on English (thanks to serialization am able to keep full data for  all languages)  
+
+- rem_stopw: flag to remove stopwords (in general I keep them in and think that the algorythm cannot ignore them, this is one of the few places where I removed them, mostly for curiosity)  
+
+- faceted: flag telling whether calculations should be "grouped" to support facets in plots using the datum  
+
+Analysis code is distributed in several files. The main file that contains the analysis and plot functions is  
+https://github.com/enrico200165/Data_Science_JHU_10_Natural-Language-Processing_R/blob/master/ev_nlp_eda_lib.R  
+note that it depends on (sources) other files providing service functions (rie() for instance) and global flags ().
 

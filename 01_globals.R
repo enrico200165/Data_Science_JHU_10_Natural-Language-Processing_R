@@ -350,7 +350,7 @@ getSerializFName <- function(var_id, force_name)
     serializeIfNeeded(df,,rdsFName)
   }
   
-  ret
+  invisible(ret)
 }
 
 

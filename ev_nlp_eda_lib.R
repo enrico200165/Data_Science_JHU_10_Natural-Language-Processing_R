@@ -1027,6 +1027,8 @@ types_coverage_an <- function(qc , to_cover = 0.9)
   p <- p + ggtitle("Words Probability Mass Function (Subset)")
   p <- p + xlab("Words ('Types'), Ordered By Decr. Freq.") # for the x axis label
   p <- p + ylab("Frequency (Relative)") # for the y axis label
+  p <- p + scale_x_continuous(labels = scales::percent) # xxx
+  p <- p + scale_y_continuous(labels = scales::percent) # xxx
   print(p)
   keypress()
   
@@ -1034,7 +1036,7 @@ types_coverage_an <- function(qc , to_cover = 0.9)
   nr_displayed <- as.integer(nr_displayed)
   mydf <- types_coverage_data[["freq_object"]][1:nr_displayed, ]
   
-  coverage_label <- paste(round(types_coverage_data$pct_to_cover,4)
+  coverage_label <- paste(round(types_coverage_data$pct_to_cover,2)
     ,"Words 'Cover'",to_cover,"of Token Occurrences")
   p <- ggplot(data=mydf, aes(x=1:nr_displayed/orig_rows
     ,y = cumul))
@@ -1046,6 +1048,8 @@ types_coverage_an <- function(qc , to_cover = 0.9)
   p <- p + ggtitle(coverage_label)
   p <- p + xlab("Words Positions, Proportions, By Decr. Freq.") # for the x axis label
   p <- p + ylab("Cumul. Frequency (Relative)")
+  p <- p + scale_x_continuous(labels = scales::percent) # xxx
+  p <- p + scale_y_continuous(labels = scales::percent) # xxx
   # 
   print(p)
 
@@ -1053,10 +1057,56 @@ types_coverage_an <- function(qc , to_cover = 0.9)
 
 
 #---------------------------------------------------------------------
- test_types_coverage <- function()  
+ test_types_coverage <- function(to_cover_par = 0.5)  
 #---------------------------------------------------------------------
 {
-  rie(types_coverage_plots, types_coverage_an ,qc_full , to_cover = 0.9)
+  gc()
+  
+  rie(types_coverage_data ,types_coverage ,qc_full
+    ,pct_to_cover = to_cover_par ,lng = "en", remove_stopwords = T) 
+
+  orig_rows <- nrow(types_coverage_data[["freq_object"]])
+
+  # -- PMF plot ---  
+  nr_displayed<- types_coverage_data$idx*0.2
+  nr_displayed <- as.integer(nr_displayed)
+  prop <- nr_displayed/orig_rows
+  mydf <- types_coverage_data[["freq_object"]][1:nr_displayed, ]
+  p <- ggplot(data=mydf, aes(x=(1:nr_displayed)/ orig_rows # nr_displayed
+    , y = props))
+  p <- p + geom_line()
+  p <- p + ggtitle("Words Probability Mass Function (Subset)")
+  p <- p + xlab("Word ('Type') Data Points, Ordered By Decr. Freq.") # for the x axis label
+  p <- p + scale_x_continuous(labels = scales::percent) # xxx
+  p <- p + scale_y_continuous(labels = scales::percent) # xxx
+  p <- p + ylab("Frequency") # for the y axis label
+  print(p)
+  rm(mydf); gc()
+  keypress()
+  
+  
+  # --- cumulative plot
+  nr_displayed<- orig_rows *2*types_coverage_data$pct_to_cover
+  nr_displayed <- as.integer(nr_displayed)
+  mydf <- types_coverage_data[["freq_object"]][1:nr_displayed, ]
+  
+  coverage_label <- paste0(round(types_coverage_data$pct_to_cover*100,2)
+    ,"% Words 'Cover' ",to_cover*100,"% of Token Occurrences")
+  p <- ggplot(data=mydf, aes(x=1:nr_displayed/orig_rows
+    ,y = cumul))
+  # p <- p + ylim(0, 1)
+  p <- p + geom_line()
+  # p <- p + geom_hline(yintercept=to_cover , linetype="dashed", color = "blue")
+  # p <- p + geom_vline(xintercept=types_coverage_data$pct_to_cover 
+  #  ,linetype="dashed", color = "blue")
+  p <- p + ggtitle(coverage_label)
+  p <- p + xlab("Word Data Point, Proportions, Ordered By Decr. Freq.") # for the x axis label
+  p <- p + ylab("Cumul. Frequency (Relative)")
+  p <- p + scale_x_continuous(labels = scales::percent) # xxx
+  p <- p + scale_y_continuous(labels = scales::percent) # xxx
+  print(p)
+  rm(mydf); gc()
+  keypress()
 }
 
 
@@ -1092,7 +1142,7 @@ types_coverage_an <- function(qc , to_cover = 0.9)
   # use_full_corpus(FALSE)
   # 
   # 
-  test_types_freq_an_q(qc_full, fct = F) 
+  # test_types_freq_an_q(qc_full, fct = F) 
   # 
   # test_types_freq_an_wordcloud(qc_full, F)
     
