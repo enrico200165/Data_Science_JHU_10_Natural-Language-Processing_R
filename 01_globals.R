@@ -2,8 +2,8 @@ require(dplyr)
 require(beepr)
 
 # illegal position, ease frequent access
-silent <- T
-fulldata <- T
+silent <- F
+fulldata <- F
 use_full_corpus <- function(vPar) {
 
   if (missing(vPar)) 
@@ -13,7 +13,7 @@ use_full_corpus <- function(vPar) {
   fulldata <<- vPar
   if (previous != fulldata) {
     qc_full <<- NULL
-    dfm_full <<- NULLinstall
+    dfm_full <<- NULL
     gc()
   }
   prt("fulldata:", previous,"->",fulldata)

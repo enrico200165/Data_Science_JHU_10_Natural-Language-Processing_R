@@ -327,7 +327,7 @@ explains the couple of unavoidable words that are a bit specialistic.   It does 
 
 # Conclusion(s)  
 ## Main findings
-The relevant findings are two, one statistical one computational:   
+The relevant findings are two, one statistical one computational:  
 - __Distribution of frequencies__:  the fact that may words (types) have 
 very low frequencies. This emerges in several ways across the analysis. It is important 
 for practical purposes as it may (to be verified when designing the algorithm) allow 
@@ -350,7 +350,9 @@ Plans for the prediction algorithms are the following:
 - Review medium and advanced R programming techniques, including techniques to monitor manage and optimize resource usages. (this means studying again https://adv-r.hadley.nz/ , looking at https://csgillespie.github.io/efficientR/ and similar sources  
 
 - Choose an implementation comparing the two informations above (choose the best algorithm among those that are likely to run within the technical/resource constraints and design how to implement it). This is likely to require some experimentation/prototyping  
+
 - Implement the chosen algorithm focusing mostly on accuracy and clean implementation    
+
 - Look for eventual optimizations  
 
 
@@ -374,8 +376,9 @@ The most frequen piece of code in this report is of the form
     rie(datum_lazily_managed ,calculation_function 
       ,parameters for the calculation function)
 
-rie means: "read if empty", this is the function that 
-if the datum is not empty (calculation performed) does nothing
+rie means: "read if empty", this is the function that  
+if the datum is not empty (calculation performed) does nothing  
+
 if empty and a serialization is available reads the serialization from 
 disk, if no serialization is available calls the calculation function
 
@@ -384,16 +387,20 @@ frequency of trigrams for english language.
 
     rie(types_freq_an_en_3,types_distrib,qc_full,"en",3,rem_stopw = T  
       ,faceted = fct)
-the calculation function is types_distrib() that takes as parameters;  
+the calculation function is types_distrib() that actual parameters 
+used in this inokation are:  
+
 - qc_full:  a (quanteda) corpus  
 
-- "en" to subset on English (thanks to serialization am able to keep full data for  all languages)  
+- "en": to subset on English (thanks to serialization am able to keep full data for  all languages)  
 
 - rem_stopw: flag to remove stopwords (in general I keep them in and think that the algorythm cannot ignore them, this is one of the few places where I removed them, mostly for curiosity)  
 
 - faceted: flag telling whether calculations should be "grouped" to support facets in plots using the datum  
 
-Analysis code is distributed in several files. The main file that contains the analysis and plot functions is  
+Analysis code is distributed in several files. The main file that contains the analysis and plot functions often used by this .rmd is  
 https://github.com/enrico200165/Data_Science_JHU_10_Natural-Language-Processing_R/blob/master/ev_nlp_eda_lib.R  
-note that it depends on (sources) other files providing service functions (rie() for instance) and global flags ().
+note that it depends on (sources) other files providing service functions (rie() for instance) and global flags (ex. fulldata flag,
+that along to functions manageing it, controls whether to use all 
+the data or subsetted data).
 
