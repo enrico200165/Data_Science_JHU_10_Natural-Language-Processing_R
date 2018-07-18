@@ -145,8 +145,12 @@ dir.exists(data_dir_cap)
 
 data_dir_corpus_full <-   file.path(data_dir_cap,"data_in","corpus_full")
 data_dir_corpus_subset <- file.path(data_dir_cap,"data_in","corpus_subset")
+
 data_dir_corpus_in <- function() {
-    if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
+    if (use_full_corpus()) 
+      data_dir_corpus_full 
+  else
+    data_dir_corpus_subset
 }
 
 
@@ -469,7 +473,7 @@ prt_last_call_time <- Sys.time()
   if (silent) {
     invisible("")
   } else {
-  time_diff <- Sys.time() - prt_last_call_time
+  time_diff <- difftime(Sys.time(),prt_last_call_time)
   pars <- list(...)
   print(paste(time_diff,paste(pars,collapse = " ")))
   prt_last_call_time <<- Sys.time()

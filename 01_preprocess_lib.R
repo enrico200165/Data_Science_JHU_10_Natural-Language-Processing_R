@@ -1,8 +1,5 @@
-# install.packages("stringr", dependencies = TRUE)
-require(quanteda)
-require(stringr)
+
 require(readtext)
-require(dplyr)
 require(pryr)
 
 #######################################################
@@ -86,7 +83,7 @@ source("01_globals.R")
     fname <- file.path(in_dir,fname)
     stopifnot(file.exists(fname))
     
-    cat("subsetting\n", fname, " to\n", fnameOut)
+    prt("subsetting\n", fname, " to\n", fnameOut)
     if (!forceIt && file.exists(fnameOut)) {
       print(paste("subset already exists, not overwriting it:",fnameOut))
       return(TRUE)
@@ -160,7 +157,10 @@ source("01_globals.R")
   stopifnot(dir.exists(in_dir))
   stopifnot(dir.exists(out_dir))
   
-  textFiles <- list.files(in_dir)
+  textFiles <- list.files(in_dir ,include.dirs = FALSE)
+  # remove dirs
+  textFiles <- textFiles[!dir.exists(file.path(in_dir,textFiles))]
+  
   if (length(textFiles) <= 0) {
     print(paste("no files found in",in_dir))
     return(FALSE)
@@ -334,8 +334,8 @@ zap_files_serializations <- function(patternPar)
 
   print(" --- Unit Testing --- ")
 
-  F && subsetTextFilesByLines(data_dir_corpus_full 
-      ,data_dir_corpus_subset ,50 ,1000 , forceIt = F)
+  T && subsetTextFilesByLines(data_dir_corpus_full 
+      ,data_dir_corpus_subset ,250 ,1000 , forceIt = F)
 
 
   if(F) {
@@ -351,7 +351,9 @@ zap_files_serializations <- function(patternPar)
   print(" --- Tests Completed --- ")
 }
 
-# test_01_preprocess_libs.R()
+  silent <- F
+# 
+  test_01_preprocess_libs.R()
 
 
 
