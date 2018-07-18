@@ -93,7 +93,7 @@ source("01_globals.R")
     }
 
     # enc <- iconvlist()[309] # utf8
-    enc <- "UTF-8" # getOption("encoding")
+    enc <- getOption("encoding")
     con <- file(fname, "rt", encoding = enc)
     out <- file(fnameOut, "wt",encoding = enc)
     
@@ -306,22 +306,6 @@ source("01_globals.R")
 # NB relies on global with fixed name
 
 # clean_rds(".*")
-read_dir = if (use_full_corpus()) data_dir_corpus_full else data_dir_corpus_subset
-if (F) {
-  if (!readIfEmpty(dfm_full)) {
-    # need the corpus
-    if (!readIfEmpty(qc_full)) {
-      print(paste("reading corpus from dir:",read_dir))
-      qc_full <- readQCorp(read_dir, FALSE)
-      serializeIfNeeded(qc_full, FALSE)
-    }
-    # choose one
-    dfm_full <- dfm(qc_full) 
-    dfm_full <- dfm(qc_full, remove_punct = T)
-    serializeIfNeeded(dfm_full, FALSE)
-    }
-}
-
 
 # --------------------------------------------------------------------
 zap_files_serializations <- function(patternPar) 
@@ -350,7 +334,7 @@ zap_files_serializations <- function(patternPar)
 
   print(" --- Unit Testing --- ")
 
-  T && subsetTextFilesByLines(data_dir_corpus_full 
+  F && subsetTextFilesByLines(data_dir_corpus_full 
       ,data_dir_corpus_subset ,50 ,1000 , forceIt = F)
 
 

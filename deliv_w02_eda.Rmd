@@ -1,7 +1,7 @@
 ---
 title: "Explorative Data Analysis"
-author: "Enrico V"
-date: "Jully 2018"
+author: "Enrico"
+date: "July 2018"
 output: html_document
 ---
 
@@ -219,29 +219,33 @@ many types/words have low frequencies and few types have (relatively)
 higher frequencies.  
 The diagram of the PMF confirms the expectation.  
 ```{r types_frequencies, echo = FALSE, results='markup'}
+  to_cover <- 0.5
+
+  use_full_corpus(T)
   invisible(gc())
+  ev_init()
 
-  to_cover_par <- 0.5
-  
   rie(types_coverage_data ,types_coverage ,qc_full
-    ,pct_to_cover = to_cover_par,lng = "en", remove_stopwords = T) 
+    ,pct_to_cover = to_cover ,lng = "en", remove_stopwords = T) 
 
-  orig_rows <- nrow(types_coverage_data[["freq_object"]])
+  frq_df_id <- "freq_df"
+  orig_rows <- nrow(types_coverage_data[[frq_df_id]])
   
   # -- PMF plot ---  
   nr_displayed<- types_coverage_data$idx*0.2
   nr_displayed <- as.integer(nr_displayed)
-  prop <- nr_displayed/orig_rows
-  mydf <- types_coverage_data[["freq_object"]][1:nr_displayed, ]
-  p <- ggplot(data=mydf, aes(x=(1:nr_displayed)/ orig_rows # nr_displayed
-    , y = props))
+  mydf <- types_coverage_data[[frq_df_id]][1:nr_displayed, ]
+  # ret$freq_object$props    $cuml
+  p <- ggplot(data=mydf, aes(x=(1:nr_displayed), y = props))
   p <- p + geom_line()
   p <- p + ggtitle("Words Probability Mass Function (Subset)")
-  p <- p + xlab("Word ('Type') Data Points, Ordered By Decr. Freq.") # for the x axis label
-  p <- p + scale_x_continuous(labels = scales::percent) # xxx
-  p <- p + scale_y_continuous(labels = scales::percent) # xxx
+  p <- p + xlab("Words ('Types'), Ordered By Decr. Freq.") # for the x axis label
   p <- p + ylab("Frequency") # for the y axis label
+  p <- p + scale_x_continuous(labels = scales::percent)
+  p <- p + scale_y_continuous(labels = scales::percent)
   print(p)
+  
+  
   rm(mydf); 
 
 ```
@@ -249,29 +253,31 @@ The diagram of the PMF confirms the expectation.
   
    
   
-Now using Quanteda we calculate that __coverage of `r paste0(to_cover_par*100,"%")` of tokens is provided by `r paste0(round(types_coverage_data$pct_to_cover*100,2),"%")` of the types__, let's also visualize the cumulative frequencies looking at the
+Now using Quanteda we calculate that __coverage of `r paste0(to_cover*100,"%")` of tokens is provided by `r paste0(round(types_coverage_data$pct_to_cover*100,2),"%")` of the types__, let's also visualize the cumulative frequencies looking at the
  subset of data that is most interesting.
 ```{r types_cumul_frequencies, echo = FALSE, results='markup'}
 
   # --- cumulative plot
-  nr_displayed<- orig_rows *2*types_coverage_data$pct_to_cover
+  nr_displayed<- orig_rows *2*types_coverage_data$pct_types_for_coverage 
   nr_displayed <- as.integer(nr_displayed)
-  mydf <- types_coverage_data[["freq_object"]][1:nr_displayed, ]
-  
-  coverage_label <- paste0(round(types_coverage_data$pct_to_cover*100,2)
-    ,"% Words 'Cover' ",to_cover_par*100,"% of Token Occurrences")
+  mydf <- types_coverage_data[[frq_df_id]][1:nr_displayed, ]
+  coverage_label <- paste0(
+    round(types_coverage_data$pct_types_for_coverage,4)*100
+    ,"% of Words 'Cover' " ,  types_coverage_data$pct_to_cover*100
+    ,"% of Token Occurrences")
   p <- ggplot(data=mydf, aes(x=1:nr_displayed/orig_rows
     ,y = cumul))
   # p <- p + ylim(0, 1)
   p <- p + geom_line()
-  # p <- p + geom_hline(yintercept=to_cover , linetype="dashed", color = "blue")
-  # p <- p + geom_vline(xintercept=types_coverage_data$pct_to_cover 
-  #  ,linetype="dashed", color = "blue")
+  p <- p + geom_hline(yintercept=to_cover , linetype="dashed", color = "blue")
+  p <- p + geom_vline(xintercept=types_coverage_data$pct_types_for_coverage 
+    ,linetype="dashed", color = "blue")
   p <- p + ggtitle(coverage_label)
-  p <- p + xlab("Word Data Point, Proportions, Ordered By Decr. Freq.") # for the x axis label
-  p <- p + ylab("Cumul. Frequency (Relative)")
+  p <- p + xlab("Words Positions, Proportions, By Decr. Freq.") # for the x axis label
+  p <- p + ylab("Cumul. Frequency")
   p <- p + scale_x_continuous(labels = scales::percent) # xxx
   p <- p + scale_y_continuous(labels = scales::percent) # xxx
+  # 
   print(p)
 
 ```
@@ -327,13 +333,13 @@ explains the couple of unavoidable words that are a bit specialistic.   It does 
 
 # Conclusion(s)  
 ## Main findings
-The relevant findings are two, one statistical one computational:  
-- __Distribution of frequencies__:  the fact that may words (types) have 
+The relevant findings are two, one statistical one computational:    
+__Distribution of frequencies__:  the fact that may words (types) have 
 very low frequencies. This emerges in several ways across the analysis. It is important 
 for practical purposes as it may (to be verified when designing the algorithm) allow 
 optimization in computing resources, which we are told might be a key point.  
-
-- __Data Size vs. Processing Resources__: The size of data provided is managed by R with difficulty even in a relatively resource rich environment (Intel I7 4 cores, 8 threads, 16GB RAM). Using all the data with a naive approach causes the computation to last for hours, hang, crash (often for inability to allocate RAM).  
+  
+__Data Size vs. Processing Resources__: The size of data provided is managed by R with difficulty even in a relatively resource rich environment (Intel I7 4 cores, 8 threads, 16GB RAM). Using all the data with a naive approach causes the computation to last for hours, hang, crash (often for inability to allocate RAM).  
   
   
 Both findings seem extremely important and related; the first might help workaround the problem indentified by the second  
@@ -364,35 +370,35 @@ I also took the opportunity to explore systematically how to use
 serialization and lazy calculations to optimize speed (read stored 
 calculated data rather than recalculating them each time) and memory 
 (removing large data from RAM after the plots have been produced).  
-This allowed me also to analyze the data without subsetting them. 
-I did develop a framework to subset data in a very flexible way and 
-used it at the beginning. The analytic code can use both subsetted 
-data or full data, just by changing a boolean flag.  
-In the end the performance and memory benefits of the lazy-calculation/serialization mechanism  allowed  me to use full data 
-in this analysis (though producing this report still takes about 20 minutes), thing that seemed impossible at the beginning when simple/direct calcutations were taking hours or hanging and crashing the machine.  
-Code is on github, distributed over servera files, the core file providing the functions reused by this report.
-The most frequen piece of code in this report is of the form  
+This allowed, for some but not all analysis, to analyze the data without subsetting them. 
+I did develop a framework to subset data, used for the few cases when R
+is unable to process full data eficiently. The analytic code can use 
+both subsetted data or full data, just by changing a boolean flag.  
+Code is on github, distributed over serveral files. 
+The most frequen piece of code in this .rmd report is  
 
     rie(datum_lazily_managed ,calculation_function 
       ,parameters for the calculation function)
 
 rie means: "read if empty", this is the function that  
 if the datum is not empty (calculation performed) does nothing  
+if empty and a serialization file is available reads the serialization 
+from disk, if no serialization is available calls the calculation 
+function to set the variable (and stores results to serialization file
+ so subsequent invokations don't repeat the calculation)
 
-if empty and a serialization is available reads the serialization from 
-disk, if no serialization is available calls the calculation function
-
-ex. of real call that lazy-manages the datum types_freq_an_en_3 that contains the 
-frequency of trigrams for english language.  
+ex. of real call that lazy-manages the datum types_freq_an_en_3 that 
+contains the frequency of trigrams for english language.  
 
     rie(types_freq_an_en_3,types_distrib,qc_full,"en",3,rem_stopw = T  
       ,faceted = fct)
-the calculation function is types_distrib() that actual parameters 
+the calculation function is types_distrib(). The actual parameters 
 used in this inokation are:  
 
 - qc_full:  a (quanteda) corpus  
 
-- "en": to subset on English (thanks to serialization am able to keep full data for  all languages)  
+- "en": to subset on English (corpus contains text for all languages 
+so must be subsetted to language of interest)  
 
 - rem_stopw: flag to remove stopwords (in general I keep them in and think that the algorythm cannot ignore them, this is one of the few places where I removed them, mostly for curiosity)  
 

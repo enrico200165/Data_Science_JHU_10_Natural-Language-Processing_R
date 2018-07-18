@@ -2,11 +2,17 @@ require(dplyr)
 require(beepr)
 
 # illegal position, ease frequent access
-silent <- F
-fulldata <- F
-use_full_corpus <- function(vPar) {
 
-  if (missing(vPar)) 
+silent <- NULL
+fulldata <- NULL
+
+# --------------------------------------------------------------------
+use_full_corpus <- function(vPar, reinit_funct = NULL 
+  ,...)
+# --------------------------------------------------------------------
+{
+
+  if (missing(vPar) || is.null(vPar)) 
     return(fulldata) 
 
   previous <- fulldata
@@ -14,16 +20,23 @@ use_full_corpus <- function(vPar) {
   if (previous != fulldata) {
     qc_full <<- NULL
     dfm_full <<- NULL
-    gc()
+    invisible(gc())
+    prt("fulldata:", previous,"->",fulldata)
+    if (!is.null(reinit_funct)) {
+      prt("############ Reinitializing from <",previous,"> ################")
+      args <- list(...)
+      do.call(reinit_funct,args)
+      prt("############ Reinitialized to <",fulldata,"> #################")
+    }
   }
-  prt("fulldata:", previous,"->",fulldata)
-  NULL
+  invisible(fulldata)
 }
 
 
 # --------------------------------------------------------------------
 #                   CONSTANTS
 # --------------------------------------------------------------------
+
 TXT_CTR = "country"
 TXT_LNG = "language"
 TXT_TYP = "type"
@@ -92,13 +105,13 @@ data_type_prefix <- function() if (fulldata) "full" else "subs"
 qc_full <- if (exists("qc_full")) qc_full else NULL
 qc_subs <- if (exists("qc_subs")) qc_full else NULL
 qc_auto <- function() {
-    if (use_full_corpus) qc_full else qc_subs
+    if (use_full_corpus()) qc_full else qc_subs
 }
 
 dfm_full <- if (exists("dfm_full")) dfm_full else NULL
 dfm_subs <- if (exists("dfm_subs")) dfm_subs else NULL
 dfm_auto <- function() {
-    if (use_full_corpus) dfm_full else dfm_subs
+    if (use_full_corpus()) dfm_full else dfm_subs
 }
 
 
@@ -130,13 +143,20 @@ data_dir_cap <- file.path(data_dir,"capstone_data")
 dir.exists(data_dir_cap)
 
 
-
 data_dir_corpus_full <-   file.path(data_dir_cap,"data_in","corpus_full")
 data_dir_corpus_subset <- file.path(data_dir_cap,"data_in","corpus_subset")
 data_dir_corpus_in <- function() {
     if (use_full_corpus) data_dir_corpus_full else data_dir_corpus_subset
 }
 
+
+read_dir <- function() {
+  val <- use_full_corpus()
+  if (val) 
+    data_dir_corpus_full 
+  else 
+    data_dir_corpus_subset
+}
 
 
 # -------------------------------------------------------------------------
@@ -248,9 +268,9 @@ getSerializFName <- function(var_id, force_name)
     # if(exists(varName)) {
     if(TRUE) {
       # 
-      print(paste("serializing var:",varName,"to file:",rdsFName,"..."))
+      prt(paste("serializing var:",varName,"to file:",rdsFName,"..."))
       saveRDS(dfPar, file = rdsFName)
-      print(paste("FINISHED serializing",varName))
+      prt(paste("FINISHED serializing",varName))
     } else {
       # print(paste("not serializing because not exists var: ",varName))
     }
