@@ -473,15 +473,26 @@ prt_last_call_time <- Sys.time()
   if (silent) {
     invisible("")
   } else {
-  time_diff <- difftime(Sys.time(),prt_last_call_time)
+  time_diff <- as.numeric(difftime(Sys.time(),prt_last_call_time))
+  time_diff <- paste(round(time_diff,2),"secs -")
+  time_diff <- paste(format(Sys.time(), "%X"), time_diff)
+  
   pars <- list(...)
   print(paste(time_diff,paste(pars,collapse = " ")))
   prt_last_call_time <<- Sys.time()
   }
 }
+
+
+
+# ------------------------------------------
+#    Tests
+# ------------------------------------------
+
   test_prt <- function() 
 {
   # check if it serializes correctly
+  silent <<-F
   prt("pippo", "pluto")
   Sys.sleep(1)
   prt("")
@@ -490,13 +501,8 @@ prt_last_call_time <- Sys.time()
   Sys.sleep(5)
   prt()
 }
-# test_prt()
 
 
-
-# ------------------------------------------
-#    Tests
-# ------------------------------------------
 
 testRemoveAllVarExcept <- function() {
   a <- 1;  b <-2; c <- 3; d <- 4; e <- 99; f <- 5
@@ -605,12 +611,21 @@ testAddToCoreDF <- function() {
 # -----------------------------------------------------------------------
   
 {
+  
+  silent <<- F
+  fulldata <<- F
+
+
+  
   # testRemoveAllVarExcept()
   # testReadIfEmpty()
   test_rie()
+  # test_prt()
+
   # testAddToCoreDF()
   # test_getSerializeFName()
   
 }
 
-#   test_Globals.R()
+#   
+  test_Globals.R()

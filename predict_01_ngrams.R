@@ -76,7 +76,6 @@ build_dfms <- function(data_dir_corpus)
   
   rie(dtf_1gram ,dtf_ngram ,txts_merged , 1)
   dtf_1gram <<- dtf_1gram
-
   
   rie(dtf_2gram ,dtf_ngram ,txts_merged , 2)
   dtf_2gram <<- dtf_2gram
@@ -87,31 +86,31 @@ build_dfms <- function(data_dir_corpus)
   return(T)
     
   # --------------- SAFE WAY ------------
-  rie(dfm_1gram ,build_dfm_ngrams ,txts_merged, 1)
-  dfm_1gram <<- dfm_1gram
-  # textstats 
-  rie(texstat_1gram, textstat_frequency, dfm_1gram)
-  # get the data table
-  rie(dtf_1gram, data.table, texstat_1gram)
-  dtf_1gram <<- dtf_1gram
-  
-
-  rie(dfm_2gram ,build_dfm_ngrams ,txts_merged, 2)  
-  dfm_2gram <<- dfm_2gram
-  # textstats 
-  rie(texstat_2gram, textstat_frequency, dfm_2gram)
-  # get the data table
-  rie(dtf_2gram, data.table, texstat_2gram)
-  dtf_2gram <<- dtf_2gram
-
-  
-  rie(dfm_3gram ,build_dfm_ngrams ,txts_merged, 3)  
-  dfm_3gram <<- dfm_3gram
-  # textstats 
-  rie(texstat_3gram, textstat_frequency, dfm_3gram)
-  # get the data table
-  rie(dtf_3gram, data.table, texstat_3gram)
-  dtf_3gram <<- dtf_3gram
+  # rie(dfm_1gram ,build_dfm_ngrams ,txts_merged, 1)
+  # dfm_1gram <<- dfm_1gram
+  # # textstats 
+  # rie(texstat_1gram, textstat_frequency, dfm_1gram)
+  # # get the data table
+  # rie(dtf_1gram, data.table, texstat_1gram)
+  # dtf_1gram <<- dtf_1gram
+  # 
+  # 
+  # rie(dfm_2gram ,build_dfm_ngrams ,txts_merged, 2)  
+  # dfm_2gram <<- dfm_2gram
+  # # textstats 
+  # rie(texstat_2gram, textstat_frequency, dfm_2gram)
+  # # get the data table
+  # rie(dtf_2gram, data.table, texstat_2gram)
+  # dtf_2gram <<- dtf_2gram
+  # 
+  # 
+  # rie(dfm_3gram ,build_dfm_ngrams ,txts_merged, 3)  
+  # dfm_3gram <<- dfm_3gram
+  # # textstats 
+  # rie(texstat_3gram, textstat_frequency, dfm_3gram)
+  # # get the data table
+  # rie(dtf_3gram, data.table, texstat_3gram)
+  # dtf_3gram <<- dtf_3gram
   
   gc()
   
@@ -133,8 +132,16 @@ pred_ngrams_re_init <- function()
 
   set_parallelism(6,NULL)
 
-  read_dir <- read_dir()
+  # read_dir <- read_dir()
 
+  txts_merged <- NULL
+
+  dfm_1gram <- NULL ;dfm_2gram <- NULL ;dfm_3gram <- NULL
+  
+  # data table frequencies
+  dtf_1gram <- NULL ;dtf_2gram <- NULL ;dtf_3gram <- NULL
+
+  
   prt("completed pred_ngrams_re_init()")
 }
 
@@ -143,7 +150,6 @@ pred_ngrams_re_init <- function()
   main <- function()
 # --------------------------------------------------------------------
 {
-
   build_dfms(data_dir_corpus_in())
 }
 
@@ -152,21 +158,7 @@ pred_ngrams_re_init <- function()
 fulldata <- F
 silent <- F
 
-txts_merged <- NULL
-
-dfm_1gram <- NULL
-dfm_2gram <- NULL
-dfm_3gram <- NULL
-
-
-dtf_1gram <- NULL # data table 1gram frequencies
-dtf_2gram <- NULL
-dtf_3gram <- NULL
-
-
-
-pred_ngrams_re_init()
+use_full_corpus(T,pred_ngrams_re_init)
+#pred_ngrams_re_init()
 main()
-prt("debug")
-prt("debug")
 
