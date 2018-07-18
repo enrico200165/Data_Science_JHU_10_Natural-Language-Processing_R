@@ -843,10 +843,9 @@ types_coverage_an <- function(qc , to_cover = 0.5)
 #   reinitializing
 #   Can NOT do very first initializations
 # ====================================================================
-   <- function() {
+eda_re_init <- function() {
 # --------------------------------------------------------------------  
   
-  silent <<- F
 
   prt("start eda_re_init()")
   set_parallelism(6,NULL)

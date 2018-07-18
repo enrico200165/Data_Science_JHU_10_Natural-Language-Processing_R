@@ -80,7 +80,9 @@ source("01_globals.R")
 source("01_preprocess_lib.R")
 source("ev_nlp_eda_lib.R")
 
-ev_init()
+fulldata <- T
+silent <- T
+eda_re_init()
 ```
 
 
@@ -221,9 +223,7 @@ The diagram of the PMF confirms the expectation.
 ```{r types_frequencies, echo = FALSE, results='markup'}
   to_cover <- 0.5
 
-  use_full_corpus(T)
   invisible(gc())
-  ev_init()
 
   rie(types_coverage_data ,types_coverage ,qc_full
     ,pct_to_cover = to_cover ,lng = "en", remove_stopwords = T) 
@@ -253,7 +253,7 @@ The diagram of the PMF confirms the expectation.
   
    
   
-Now using Quanteda we calculate that __coverage of `r paste0(to_cover*100,"%")` of tokens is provided by `r paste0(round(types_coverage_data$pct_to_cover*100,2),"%")` of the types__, let's also visualize the cumulative frequencies looking at the
+Now using Quanteda we calculate that __coverage of `r paste0(to_cover*100,"%")` of tokens is provided by `r paste0(round(types_coverage_data$pct_types_for_coverage*100,2),"%")` of the types__, let's also visualize the cumulative frequencies looking at the
  subset of data that is most interesting.
 ```{r types_cumul_frequencies, echo = FALSE, results='markup'}
 
