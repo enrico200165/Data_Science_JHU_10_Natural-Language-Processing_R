@@ -379,12 +379,10 @@ getSerializFName <- function(var_id, force_name)
 
 
 # --------------------------------------------------------------------
-  removeAllVarExcept <- function (survivors,e)
+  removeAllVarExcept <- function (survivors = character(0), e)
 # --------------------------------------------------------------------
 {
-  if (missing(e))
-    #e <- env_parent()
-    e <- parent.frame()
+  if (missing(e)) e <- parent.frame()
   
   names_initial <- rlang::env_names(e)
 
@@ -627,5 +625,4 @@ testAddToCoreDF <- function() {
   
 }
 
-#   
-  test_Globals.R()
+# test_Globals.R()
