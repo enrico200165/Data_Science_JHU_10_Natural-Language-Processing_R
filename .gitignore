@@ -51,7 +51,8 @@ rsconnect/
 
 # data texts files
 *.txt
-
+# saved non code files
+*SAVED
 itaur_copy_modify
 
 
@@ -59,3 +60,5 @@ itaur_copy_modify
 # quanteda data
 quanteda_mine/data/
 itaur_copy_modify/data
+
+save_data/

@@ -65,14 +65,13 @@ dtf_ngram <- function(txts_merged , n)
   dtf_ngram <- data.table(texstat_ngram)
 }
 
+
 # --------------------------------------------------------------------
-build_dfms <- function(data_dir_corpus) 
+build_dtfs <- function(txts_merged) 
 # --------------------------------------------------------------------
 # https://stackoverflow.com/questions/20345022/convert-a-data-frame-to-a-data-table-without-copy
 #
 {
-  
-  rie(txts_merged ,read_texts ,data_dir_corpus)
   
   rie(dtf_1gram ,dtf_ngram ,txts_merged , 1)
   dtf_1gram <<- dtf_1gram
@@ -83,38 +82,48 @@ build_dfms <- function(data_dir_corpus)
   rie(dtf_3gram ,dtf_ngram ,txts_merged , 3)
   dtf_3gram <<- dtf_3gram
 
-  return(T)
-    
-  # --------------- SAFE WAY ------------
-  # rie(dfm_1gram ,build_dfm_ngrams ,txts_merged, 1)
-  # dfm_1gram <<- dfm_1gram
-  # # textstats 
-  # rie(texstat_1gram, textstat_frequency, dfm_1gram)
-  # # get the data table
-  # rie(dtf_1gram, data.table, texstat_1gram)
-  # dtf_1gram <<- dtf_1gram
-  # 
-  # 
-  # rie(dfm_2gram ,build_dfm_ngrams ,txts_merged, 2)  
-  # dfm_2gram <<- dfm_2gram
-  # # textstats 
-  # rie(texstat_2gram, textstat_frequency, dfm_2gram)
-  # # get the data table
-  # rie(dtf_2gram, data.table, texstat_2gram)
-  # dtf_2gram <<- dtf_2gram
-  # 
-  # 
-  # rie(dfm_3gram ,build_dfm_ngrams ,txts_merged, 3)  
-  # dfm_3gram <<- dfm_3gram
-  # # textstats 
-  # rie(texstat_3gram, textstat_frequency, dfm_3gram)
-  # # get the data table
-  # rie(dtf_3gram, data.table, texstat_3gram)
-  # dtf_3gram <<- dtf_3gram
-  
   gc()
   
-  T
+  list(
+    dtf_1gram = dtf_1gram
+   ,dtf_2gram = dtf_2gram
+   ,dtf_3gram = dtf_3gram
+    )
+}
+
+
+# --------------------------------------------------------------------
+split_ngrams_dts <- function(dft_sstring1 ,dft_sstring2 ,dft_sstring3)
+# --------------------------------------------------------------------
+# from ngram frequency data table with ngram in single string with
+# _ separator build data tables with 1 column for each type
+# This SHOULD save space in memory as identical strings are not replicated
+{
+ 
+  # 1grams
+  dt1_fun <- function(dt) { setnames(dt,"feature", "first") }
+  rie(dtf_sep_1gram , dt1_fun, dft_sstring1)# rie(dtf_sep_1gram , dt1, dtf_1gram)
+  dtf_sep_1gram <<- dtf_sep_1gram
+  
+  # 2grams
+  # kill_var(dtf_sep_2gram)
+dt2_fun <- function(dt) { 
+  dt[ ,c("first", "second") := tstrsplit(feature, "_", fixed=TRUE)]
+  dt[ , feature := NULL]
+}
+rie(dtf_sep_2gram , dt2_fun, dft_sstring2)
+
+
+  # kill_var(dtf_sep_3gram)
+dt3_fun <- function(dt) { 
+  dt[ ,c("first", "second" , "third") := tstrsplit(feature, "_", fixed=TRUE)]
+  dt[ , feature := NULL]
+}
+rie(dtf_sep_3gram , dt3_fun, dft_sstring2)
+
+  list(dft_sstring1 = dft_sstring1
+    ,dft_sstring2 = dft_sstring2
+    ,dft_sstring3 = dft_sstring3)
 }
 
 
@@ -150,13 +159,27 @@ pred_ngrams_re_init <- function()
   main <- function()
 # --------------------------------------------------------------------
 {
-  build_dfms(data_dir_corpus_in())
+
+  prt("reading files into single text")
+  rie(txts_merged ,read_texts ,data_dir_corpus_in())
+  
+  prt("building frequency data tables sigle-string _sep")
+  ret_dts <- build_dtfs(txts_merged)
+  
+  prt("splitting frequency data tables ngrams")
+  split_ngrams_dts(ret_dts[[1]][1:10,] ,ret_dts[[2]][1:10,] ,ret_dts[[3]][1:10,])
+
+  prt("finished")
+  
+  print(debug)
 }
 
 
 
 fulldata <- F
 silent <- F
+
+
 
 use_full_corpus(T,pred_ngrams_re_init)
 #pred_ngrams_re_init()

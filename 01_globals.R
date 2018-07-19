@@ -473,13 +473,13 @@ prt_last_call_time <- Sys.time()
   if (silent) {
     invisible("")
   } else {
-  time_diff <- as.numeric(difftime(Sys.time(),prt_last_call_time))
-  time_diff <- paste(round(time_diff,2),"secs -")
-  time_diff <- paste(format(Sys.time(), "%X"), time_diff)
-  
-  pars <- list(...)
-  print(paste(time_diff,paste(pars,collapse = " ")))
-  prt_last_call_time <<- Sys.time()
+    time_diff <- as.numeric(difftime(Sys.time(), prt_last_call_time))
+    time_diff <- paste(round(time_diff, 2), "secs -")
+    time_diff <- paste(format(Sys.time(), "%X"), time_diff)
+    
+    pars <- list(...)
+    print(paste(time_diff, paste(pars, collapse = " ")))
+    prt_last_call_time <<- Sys.time()
   }
 }
 
