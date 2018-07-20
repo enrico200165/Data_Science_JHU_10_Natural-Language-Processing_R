@@ -193,7 +193,7 @@ pred_ngrams_re_init <- function()
 
 
 
-fulldata <- F
+fulldata <- T
 silent <- F
 
 use_full_corpus(fulldata,pred_ngrams_re_init)
