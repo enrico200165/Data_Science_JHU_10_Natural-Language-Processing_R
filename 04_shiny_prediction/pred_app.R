@@ -2,10 +2,10 @@
 # VITAL: https://shiny.rstudio.com/articles/js-send-message.html in particular
 # https://stackoverflow.com/questions/47215230/listen-to-button-events-with-shiny-oninputchange-r-shiny
 #
-# Find out more about building applications with Shiny here:
+# https://github.com/daattali/advanced-shiny/tree/master/message-javascript-to-r-force
 #
-#    http://shiny.rstudio.com/
-#
+
+
 
 library(shiny)
 library(shinyjs)
@@ -20,7 +20,8 @@ EVT_KEY_UP <- "keyup"
 
 LOG_TEXT <- "traceOut"
 
-TXT_IN_ID <- "txti"
+TXT_IN_ID  <- "txti"
+GSTATUS_ID <- "globalStatus"
 
 
 #####################################################################
@@ -115,10 +116,11 @@ ui <- fluidPage(
         
         ,tags$script('
         $(document).on("keypress", function (e) {
-          //if(e.which == " ") {
-            Shiny.onInputChange("tasto", e.which);
-            alert("key_press" + e.which)
-          //}
+          if(e.which == 32) {
+            Shiny.onInputChange("tasto", [e.key, Math.random()]);
+            console.log("rilevato keypress significativo")
+            // alert("key_press " + e.which)
+          }
         });')
         ,div(style="display: inline-block;vertical-align:top;"
             ,textInput(TXT_IN_ID, label = h3("Text input"), value = ""))
@@ -132,7 +134,7 @@ ui <- fluidPage(
         ,textOutput("utlCmdChosen")
         ,hr()
         ,h3("AppStatus",style="color:blue")
-        ,textOutput("globalStatus")
+        ,textOutput(GSTATUS_ID)
         ,hr()
         ,h3("Debug messages",style="color:blue")
 
@@ -151,18 +153,19 @@ server <- function(input, output) {
   # ---- EVENTS
   do_test <- function() { 
     print(rep("#",50))
-    output$globalStatus <<- "premuto"; 
-    output$globalStatus <- "premuto"; 
-    output$traceOut <- "premuto" 
+    setMsg(paste(input[[TXT_IN_ID]]))
+    print(paste("do_test()",input[[TXT_IN_ID]]))
   }
-  observeEvent(input$tasto, {
-    #output$globalStatus <- "premuto"
-    print("YEAH")
-  })
-  onevent(EVT_KEY_PRESS, "textSample",do_test )
-  #onevent("mouseleave", "disappear", show("text"))
+  onevent(EVT_KEY_PRESS, "", do_test)
   onevent(EVT_KEY_UP, "textSample", do_test)
   onevent(EVT_KEY_DOWN, "textSample", do_test)
+  
+  
+  observeEvent(input$tasto, {
+    setMsg(paste(input[[TXT_IN_ID]] ,"### should predict now ###"))
+    print(paste("R server side, ricevuto evento a",Sys.time(), input[[TXT_IN_ID]][1]))
+  })
+
   
   output$globalStatus <- renderText({
     status <- paste("y var:",input$yVar
