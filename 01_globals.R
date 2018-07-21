@@ -326,10 +326,6 @@ getSerializFName <- function(var_id, force_name)
   
   ret
 }
-# pippo <- 1:10
-# serializeIfNeeded(pippo)
-# pippo <- NULL
-# readIfEmpty(pippo)
 
 
 #---------------------------------------------------------------------
@@ -379,6 +375,51 @@ getSerializFName <- function(var_id, force_name)
 
 
 # --------------------------------------------------------------------
+# https://stackoverflow.com/questions/1358003/tricks-to-manage-the-available-memory-in-an-r-session
+# improved by me
+# --------------------------------------------------------------------
+.ls.objects <- function (pos = 1, pattern, order.by ,no_funct = T
+                        ,decreasing=FALSE, head=FALSE, n=5) 
+# --------------------------------------------------------------------
+{
+    napply <- function(names, fn) sapply(names, function(x)
+                                         fn(get(x, pos = pos)))
+    
+    names <- ls(pos = pos, pattern = pattern)
+    
+    obj.class <- napply(names, function(x) as.character(class(x))[1])
+    obj.mode <- napply(names, mode)
+    obj.type <- ifelse(is.na(obj.class), obj.mode, obj.class)
+    obj.prettysize <- napply(names, function(x) {
+                           format(pryr::object_size(x), units = "auto") })
+    obj.size <- napply(names, pryr::object_size)
+    obj.dim <- t(napply(names, function(x)
+                        as.numeric(dim(x))[1:2]))
+    vec <- is.na(obj.dim)[, 1] & (obj.type != "function")
+    obj.dim[vec, 1] <- napply(names, length)[vec]
+    out <- data.frame(obj.type, obj.size, obj.prettysize, obj.dim)
+    names(out) <- c("Type", "Size", "PrettySize", "Length/Rows", "Columns")
+    if (!missing(order.by))
+        out <- out[order(out[[order.by]], decreasing=decreasing), ]
+    if (head)
+        out <- head(out, n)
+    
+    if (no_funct)
+      out <- out[ out$Type != "function", ]
+    
+    out$ID <- rownames(out)
+    
+    out
+}
+
+# shorthand
+lsos <- function(..., n=100) {
+    .ls.objects(..., order.by="Size", decreasing=TRUE, head=TRUE, n=n)
+}
+
+
+
+# --------------------------------------------------------------------
   removeAllVarExcept <- function (survivors = character(0), e)
 # --------------------------------------------------------------------
 {
@@ -416,14 +457,68 @@ getSerializFName <- function(var_id, force_name)
   }
 }
 
-# kill_var(freq_of_freq_plots)
+
+
 # --------------------------------------------------------------------
-  GiB <- function (x, digits)
+mem_health <- function(survivors = character(0) ,dry_run = F ,verbose = F)
 # --------------------------------------------------------------------
+# named by var ID array of sizes of existing variables
 {
-  if (missing(digits))
-    digits <- 2
-  round(x/(2^30),digits)
+  
+  if (dry_run) verbose <- T
+
+  gc_first <- gc()
+    
+  all_vars_df <- lsos()
+  
+  # these 2 rows below should be unnecessary
+  local_vars <- ls()
+  delete_vars_df <- all_vars_df[!(all_vars_df$ID %in% local_vars), ]
+  # below here not unnecessary
+  delete_vars_df <- all_vars_df[!(all_vars_df$ID %in% survivors), ]
+
+  wrong_vars <- setdiff(survivors,all_vars_df$ID)
+  if (length(wrong_vars) > 0) {
+    prt("ERRORS: saving non existing vars",paste(wrong_vars))
+  }
+
+  mem_delete_vars <- sum(delete_vars_df$Size)
+  
+  if (verbose) {
+    prt("deleting", length(delete_vars_df$ID),"vars:",paste(delete_vars_df$ID))
+    prt(" sparing", length(survivors),"vars:", paste(survivors))
+  }
+
+  prt("Delete vars tot. mem:" ,XiB(mem_delete_vars))
+  if (!dry_run) {
+    do.call(rm, as.list(delete_vars_df$ID))
+  }
+
+  (gc() - gc_first)
+}
+silent <- F
+x <- mem_health(lsos()$ID[10:11],dry_run = T)
+
+
+
+# --------------------------------------------------------------------
+  MiB <- function (x, digits = 2) round(x/(2^20),digits)
+# --------------------------------------------------------------------
+# --------------------------------------------------------------------
+  GiB <- function (x, digits = 2)   round(x/(2^30),digits)
+# --------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------
+  XiB <- function (x, digits = 2)
+# --------------------------------------------------------------------
+# for printing
+{
+  unit <- "b"
+  if (x < 2^(10) )   return(paste(x,"b"))
+  if (x < 2^(10*2) ) return(paste(round(x/2^10    ,digits),"KiB"))
+  if (x < 2^(10*3) ) return(paste(round(x/2^(10*2),digits),"MiB"))
+                     return(paste(round(x/2^(10*3),digits),"GiB"))
 }
 
 
@@ -443,14 +538,6 @@ keypress <- function (message, sound_nr = 1)
 
 
 
-# --------------------------------------------------------------------
-  MiB <- function (x, digits)
-# --------------------------------------------------------------------
-{
-  if (missing(digits))
-    digits <- 2
-  round(x/(2^20),digits)
-}
 
 # --------------------------------------------------------------------
   clean_rds <- function(patt)
@@ -604,6 +691,18 @@ testAddToCoreDF <- function() {
     
   }
 
+  
+  test_XiB <- function() {
+
+  silent <<- F
+  prt(XiB(1*2^(10+3)))
+  prt(XiB(1*2^(20+3)))
+  prt(XiB(2.1*2^(30+3)))
+
+}
+
+  
+  
 # -----------------------------------------------------------------------
   test_Globals.R <- function() 
 # -----------------------------------------------------------------------
