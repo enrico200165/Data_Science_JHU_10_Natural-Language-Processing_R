@@ -105,42 +105,68 @@ split_ngrams_dts <- function(dft_sstring1 ,dft_sstring2 ,dft_sstring3)
   prt("splitting dts 1grams")
   if (feature %in% colnames(dft_sstring1)) {
     dt1_fun <- function(dt) {
-      setnames(dt, "feature", "first")
+      setnames(dt, "feature", "primo")
     }
     rie(dtf_sep_1gram , dt1_fun, dft_sstring1)
   } else {
     prt("feature col not found")
   }
   dtf_sep_1gram <<- dtf_sep_1gram
+  # mem_health(c("dtf_sep_1gram","dtf_sep_2gram","dtf_sep_3gram"))
   
   # 2grams
   prt("splitting dts 2grams")
   if (feature %in% colnames(dft_sstring2)) {
     dt2_fun <- function(dt) {
-      dt[, c("first", "second") := tstrsplit(feature, "_", fixed = TRUE)]
+      
+      splits <- strsplit(dt$feature,"_" ,fixed = T)
+      prim <- sapply(splits,function(x) x[1])
+      sec  <- sapply(splits,function(x) x[2])
+
+      dt[ , `:=`(primo = prim, secondo = sec) ]
       dt[, feature := NULL]
+      rm(splits , prim , sec); gc()
+      dt
     }
     rie(dtf_sep_2gram , dt2_fun, dft_sstring2)
+    dtf_sep_2gram <<- dtf_sep_2gram
   } else {
     prt("feature col not found")
   }
-  
+  mem_health(c("dtf_sep_1gram","dtf_sep_2gram","dtf_sep_3gram"
+    , "dtf_3gram"))
+
+
   # kill_var(dtf_sep_3gram)
   prt("splitting dts 3grams")
   if (feature %in% colnames(dft_sstring3)) {
+
     dt3_fun <- function(dt) {
-      dt[, c("first", "second" , "third") := tstrsplit(dt$feature, "_", fixed = TRUE)]
+          
+      splits <- strsplit(dt$feature,"_" ,fixed = T)
+      prim <- sapply(splits,function(x) x[1])
+      sec  <- sapply(splits,function(x) x[2])
+      ter <- sapply(splits,function(x)  x[3])
+
+      dt[ , `:=`(primo = prim, secondo = sec , terzo = ter) ]
       dt[, feature := NULL]
+      rm(splits , prim , sec , ter); gc()
+
+      dt
     }
     rie(dtf_sep_3gram , dt3_fun, dft_sstring3)
   } else {
     prt("feature col not found")
   }
+  dtf_sep_3gram <<- dtf_sep_3gram
+  # mem_health(c("dtf_sep_1gram","dtf_sep_2gram","dtf_sep_3gram"))
   
-  list(
-     dtf_sep_1gram = dtf_sep_1gram
-    ,dtf_sep_2gram = dtf_sep_2gram
-    ,dtf_sep_3gram = dtf_sep_3gram)
+  # list(
+  #    dtf_sep_1gram = dtf_sep_1gram
+  #   ,dtf_sep_2gram = dtf_sep_2gram
+  #   ,dtf_sep_3gram = dtf_sep_3gram)
+  
+  T
 }
 
 
@@ -185,10 +211,12 @@ pred_ngrams_re_init <- function()
   
   prt("splitting frequency data tables ngrams")
   split_ngrams_dts(ret_dts[[1]], ret_dts[[2]] ,ret_dts[[3]])
+  kill_var(dtf_1gram); 
+  kill_var(dtf_2gram) ; 
+  kill_var(dtf_3gram) ; 
+  gc()
 
   prt("finished")
-  
-  prt("debug")
 }
 
 
@@ -196,7 +224,7 @@ pred_ngrams_re_init <- function()
 fulldata <- T
 silent <- F
 
-use_full_corpus(fulldata,pred_ngrams_re_init)
+use_full_corpus(fulldata, pred_ngrams_re_init)
 
 main()
 

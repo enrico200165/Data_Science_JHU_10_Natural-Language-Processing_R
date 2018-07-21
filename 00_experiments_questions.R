@@ -10,6 +10,7 @@ require(quanteda.corpora)
 #install.packages("spacyr")
 require(spacyr)
 require(stringr)
+require(data.table)
 
 source("01_preprocess_lib.R")
 
@@ -202,7 +203,26 @@ remove_punctuation <- function() {
 }
 
 
+con <- DBI::dbConnect(RSQLite::SQLite(), path = ":ngrams:")
 
 
- gsub("[[:punct:]]"," ","don't I'm Enrico's")
 
+copy_to(con, dtf_sep_1gram, "1grams_freq",
+  temporary = FALSE, 
+  indexes = list("primo")
+)
+
+copy_to(con, dtf_sep_2gram, "2grams_freq",
+  temporary = FALSE, 
+  indexes = list(
+    c("primo", "secondo"),
+    "primo", "secondo")
+)
+
+copy_to(con, dtf_sep_3gram, "3grams_freq",
+  temporary = FALSE, 
+  indexes = list(
+    c("primo", "secondo","terzo"),
+    c("primo", "secondo"),
+    "primo", "secondo" , "terzo")
+)

@@ -3,8 +3,8 @@ require(beepr)
 
 # illegal position, ease frequent access
 
-silent <- NULL
-fulldata <- NULL
+silent <- F
+fulldata <- F
 
 # --------------------------------------------------------------------
 use_full_corpus <- function(vPar, reinit_funct = NULL 
@@ -347,7 +347,7 @@ getSerializFName <- function(var_id, force_name)
       || (length(df) <= 0 && nrow(df) <= 0)) {
     # print(paste(varName,"is empty", rdsFName))
     if (file.exists(rdsFName)) {
-      # print(paste("reading serialization for:",varName," file:", rdsFName))
+      prt("reading serialization for:",varName," file:", rdsFName)
       df <- readRDS(rdsFName)
       #assign(varName,df,.GlobalEnv) # pass it outside
     } else {
@@ -435,32 +435,28 @@ lsos <- function(..., n=100) {
 
 
 # --------------------------------------------------------------------
-  kill_var <- function (variablesPar, serializ)
+  kill_var <- function (variablesPar, serializ = F)
 # --------------------------------------------------------------------
 {
-  if (missing(serializ)) serializ <- TRUE
-
-  e <- parent.frame()
-  varName <- deparse(substitute(variablesPar))
-  if ( exists(varName,e)) {
-    rlang::env_unbind(e, varName)
-    stopifnot(!exists(varName,e))
-  } else {
-    if (exists(varName,.GlobalEnv))
-      rlang::env_unbind(.GlobalEnv, varName)
-      stopifnot(!exists(varName,.GlobalEnv))
-  }
   
+  e <- parent.frame()
+  
+  varName <- deparse(substitute(variablesPar))
+  
+  # rm(list = varName, pos = ".GlobalEnv")  
+  rm(list = varName, pos =  .GlobalEnv)  
+
   fname <- getSerializFName(varName)
   if (serializ && file.exists(fname)) {
     ret <- file.remove(fname)
   }
 }
 
-
+kill_var(LNG_DE)
 
 # --------------------------------------------------------------------
-mem_health <- function(survivors = character(0) ,dry_run = F ,verbose = F)
+mem_health <- function(survivors = character(0) ,dry_run = F 
+  ,save_size = -1 ,verbose = F)
 # --------------------------------------------------------------------
 # named by var ID array of sizes of existing variables
 {
@@ -471,12 +467,15 @@ mem_health <- function(survivors = character(0) ,dry_run = F ,verbose = F)
     
   all_vars_df <- lsos()
   
-  # these 2 rows below should be unnecessary
+  # remove local, should be unnecessary
   local_vars <- ls()
   delete_vars_df <- all_vars_df[!(all_vars_df$ID %in% local_vars), ]
-  # below here not unnecessary
+  # variables to save
   delete_vars_df <- all_vars_df[!(all_vars_df$ID %in% survivors), ]
+  # don't remove small variables
+  delete_vars_df <- all_vars_df[delete_vars_df$size > save_size, ]
 
+  
   wrong_vars <- setdiff(survivors,all_vars_df$ID)
   if (length(wrong_vars) > 0) {
     prt("ERRORS: saving non existing vars",paste(wrong_vars))
@@ -496,8 +495,8 @@ mem_health <- function(survivors = character(0) ,dry_run = F ,verbose = F)
 
   (gc() - gc_first)
 }
-silent <- F
-x <- mem_health(lsos()$ID[10:11],dry_run = T)
+# silent <- F
+# x <- mem_health(c("fulldata"), dry_run = F)
 
 
 

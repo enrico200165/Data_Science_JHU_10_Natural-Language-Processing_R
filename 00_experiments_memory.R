@@ -22,12 +22,3 @@ keypress()
 summary(x)
 
 
-# --------------------------------------------------------------------
-vars_mem <- function()
-# --------------------------------------------------------------------
-# named by var ID array of sizes of existing variables
-{
-  vars_mem_ret <- sapply(ls(all.names = TRUE) ,pryr::object_size)
-  vars_mem_ret <- sort(vars_mem , decreasing = T)
-  # sapply(vars_mem,XiB)
-}
