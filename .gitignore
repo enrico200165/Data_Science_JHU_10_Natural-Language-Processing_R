@@ -4,7 +4,9 @@
 
 # Session Data files
 .RData
+.RData*
 compact.RData
+
 # R data
 .RDataTmp
 
@@ -44,10 +46,11 @@ rsconnect/
 .Rproj.user
 
 
-
+# ------------ data files --------------------
 # R persistence/serialization files
 *rds
 *html
+*sqlite
 
 # data texts files
 *.txt

@@ -6,6 +6,11 @@ require(readtext)
 source("01_globals.R")
 # source("01_preprocess_lib.R")
 
+# --------------------------------------------------------------------
+# from text files produce ngrams data.tables - nothing more
+#---------------------------------------------------------------------
+
+
 
 
 # --------------------------------------------------------------------
@@ -188,7 +193,7 @@ pred_ngrams_re_init <- function()
 
   txts_merged <- NULL
 
-  dfm_1gram <- NULL ;dfm_2gram <- NULL ;dfm_3gram <- NULL
+  dfm_1gram <<- NULL ;dfm_2gram <<- NULL ;dfm_3gram <<- NULL
   
   # data table frequencies
   dtf_1gram <- NULL ;dtf_2gram <- NULL ;dtf_3gram <- NULL
@@ -199,7 +204,7 @@ pred_ngrams_re_init <- function()
 
 
 # --------------------------------------------------------------------  
-  main <- function()
+  produce_ngram_bare_dtf <- function()
 # --------------------------------------------------------------------
 {
 
@@ -220,12 +225,12 @@ pred_ngrams_re_init <- function()
 }
 
 
-
-fulldata <- T
+if (F) {
+fulldata <<- T
 silent <- F
 
 use_full_corpus(fulldata, pred_ngrams_re_init)
 
-main()
+produce_ngram_bare_dtf()
+}
 
-print(.libPaths())
