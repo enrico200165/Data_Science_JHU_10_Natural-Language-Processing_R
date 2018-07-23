@@ -4,7 +4,7 @@ require(data.table)
 require(readtext)
 
 source("01_globals.R")
-# source("01_preprocess_lib.R")
+source("02_pred_globals.R")
 
 
 # ####################################################################
@@ -85,7 +85,6 @@ build_dtfs <- function(txts_merged)
 # https://stackoverflow.com/questions/20345022/convert-a-data-frame-to-a-data-table-without-copy
 #
 {
-  
   rie(dtf_1gram ,dtf_ngram ,txts_merged , 1)
   dtf_1gram <<- dtf_1gram
   
@@ -106,7 +105,7 @@ build_dtfs <- function(txts_merged)
 
 
 # --------------------------------------------------------------------
-split_ngrams_dts <- function(dft_sstring1 ,dft_sstring2 ,dft_sstring3)
+split_ngrams_dts <- function(dtf_sstring1 ,dtf_sstring2 ,dtf_sstring3)
 # --------------------------------------------------------------------
 # from ngram frequency data table with ngram in single string with
 # _ separator build data tables with 1 column for each type
@@ -114,20 +113,20 @@ split_ngrams_dts <- function(dft_sstring1 ,dft_sstring2 ,dft_sstring3)
 {
   feature <- "feature"
   prt("splitting dts 1grams")
-  if (feature %in% colnames(dft_sstring1)) {
+  if (feature %in% colnames(dtf_sstring1)) {
     dt1_fun <- function(dt) {
       setnames(dt, "feature", "primo")
     }
-    rie(dtf_sep_1gram , dt1_fun, dft_sstring1)
+    rie(dtf_1gram_sep, dt1_fun, dtf_sstring1)
   } else {
     prt("feature col not found")
   }
-  dtf_sep_1gram <<- dtf_sep_1gram
+  dtf_1gram_sep <<- dtf_1gram_sep
   # mem_health(c("dtf_sep_1gram","dtf_sep_2gram","dtf_sep_3gram"))
   
   # 2grams
   prt("splitting dts 2grams")
-  if (feature %in% colnames(dft_sstring2)) {
+  if (feature %in% colnames(dtf_sstring2)) {
     dt2_fun <- function(dt) {
       
       splits <- strsplit(dt$feature,"_" ,fixed = T)
@@ -139,8 +138,8 @@ split_ngrams_dts <- function(dft_sstring1 ,dft_sstring2 ,dft_sstring3)
       rm(splits , prim , sec); gc()
       dt
     }
-    rie(dtf_sep_2gram , dt2_fun, dft_sstring2)
-    dtf_sep_2gram <<- dtf_sep_2gram
+    rie(dtf_2gram_sep , dt2_fun, dtf_sstring2)
+    dtf_2gram_sep <<- dtf_2gram_sep
   } else {
     prt("feature col not found")
   }
@@ -150,7 +149,7 @@ split_ngrams_dts <- function(dft_sstring1 ,dft_sstring2 ,dft_sstring3)
 
   # kill_var(dtf_sep_3gram)
   prt("splitting dts 3grams")
-  if (feature %in% colnames(dft_sstring3)) {
+  if (feature %in% colnames(dtf_sstring3)) {
 
     dt3_fun <- function(dt) {
           
@@ -165,11 +164,11 @@ split_ngrams_dts <- function(dft_sstring1 ,dft_sstring2 ,dft_sstring3)
 
       dt
     }
-    rie(dtf_sep_3gram , dt3_fun, dft_sstring3)
+    rie(dtf_3gram_sep , dt3_fun, dtf_sstring3)
   } else {
     prt("feature col not found")
   }
-  dtf_sep_3gram <<- dtf_sep_3gram
+  dtf_3gram_sep <<- dtf_3gram_sep
   # mem_health(c("dtf_sep_1gram","dtf_sep_2gram","dtf_sep_3gram"))
   
   # list(
@@ -199,8 +198,6 @@ pred_ngrams_re_init <- function()
 
   txts_merged <- NULL
 
-  dfm_1gram <<- NULL ;dfm_2gram <<- NULL ;dfm_3gram <<- NULL
-  
   # data table frequencies
   dtf_1gram <- NULL ;dtf_2gram <- NULL ;dtf_3gram <- NULL
 
@@ -227,12 +224,12 @@ pred_ngrams_re_init <- function()
   kill_var(dtf_3gram) ; 
   gc()
 
-  prt("finished")
 }
 
 
-if (F) {
-fulldata <<- T
+  
+if (T) {
+fulldata <- F
 silent <- F
 
 use_full_corpus(fulldata, pred_ngrams_re_init)

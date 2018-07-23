@@ -568,6 +568,38 @@ prt_last_call_time <- Sys.time()
 }
 
 
+# --------------------------------------------------------------------
+coverage_of_freq_list <- function(frq_vect, qtiles_vec)
+# --------------------------------------------------------------------
+{
+    # naive attempt to avoid underflow
+    molt <- 100 * 1000
+  
+    # get proportions
+    props <- frq_vect*molt/sum(frq_vect);
+    stopifnot(round(sum(props)-(1*molt),5) == 0)
+    # cumulative
+    cumul <- cumsum(props)
+    
+    
+    idxs <- numeric(length =length(qtiles_vec))
+    pcts <- numeric(length =length(qtiles_vec))
+    
+    for (i in seq_along(qtiles_vec)) {
+      
+      qtile <- qtiles_vec[i]
+      idxs[i] <- which(cumul >= qtile*molt)[1]
+      pcts[i] <- idxs[i]/length(frq_vect)
+      
+      prt(qtile,"somma:",round(sum(props[1:idxs[i]])/molt ,2))
+      print("")
+    }
+    
+    list(
+      idxs = idxs
+      ,pcts = pcts)
+}
+
 
 # ------------------------------------------
 #    Tests
@@ -701,7 +733,17 @@ testAddToCoreDF <- function() {
 }
 
   
-  
+# --------------------------------------------------------------------
+test_coverage_of_freq_list <- function() 
+# --------------------------------------------------------------------
+{
+  qtiles_vec <- c(0.5,0.6,0.7,0.8,0.9,0.95,0.96,0.97,0.98,0.99)
+
+  ret <- coverage_of_freq_list(rep(1:1000), qtiles_vec)
+
+  print(rbind(qtiles_vec ,ret[[1]],ret[[2]]))
+}
+    
 # -----------------------------------------------------------------------
   test_Globals.R <- function() 
 # -----------------------------------------------------------------------
@@ -715,12 +757,13 @@ testAddToCoreDF <- function() {
   
   # testRemoveAllVarExcept()
   # testReadIfEmpty()
-  test_rie()
+  # test_rie()
   # test_prt()
 
   # testAddToCoreDF()
   # test_getSerializeFName()
-  
+  test_coverage_of_freq_list()
 }
 
-# test_Globals.R()
+# 
+  test_Globals.R()

@@ -203,26 +203,43 @@ remove_punctuation <- function() {
 }
 
 
-con <- DBI::dbConnect(RSQLite::SQLite(), path = ":ngrams:")
+
+coverage_of_freq_list <- function(frq_vect, qtiles_vec)
+{
+    # naive attempt to avoid underflow
+    molt <- 100 * 1000
+  
+    # get proportions
+    props <- frq_vect*molt/sum(frq_vect);
+    stopifnot(round(sum(props)-(1*molt),5) == 0)
+    # cumulative
+    cumul <- cumsum(props)
+    
+    
+    idxs <- numeric(length =length(qtiles_vec))
+    pcts <- numeric(length =length(qtiles_vec))
+    
+    for (i in seq_along(qtiles_vec)) {
+      
+      qtile <- qtiles_vec[i]
+      idxs[i] <- which(cumul >= qtile*molt)[1]
+      pcts[i] <- idxs[i]/length(frq_vect)
+      
+      prt(qtile,"somma:",round(sum(props[1:idxs[i]])/molt ,2))
+      print("")
+    }
+    
+    
+    
+    
+    list(
+      idxs = idxs
+      ,pcts = pcts)
+}
 
 
+qtiles_vec <- c(0.5,0.6,0.7,0.8,0.9,0.95,0.96,0.97,0.98,0.99)
+ret <- coverage_of_freq_list(rep(1:1000), qtiles_vec)
 
-copy_to(con, dtf_sep_1gram, "1grams_freq",
-  temporary = FALSE, 
-  indexes = list("primo")
-)
+print(rbind(qtiles_vec ,ret[[1]],ret[[2]]))
 
-copy_to(con, dtf_sep_2gram, "2grams_freq",
-  temporary = FALSE, 
-  indexes = list(
-    c("primo", "secondo"),
-    "primo", "secondo")
-)
-
-copy_to(con, dtf_sep_3gram, "3grams_freq",
-  temporary = FALSE, 
-  indexes = list(
-    c("primo", "secondo","terzo"),
-    c("primo", "secondo"),
-    "primo", "secondo" , "terzo")
-)
