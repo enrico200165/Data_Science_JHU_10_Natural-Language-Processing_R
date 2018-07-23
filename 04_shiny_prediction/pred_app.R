@@ -46,13 +46,13 @@ setClass("plotParsClass",
 plotPars = new("plotParsClass")
 
 
-# initBE <- function() {
-#   data("mtcars")
-#   values <<- reactiveValues()
-#   values$msg <<- "reactive value message"
-#   
-#   curdf <<- mtcars
-# }
+initBE <- function() {
+ data("mtcars")
+ values <<- reactiveValues()
+ values$msg <<- "reactive value message"
+ 
+ curdf <<- mtcars
+}
 
 setMsg <- function(m) { values$msg <<- m; }
 
@@ -148,6 +148,8 @@ ui <- fluidPage(
 ########################################################################
 server <- function(input, output) {
   
+  
+  initBE()
   print("Server started")
   
   # ---- EVENTS
