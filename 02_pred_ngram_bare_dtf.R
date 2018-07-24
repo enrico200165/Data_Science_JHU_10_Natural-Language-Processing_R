@@ -219,7 +219,9 @@ pred_ngrams_re_init <- function()
   
   prt("splitting frequency data tables ngrams")
   split_ngrams_dts(ret_dts[[1]], ret_dts[[2]] ,ret_dts[[3]])
-  kill_var(dtf_1gram); 
+
+  kill_var(txts_merged)
+  kill_var(dtf_1gram);
   kill_var(dtf_2gram) ; 
   kill_var(dtf_3gram) ; 
   gc()

@@ -1,37 +1,18 @@
 require(dplyr)
 require(beepr)
 
-# illegal position, ease frequent access
+
+# illegal position and dummy assignments 4 ease frequent access
 
 silent <- F
 fulldata <- F
 
-# --------------------------------------------------------------------
-use_full_corpus <- function(vPar, reinit_funct = NULL 
-  ,...)
-# --------------------------------------------------------------------
-{
-
-  if (missing(vPar) || is.null(vPar)) 
-    return(fulldata) 
-
-  previous <- fulldata
-  fulldata <<- vPar
-  if (previous != fulldata) {
-    qc_full <<- NULL
-    dfm_full <<- NULL
-    invisible(gc())
-    prt("fulldata:", previous,"->",fulldata)
-    if (!is.null(reinit_funct)) {
-      prt("############ Reinitializing from <",previous,"> ################")
-      args <- list(...)
-      do.call(reinit_funct,args)
-      prt("############ Reinitialized to <",fulldata,"> #################")
-    }
-  }
-  invisible(fulldata)
+strict_ <- T ; strict <- function(val) { 
+  if (!missing(val)) 
+    strict_ <<- val
+  
+  (exists("strict_") && strict_)
 }
-
 
 # --------------------------------------------------------------------
 #                   CONSTANTS
@@ -94,6 +75,32 @@ map_acro <- function(x) ..map_values[
 #
 # mostly to get a NULL (easily mangeable) instead of a non-existing 
 # variable (more laborious to manage)
+
+# --------------------------------------------------------------------
+use_full_corpus <- function(vPar, reinit_funct = NULL 
+  ,...)
+# --------------------------------------------------------------------
+{
+
+  if (missing(vPar) || is.null(vPar)) 
+    return(fulldata) 
+
+  previous <- fulldata
+  fulldata <<- vPar
+  if (previous != fulldata) {
+    qc_full <<- NULL
+    dfm_full <<- NULL
+    invisible(gc())
+    prt("fulldata:", previous,"->",fulldata)
+    if (!is.null(reinit_funct)) {
+      prt("############ Reinitializing from <",previous,"> ################")
+      args <- list(...)
+      do.call(reinit_funct,args)
+      prt("############ Reinitialized to <",fulldata,"> #################")
+    }
+  }
+  invisible(fulldata)
+}
 
 
 
@@ -361,7 +368,8 @@ getSerializFName <- function(var_id, force_name)
     ret <- TRUE
   } else {
     prt(varName,"alread filled, size GiB:"
-      ,GiB(pryr::object_size(df)), "size: ",pryr::object_size(df))
+      ,GiB(pryr::object_size(df)), "size: " 
+      ,XiB(pryr::object_size(df)))
     ret <- TRUE
   }
   # print(paste("exit",varName, ))
@@ -575,17 +583,23 @@ prt_last_call_time <- Sys.time()
   }
 }
 
+prt_warn <- function(...) do.call(prt,prepend(list(...),"# WARNING:"))
+prt_error <- function(...) do.call(prt,prepend(list(...),"### ERROR:"))
 
 # --------------------------------------------------------------------
 coverage_of_freq_list <- function(frq_vect, qtiles_vec)
 # --------------------------------------------------------------------
 {
+  
+    stopifnot(!is.null(frq_vect) && exists("frq_vect"))
+    stopifnot(!is.null(qtiles_vec) && exists("qtiles_vec"))
+  
     # naive attempt to avoid underflow
     molt <- 100 * 1000
   
     # get proportions
     props <- frq_vect*molt/sum(frq_vect);
-    stopifnot(round(sum(props)-(1*molt),5) == 0)
+    stopifnot(!strict() || round(sum(props)-(1*molt),5) == 0)
     # cumulative
     cumul <- cumsum(props)
     
@@ -596,7 +610,13 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec)
     for (i in seq_along(qtiles_vec)) {
       
       qtile <- qtiles_vec[i]
-      idxs[i] <- which(cumul >= qtile*molt)[1]
+      idx_set <- which(cumul >= qtile*molt)
+      if (length(idx_set) <= 0) {
+        prt_warn("unable to find quantile")
+        prt_warn("freq vector:", frq_vect)
+        stop()
+      }
+      idxs[i] <- idx_set[1]
       pcts[i] <- idxs[i]/length(frq_vect)
       
       prt(qtile,"somma:",round(sum(props[1:idxs[i]])/molt ,2))
@@ -607,4 +627,5 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec)
       idxs = idxs
       ,pcts = pcts)
 }
+
 
