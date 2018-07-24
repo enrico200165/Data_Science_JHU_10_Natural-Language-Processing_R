@@ -765,5 +765,4 @@ test_coverage_of_freq_list <- function()
   test_coverage_of_freq_list()
 }
 
-# 
-  test_Globals.R()
+# test_Globals.R()

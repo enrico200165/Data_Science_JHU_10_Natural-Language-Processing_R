@@ -228,7 +228,7 @@ pred_ngrams_re_init <- function()
 
 
   
-if (T) {
+if (F) {
 fulldata <- F
 silent <- F
 
