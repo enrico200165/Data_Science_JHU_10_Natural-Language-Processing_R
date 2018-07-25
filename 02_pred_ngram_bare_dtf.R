@@ -1,7 +1,8 @@
-require(quanteda)
 require(dplyr)
 require(data.table)
-require(readtext)
+
+# require(quanteda)
+# require(readtext)
 
 source("01_globals.R")
 source("02_pred_globals.R")
@@ -113,16 +114,17 @@ split_ngrams_dts <- function(dtf_sstring1 ,dtf_sstring2 ,dtf_sstring3)
 {
   feature <- "feature"
   prt("splitting dts 1grams")
+  
   if (feature %in% colnames(dtf_sstring1)) {
     dt1_fun <- function(dt) {
-      setnames(dt, "feature", "primo")
+      setnames(dt, "feature", TYPES_COLNAMES[1])
     }
     rie(dtf_1gram_sep, dt1_fun, dtf_sstring1)
   } else {
     prt("feature col not found")
   }
   dtf_1gram_sep <<- dtf_1gram_sep
-  # mem_health(c("dtf_sep_1gram","dtf_sep_2gram","dtf_sep_3gram"))
+  # mem_health(c("dtf_1gram_sep","dtf_2gram_sep","dtf_3gram_sep"))
   
   # 2grams
   prt("splitting dts 2grams")
@@ -132,8 +134,7 @@ split_ngrams_dts <- function(dtf_sstring1 ,dtf_sstring2 ,dtf_sstring3)
       splits <- strsplit(dt$feature,"_" ,fixed = T)
       prim <- sapply(splits,function(x) x[1])
       sec  <- sapply(splits,function(x) x[2])
-
-      dt[ , `:=`(primo = prim, secondo = sec) ]
+      dt[ , TYPES_COLNAMES[1:2] := list(prim, sec) ]
       dt[, feature := NULL]
       rm(splits , prim , sec); gc()
       dt
@@ -143,11 +144,10 @@ split_ngrams_dts <- function(dtf_sstring1 ,dtf_sstring2 ,dtf_sstring3)
   } else {
     prt("feature col not found")
   }
-  mem_health(c("dtf_sep_1gram","dtf_sep_2gram","dtf_sep_3gram"
-    , "dtf_3gram"))
+  mem_health(c("dtf_1gram_sep","dtf_2gram_sep","dtf_3gram_sep"))
 
 
-  # kill_var(dtf_sep_3gram)
+  # kill_var(dtf_3gram_sep)
   prt("splitting dts 3grams")
   if (feature %in% colnames(dtf_sstring3)) {
 
@@ -156,9 +156,9 @@ split_ngrams_dts <- function(dtf_sstring1 ,dtf_sstring2 ,dtf_sstring3)
       splits <- strsplit(dt$feature,"_" ,fixed = T)
       prim <- sapply(splits,function(x) x[1])
       sec  <- sapply(splits,function(x) x[2])
-      ter <- sapply(splits,function(x)  x[3])
+      ter  <- sapply(splits,function(x) x[3])
 
-      dt[ , `:=`(primo = prim, secondo = sec , terzo = ter) ]
+      dt[ , TYPES_COLNAMES := list(prim, sec , ter) ]
       dt[, feature := NULL]
       rm(splits , prim , sec , ter); gc()
 
@@ -172,9 +172,10 @@ split_ngrams_dts <- function(dtf_sstring1 ,dtf_sstring2 ,dtf_sstring3)
   # mem_health(c("dtf_sep_1gram","dtf_sep_2gram","dtf_sep_3gram"))
   
   # list(
-  #    dtf_sep_1gram = dtf_sep_1gram
-  #   ,dtf_sep_2gram = dtf_sep_2gram
-  #   ,dtf_sep_3gram = dtf_sep_3gram)
+  #    dtf_1gram_sep = dtf_1gram_sep
+  #   ,dtf_2gram_sep = dtf_2gram_sep
+  #   ,dtf_3gram_sep = dtf_3gram_sep
+  #)
   
   T
 }
@@ -226,16 +227,5 @@ pred_ngrams_re_init <- function()
   kill_var(dtf_3gram) ; 
   gc()
 
-}
-
-
-  
-if (F) {
-fulldata <- F
-silent <- F
-
-use_full_corpus(fulldata, pred_ngrams_re_init)
-
-produce_ngram_bare_dtf()
 }
 

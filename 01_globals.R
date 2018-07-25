@@ -1,6 +1,6 @@
 require(dplyr)
 require(beepr)
-
+require(rlang)
 
 # illegal position and dummy assignments 4 ease frequent access
 
@@ -455,12 +455,15 @@ lsos <- function(..., n=100) {
   else 0
   
   
-  # rm(list = varName, pos = ".GlobalEnv")  
-  rm(list = varName, pos =  .GlobalEnv)
-  if (var_size >= 1024*1024) {
-    gc()
+  # rm(list = varName, pos = ".GlobalEnv")
+  if (exists(varName)) {
+    rm(list = varName, pos =  .GlobalEnv)
+    if (var_size >= 1024*1024) { gc() }
+  } else {
+    prt_warn("killing variable:" ,varName , "does NOT exist")
   }
-
+    
+    
   if (serializ) {
     fname <- getSerializFName(varName)
     if (serializ && file.exists(fname)) {
@@ -619,8 +622,8 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec)
       idxs[i] <- idx_set[1]
       pcts[i] <- idxs[i]/length(frq_vect)
       
-      prt(qtile,"somma:",round(sum(props[1:idxs[i]])/molt ,2))
-      print("")
+      #prt(qtile,"somma:",round(sum(props[1:idxs[i]])/molt ,2))
+      #print("")
     }
     
     list(

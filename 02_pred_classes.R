@@ -21,18 +21,30 @@ DTF_Basic <- R6Class(
     stopifnot(nrow(dtf_par$primo) > 0)
     
     private$..dtf <- dtf_par
-    
     private$..nfeat <- nrow(private$..dtf );
-    
-    private$..coverage <- coverage_of_freq_list(private$..dtf$frequency
-        ,qtiles_vec)
+    private$..coverage <- coverage_of_freq_list(
+      private$..dtf$frequency ,qtiles_vec)
+    if (all(TYPES_COLNAMES %in% names(private$..dtf)))
+      setkeyv(private$..dtf ,TYPES_COLNAMES)
+    else if (all(TYPES_COLNAMES[1:2] %in% names(private$..dtf)))
+      setkeyv(private$..dtf ,TYPES_COLNAMES[1:2])
+    else if (TYPES_COLNAMES[1] %in% names(private$..dtf))
+      setkeyv(private$..dtf ,TYPES_COLNAMES[1])
+    else {
+      prt_error("unexpected situation setting keys")
+      stop()      
+    }
+    # 
+    prt("key",key(private$..dtf))
   }
-   
    
   ,finalize = function() {
     #rm(private$dtf)
     gc()
   }
+   
+   
+   ,nfeat = function() private$..nfeat
    
   ,types_to_cover = function(qtile) {
     
@@ -83,20 +95,35 @@ DTF_Basic <- R6Class(
 
 strict(F)
 
-dtf_test <- if (exists("dtf_test")) dtf_test else NULL
+dtf_1gram_test <- if (exists("dtf_1gram_test")) dtf_1gram_test else NULL
+dtf_2gram_test <- if (exists("dtf_2gram_test")) dtf_2gram_test else NULL
+dtf_3gram_test <- if (exists("dtf_3gram_test")) dtf_3gram_test else NULL
 
-get_test_dtf <- function() {
+
+
+get_test_dtf1 <- function() {
+  rie(dtf_1gram_sep,produce_ngram_bare_dtf)
+  dtf_1gram_test <<- dtf_1gram_sep[1:100, ]
+}
+get_test_dtf2 <- function() {
   rie(dtf_2gram_sep,produce_ngram_bare_dtf)
-  dtf_test <<- dtf_2gram_sep[1:100, ]
+  dtf_2gram_test <<- dtf_2gram_sep[1:100, ]
+}
+get_test_dtf3 <- function() {
+  rie(dtf_3gram_sep,produce_ngram_bare_dtf)
+  dtf_3gram_test <<- dtf_3gram_sep[1:100, ]
 }
 
 
-rie(dtf_test, get_test_dtf)
+rie(dtf_1gram_test, get_test_dtf1)
+rie(dtf_2gram_test, get_test_dtf2)
+rie(dtf_3gram_test, get_test_dtf3)
 
-x <- DTF_Basic$new(dtf_test)
-prt(x$dump())
+x1 <- DTF_Basic$new(dtf_1gram_test)
+x2 <- DTF_Basic$new(dtf_2gram_test)
+x3 <- DTF_Basic$new(dtf_3gram_test)
 
-
-x$types_to_cover(qtiles_vec[4])
+#prt("nr of features",x$nfeat())
+# x$types_to_cover(qtiles_vec[4])
 
 # x <- DTF_Basic$new(NULL)
