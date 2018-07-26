@@ -335,7 +335,7 @@ zap_files_serializations <- function(patternPar)
   print(" --- Unit Testing --- ")
 
   T && subsetTextFilesByLines(data_dir_corpus_full 
-      ,data_dir_corpus_subset ,250 ,1000 , forceIt = F)
+      ,data_dir_corpus_subset ,5,10000 , forceIt = F)
 
 
   if(F) {
@@ -352,7 +352,8 @@ zap_files_serializations <- function(patternPar)
 }
 
   silent <- F
-# test_01_preprocess_libs.R()
+# 
+  test_01_preprocess_libs.R()
 
 
 

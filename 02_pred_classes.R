@@ -24,12 +24,27 @@ DTF_Basic <- R6Class(
     private$..nfeat <- nrow(private$..dtf );
     private$..coverage <- coverage_of_freq_list(
       private$..dtf$frequency ,qtiles_vec)
-    if (all(TYPES_COLNAMES %in% names(private$..dtf)))
+    if (all(TYPES_COLNAMES %in% names(private$..dtf))) {
+      # trigrams
       setkeyv(private$..dtf ,TYPES_COLNAMES)
-    else if (all(TYPES_COLNAMES[1:2] %in% names(private$..dtf)))
+      # below here maybe redundant or just unnecessary
+      setindexv(private$..dtf ,TYPES_COLNAMES[1:2])
+      setindexv(private$..dtf ,TYPES_COLNAMES[1])
+      setindexv(private$..dtf ,TYPES_COLNAMES[2])
+    }
+    else if (all(TYPES_COLNAMES[1:2] %in% names(private$..dtf))) {
+      # bigrams
       setkeyv(private$..dtf ,TYPES_COLNAMES[1:2])
-    else if (TYPES_COLNAMES[1] %in% names(private$..dtf))
+      # below here maybe redundant or just unnecessary
+      setindexv(private$..dtf ,TYPES_COLNAMES[1])
+      setindexv(private$..dtf ,TYPES_COLNAMES[2])
+    }
+    else if (TYPES_COLNAMES[1] %in% names(private$..dtf)) {
+      # 1grams
       setkeyv(private$..dtf ,TYPES_COLNAMES[1])
+      # nearly surely unnecessary
+      setindexv(private$..dtf ,TYPES_COLNAMES[1])
+    }
     else {
       prt_error("unexpected situation setting keys")
       stop()      
@@ -100,30 +115,29 @@ dtf_2gram_test <- if (exists("dtf_2gram_test")) dtf_2gram_test else NULL
 dtf_3gram_test <- if (exists("dtf_3gram_test")) dtf_3gram_test else NULL
 
 
-
-get_test_dtf1 <- function() {
+build_test_objects <- function() {
+  
   rie(dtf_1gram_sep,produce_ngram_bare_dtf)
   dtf_1gram_test <<- dtf_1gram_sep[1:100, ]
-}
-get_test_dtf2 <- function() {
-  rie(dtf_2gram_sep,produce_ngram_bare_dtf)
+
+  rie(dtf_2gram_sep ,produce_ngram_bare_dtf)
   dtf_2gram_test <<- dtf_2gram_sep[1:100, ]
-}
-get_test_dtf3 <- function() {
-  rie(dtf_3gram_sep,produce_ngram_bare_dtf)
+
+  rie(dtf_3gram_sep ,produce_ngram_bare_dtf)
   dtf_3gram_test <<- dtf_3gram_sep[1:100, ]
 }
+  
+build_test_objects()
 
 
-rie(dtf_1gram_test, get_test_dtf1)
-rie(dtf_2gram_test, get_test_dtf2)
-rie(dtf_3gram_test, get_test_dtf3)
+o_1grams_basic <- DTF_Basic$new(dtf_1gram_test)
+o_2grams_basic <- DTF_Basic$new(dtf_2gram_test)
+o_3grams_basic <- DTF_Basic$new(dtf_3gram_test)
 
-x1 <- DTF_Basic$new(dtf_1gram_test)
-x2 <- DTF_Basic$new(dtf_2gram_test)
-x3 <- DTF_Basic$new(dtf_3gram_test)
 
-prt(x3$dump())
+
+
+prt(o_3grams_basic$dump())
 
 #prt("nr of features",x$nfeat())
 # x$types_to_cover(qtiles_vec[4])

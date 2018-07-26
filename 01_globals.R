@@ -558,12 +558,11 @@ keypress <- function (message, sound_nr = 1)
 
 
 # --------------------------------------------------------------------
-  clean_rds <- function(patt)
+  clean_rds <- function(patt = "sub.*")
 # --------------------------------------------------------------------
 {
-  patt = if(missing(patt)) ".*ubset.*" else patt
-  patt <- paste0(patt,".*.rds")
-  print(list.files(".",patt))
+  patt <- paste0(patt,".rds")
+  # prt(patt); prt(list.files(".",patt))
   file.remove(list.files(".",patt))
 }
 

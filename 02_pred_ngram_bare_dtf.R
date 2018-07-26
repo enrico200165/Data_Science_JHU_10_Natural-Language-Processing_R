@@ -1,8 +1,8 @@
 require(dplyr)
 require(data.table)
 
-# require(quanteda)
-# require(readtext)
+require(quanteda)
+require(readtext)
 
 source("01_globals.R")
 source("02_pred_globals.R")
@@ -125,6 +125,8 @@ split_ngrams_dts <- function(dtf_sstring1 ,dtf_sstring2 ,dtf_sstring3)
   }
   dtf_1gram_sep <<- dtf_1gram_sep
   # mem_health(c("dtf_1gram_sep","dtf_2gram_sep","dtf_3gram_sep"))
+  if (nrow(dtf_sstring1) != nrow(dtf_1gram_sep))
+    prt_error("different nr rows splitting unigram:",nrow(dtf_sstring1),nrow(dtf_1gram_sep))
   
   # 2grams
   prt("splitting dts 2grams")
@@ -134,7 +136,8 @@ split_ngrams_dts <- function(dtf_sstring1 ,dtf_sstring2 ,dtf_sstring3)
       splits <- strsplit(dt$feature,"_" ,fixed = T)
       prim <- sapply(splits,function(x) x[1])
       sec  <- sapply(splits,function(x) x[2])
-      dt[ , TYPES_COLNAMES[1:2] := list(prim, sec) ]
+      # dt[ , TYPES_COLNAMES[1:2] := list(prim, sec) ]
+      dt[ , `:=`(primo = prim, secondo = sec) ]
       dt[, feature := NULL]
       rm(splits , prim , sec); gc()
       dt
@@ -142,10 +145,12 @@ split_ngrams_dts <- function(dtf_sstring1 ,dtf_sstring2 ,dtf_sstring3)
     rie(dtf_2gram_sep , dt2_fun, dtf_sstring2)
     dtf_2gram_sep <<- dtf_2gram_sep
   } else {
-    prt("feature col not found")
+    prt_error("feature col not found")
   }
+  if (nrow(dtf_sstring2) != nrow(dtf_2gram_sep))
+    prt("different nr rows splitting unigram:",nrow(dtf_sstring2),nrow(dtf_2gram_sep))
   mem_health(c("dtf_1gram_sep","dtf_2gram_sep","dtf_3gram_sep"))
-
+  
 
   # kill_var(dtf_3gram_sep)
   prt("splitting dts 3grams")
@@ -158,7 +163,8 @@ split_ngrams_dts <- function(dtf_sstring1 ,dtf_sstring2 ,dtf_sstring3)
       sec  <- sapply(splits,function(x) x[2])
       ter  <- sapply(splits,function(x) x[3])
 
-      dt[ , TYPES_COLNAMES := list(prim, sec , ter) ]
+      # dt[ , TYPES_COLNAMES[1:3] := list(prim, sec , ter) ] # seems to corrupt memory
+      dt[ , `:=`(primo = prim, secondo = sec , terzo = ter) ]
       dt[, feature := NULL]
       rm(splits , prim , sec , ter); gc()
 
@@ -166,10 +172,12 @@ split_ngrams_dts <- function(dtf_sstring1 ,dtf_sstring2 ,dtf_sstring3)
     }
     rie(dtf_3gram_sep , dt3_fun, dtf_sstring3)
   } else {
-    prt("feature col not found")
+    prt_error("feature col not found")
   }
   dtf_3gram_sep <<- dtf_3gram_sep
-  # mem_health(c("dtf_sep_1gram","dtf_sep_2gram","dtf_sep_3gram"))
+  if (nrow(dtf_sstring3) != nrow(dtf_3gram_sep))
+    prt("different nr rows splitting unigram:",nrow(dtf_sstring3),nrow(dtf_3gram_sep))
+  mem_health(c("dtf_sep_1gram","dtf_sep_2gram","dtf_sep_3gram"))
   
   # list(
   #    dtf_1gram_sep = dtf_1gram_sep
@@ -217,6 +225,8 @@ pred_ngrams_re_init <- function()
   
   prt("building frequency data tables sigle-string _sep")
   ret_dts <- build_dtfs(txts_merged)
+  prt("number of features in 1grams, 2grams, 3grams",nrow(ret_dts[[1]])
+      ,nrow(ret_dts[[2]]),nrow(ret_dts[[3]]))
   
   prt("splitting frequency data tables ngrams")
   split_ngrams_dts(ret_dts[[1]], ret_dts[[2]] ,ret_dts[[3]])
@@ -229,3 +239,6 @@ pred_ngrams_re_init <- function()
 
 }
 
+clean_rds()
+# rm(list=ls(all=TRUE))
+produce_ngram_bare_dtf()
