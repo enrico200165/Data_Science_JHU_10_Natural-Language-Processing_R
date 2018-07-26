@@ -123,6 +123,8 @@ x1 <- DTF_Basic$new(dtf_1gram_test)
 x2 <- DTF_Basic$new(dtf_2gram_test)
 x3 <- DTF_Basic$new(dtf_3gram_test)
 
+prt(x3$dump())
+
 #prt("nr of features",x$nfeat())
 # x$types_to_cover(qtiles_vec[4])
 

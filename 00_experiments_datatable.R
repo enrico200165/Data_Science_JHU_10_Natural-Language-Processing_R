@@ -1,18 +1,7 @@
-require(dplyr)
-require(ggplot2)
-require(quanteda)
-# help(package = "quanteda")
-#install.packages("readtext")
-require(readtext)
-#install.packages("devtools")
-#devtools::install_github("quanteda/quanteda.corpora")
-require(quanteda.corpora)
-#install.packages("spacyr")
-require(spacyr)
-require(stringr)
 require(data.table)
+require(dplyr)
 
-source("01_preprocess_lib.R")
+source("01_globals.R")
 
 
 # --------------------------------------------------------------------
