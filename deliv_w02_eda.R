@@ -13,17 +13,8 @@ source("ev_nlp_eda_lib.R")
 
 
 #---------------------------------------------------------------------
-  distributionWordFrequencies <- function()
-#---------------------------------------------------------------------
-{
-  
-}
-
-
-
-
-
 recover_or_delete <- function(data_dir) {
+#---------------------------------------------------------------------
 
 for(fname in file.path(data_dir,files)) {
   result <- enricoReadText(fname, -1)

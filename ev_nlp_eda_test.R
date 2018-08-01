@@ -208,30 +208,46 @@ test_types_freq_an_wordcloud <- function(qc, fct)
 # -------------------------------------------------------------------
 {
  
-  use_full_corpus(F, eda_re_init)
+  test_physical_analysis_plots(data_dir_corpus_full); #
+  keypress()
   
-  test_physical_analysis_plots(data_dir_corpus_full); #keypress()
-  
-  test_freq_distrib(); #keypress()
+  test_freq_distrib(); #
+  keypress()
 
-  test_freq_of_freq_an_simple();   #keypress()
+  test_freq_of_freq_an_simple();   #
+  keypress()
   
-  test_freq_of_freq_an_realistic(); #keypress()
+  test_freq_of_freq_an_realistic(); #
+  keypress()
   
-  test_types_freq_an_q(qc_full, fct = F) ;#keypress()
+  test_types_freq_an_q(qc_full, fct = F) ;#
+  keypress()
    
-  test_types_freq_an_wordcloud(qc_full, F) ;#keypress()
+  test_types_freq_an_wordcloud(qc_full, F) ;#
+  keypress()
     
   test_types_coverage() ;#keypress()
+  
+  prt(" --- FINISHED ---")
   
 }
   
 silent <- F
 fulldata <- T
 
+profileFilePath <- file.path("profiler","ev_nlp_eda_test.txt")
+Rprof(profileFilePath, memory.profiling=T)
+
 eda_re_init()
+use_full_corpus(T, eda_re_init)
 test_ev_nlp_eda_lib.R()
 
+Rprof(NULL);
+prof <- summaryRprof("path_to_hold_output")
+print(prof)
 
+# require(profr)
+# x <- profr({use_full_corpus(T, eda_re_init)})
+# ggplot(x)
 
 

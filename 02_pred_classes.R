@@ -135,7 +135,7 @@ o_2grams_basic <- DTF_Basic$new(dtf_2gram_test)
 o_3grams_basic <- DTF_Basic$new(dtf_3gram_test)
 
 
-
+prt(o_3grams_basic$nfeat())
 
 prt(o_3grams_basic$dump())
 

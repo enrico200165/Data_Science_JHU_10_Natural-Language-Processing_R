@@ -1,4 +1,5 @@
 
+require(quanteda) # for docvars
 require(readtext)
 require(pryr)
 
@@ -73,7 +74,10 @@ source("01_globals.R")
   ,nrLinesRead,forceIt) {
 # ---------------------------------------------------------
 
-    stopifnot(all(dir.exists(in_dir),dir.exists(out_dir)))
+    stopifnot(dir.exists(in_dir))
+    stopifnot(dir.exists(out_dir))
+    stopifnot(nrLinesKept <= nrLinesRead)
+    
     
     descr <- paste0("_", nrLinesKept, "_", nrLinesRead)
     # remove/clean up eventual prexisting subset
@@ -124,25 +128,24 @@ source("01_globals.R")
     TRUE
   }
 
-  
+
 # ---------------------------------------------------------
   readTxtFileToStringVectors <- function(fname, nrLinesToRead) {
 # ---------------------------------------------------------
   enc <- getOption("encoding")
   con <- file(fname, "rt", encoding = enc)
   # enc <- iconvlist()[309] # utf8
+  
   linesRead <- character(0)
   tryCatch({
       linesRead <- readLines(con, nrLinesToRead, skipNul = T)
-    },
-    error = function(x) { print("error"); print(x)},
-    warning = function(x) { print("warning"); print(x)},
-    finally = {
-      close.connection(con)
-      gc() 
-      return(linesRead)
-    }
+  }
+  ,error = function(x) { print("error"); print(x)}
+  ,warning = function(x) { print("warning"); print(x)}
+  ,finally = { close.connection(con); gc(); return(linesRead) }
   )
+  
+  linesRead
 }
   
   
@@ -154,24 +157,17 @@ source("01_globals.R")
 {    
   print(paste("out dir:",out_dir," - in dir: ",in_dir))
 
-  stopifnot(dir.exists(in_dir))
-  stopifnot(dir.exists(out_dir))
+  stopifnot(dir.exists(in_dir)) ;stopifnot(dir.exists(out_dir))
   
   textFiles <- list.files(in_dir ,include.dirs = FALSE)
   # remove dirs
   textFiles <- textFiles[!dir.exists(file.path(in_dir,textFiles))]
   
   if (length(textFiles) <= 0) {
-    print(paste("no files found in",in_dir))
+    prt_error(paste("no files found in",in_dir))
     return(FALSE)
   }
   
-  # remove eventual subset string
-  # textFiles <- gsub("_?subset.*\\.", ".", textFiles)
-  # textFiles <- grep(".*tw.*",textFiles,value = TRUE)
-  # textFiles <- grep("subset",textFiles,value = TRUE,invert = T)
-  
-  # textFiles <- file.path(data_dir_corpus, textFiles)
   sapply(textFiles, FUN = function(x) { 
     subsetLines(x, in_dir, out_dir,nrLinesKept, nrLinesRead, forceIt); TRUE
     } )
@@ -189,8 +185,7 @@ source("01_globals.R")
 {
   varName <- deparse(substitute(mydf))
   
-  if ( missing(in_dir) || is.na(in_dir) || (nchar(in_dir) <= 0)
-    ) {
+  if ( missing(in_dir) || is.na(in_dir) || (nchar(in_dir) <= 0)) {
     nomeFile <- nFile
   } else {
     stopifnot(dir.exists(in_dir))
@@ -200,7 +195,7 @@ source("01_globals.R")
   exists <- exists(varName)
   filled <- exists && (!is.null(nrow(mydf)) &&  nrow(mydf)> 0)
   if (filled) {
-    print(paste(varName,"exists and is filled, do nothing"))
+    prt(paste(varName,"exists and is filled, do nothing"))
     return(mydf)
   }
   
@@ -219,7 +214,7 @@ source("01_globals.R")
          return(NA)
     }
 
-    print(paste(varName,"reading file from",nomeFile," and writing serialization"))
+    prt(paste(varName,"reading file from",nomeFile," and writing serialization"))
     my_rt <- readtext(nomeFile
     , docvarsfrom = "filenames", docvarnames = c(TXT_LNG,TXT_CTR, TXT_TYP,
                                                  "dummy1", "lines_in", "lines_tot") ,dvsep = "[_.]"
@@ -228,14 +223,10 @@ source("01_globals.R")
     sampled_pctg <- 100*docvars(my_rt)$lines_in/docvars(my_rt)$lines_tot
     my_rt <- select(my_rt,-c(6:ncol(my_rt)))
     my_rt$sample_pctg <- sampled_pctg
-    
-    # print(docvars(mydf))
-    # mydf <- corpus(my_rt)
-    # print(single Quanteda paste("blogs",format(text object.size(my_rt), units = "MiB")))text       
   }
   
   if (!file.exists(rdsFName)) {
-    # print(paste("saving serialization to: ",rdsFName))
+    # prt(paste("saving serialization to: ",rdsFName))
     saveRDS(my_rt, file = rdsFName)
   }
   
@@ -300,13 +291,6 @@ source("01_globals.R")
 }
 
 
-# ====================================================================
-# GLOBAL CODE, must be so to keep things simple
-# ====================================================================
-# NB relies on global with fixed name
-
-# clean_rds(".*")
-
 # --------------------------------------------------------------------
 zap_files_serializations <- function(patternPar) 
 # --------------------------------------------------------------------
@@ -321,6 +305,41 @@ zap_files_serializations <- function(patternPar)
 # zap_files_serializations()
 
 
+
+# ---------------------------------------------------------
+  checkUSANewsFileProblem <- function(fname, nrLinesToRead) {
+# ---------------------------------------------------------
+  
+    
+  stopifnot(file.exists(fname))
+    
+  enc <- getOption("encoding")
+  con <- file(fname, "rt", encoding = enc)
+  # enc <- iconvlist()[309] # utf8
+  
+  linesRead <- character(0)
+  tryCatch({
+      linesRead <- readLines(con, nrLinesToRead, skipNul = T)
+  }
+  ,error = function(x) { print("error"); print(x)}
+  ,warning = function(x) { print("warning"); print(x)}
+  ,finally = { 
+      last_line_read <- linesRead[length(linesRead)]
+      prt("read nr. lines: ",length(linesRead)
+    ,"last line read:", substr(last_line_read,1,32)
+    ,"length",nchar(last_line_read))
+    close.connection(con); gc(); return(linesRead) 
+    }
+  )
+  
+  last_line_read <- linesRead[length(linesRead)]
+  prt("read nr. lines: ",length(linesRead)
+    ,"last line read:", substr(last_line_read,1,32)
+    ,"length",length(last_line_read))
+  
+  linesRead
+}
+
 # ====================================================================
 #                         Unit Tests
 # ====================================================================
@@ -334,11 +353,13 @@ zap_files_serializations <- function(patternPar)
 
   print(" --- Unit Testing --- ")
 
+  silent <<- F
+
   T && subsetTextFilesByLines(data_dir_corpus_full 
       ,data_dir_corpus_subset ,5,10000 , forceIt = F)
 
 
-  if(F) {
+  if(T) {
     print(list.files(data_dir_corpus_full))
 
     start_time <- proc.time()
@@ -351,9 +372,7 @@ zap_files_serializations <- function(patternPar)
   print(" --- Tests Completed --- ")
 }
 
-  silent <- F
 # 
   test_01_preprocess_libs.R()
-
 
 

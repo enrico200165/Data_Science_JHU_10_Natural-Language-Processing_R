@@ -162,6 +162,8 @@ user friendly than classic histograms, and provide the same info.
 Words (1-grams)
 ```{r types_distrib_an_q_de, echo = FALSE, results='markup'}
 
+  invisible(gc)
+
   # if((missing(fct))) fct <- FALSE 
   fct <- FALSE
   rie(types_freq_an_q_plots , types_freq_an_q ,qc_full ,fct)
