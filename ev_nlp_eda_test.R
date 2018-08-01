@@ -80,8 +80,7 @@ source("ev_nlp_eda_lib.R")
 # -------------------------------------------------------------------
 
 {
-  freq_d <- freq_distrib(dfm_full
-    ,"en" ,rem_stopw = T ,proportions = F)
+  freq_d <- freq_distrib(dfm_full ,"en" ,rem_stopw = F ,proportions = F)
 
   freq_d
 }
@@ -234,6 +233,7 @@ test_types_freq_an_wordcloud <- function(qc, fct)
   
 silent <- F
 fulldata <- T
+keypressWait <- F 
 
 profileFilePath <- file.path("profiler","ev_nlp_eda_test.txt")
 Rprof(profileFilePath, memory.profiling=T)

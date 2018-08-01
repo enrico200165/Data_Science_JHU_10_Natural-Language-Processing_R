@@ -9,7 +9,7 @@ require(Hmisc)
 require(stringr)
 
 source("01_globals.R")
-# source("01_preprocess_lib.R")
+source("01_preprocess_lib.R") # needed to read corpus
 
 
 

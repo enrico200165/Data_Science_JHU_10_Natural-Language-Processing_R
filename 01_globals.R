@@ -4,8 +4,9 @@ require(rlang)
 
 # illegal position and dummy assignments 4 ease frequent access
 
-silent <- F
-fulldata <- F
+silent       <- if (exists("silent"))       silent       else NULL
+fulldata     <- if (exists("fulldata"))     fulldata     else NULL
+keypressWait <- if (exists("keypressWait")) keypressWait else FALSE
 
 strict_ <- T ; strict <- function(val) { 
   if (!missing(val)) 
@@ -541,16 +542,19 @@ mem_health <- function(survivors = character(0) ,dry_run = F
 
 
 # --------------------------------------------------------------------
-keypress <- function (message, sound_nr = 1)
+keypress <- function (message = "Press [enter] to continue"
+  , sound_nr = 1)
 # --------------------------------------------------------------------
 {
   beep(sound = sound_nr, expr = NULL)
-  Sys.sleep(1)
-  if (!silent) {
-  if (missing(message)) message <- "Press [enter] to continue"
+
+  if (keypressWait) {
     invisible(readline(prompt=message))
-  # prt(message)
+  } else {
+    prt(message)
+    System.wait(5)
   }
+
   invisible(T)
 }
 
