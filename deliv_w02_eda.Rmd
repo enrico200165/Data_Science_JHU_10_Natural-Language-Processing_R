@@ -80,9 +80,10 @@ source("01_globals.R")
 source("01_preprocess_lib.R")
 source("ev_nlp_eda_lib.R")
 
-fulldata <- T
+fulldata <- T ; memory.limit(size = 24000)
 silent <- T
 eda_re_init()
+
 ```
 
 

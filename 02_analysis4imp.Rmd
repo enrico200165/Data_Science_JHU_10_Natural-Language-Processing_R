@@ -9,6 +9,9 @@ output: html_document
 knitr::opts_chunk$set(
   collapse = TRUE, cache = FALSE
 )
+
+memory.limit(size = 24000)
+
 ```
 
 # Foreword  
@@ -36,7 +39,7 @@ require(knitr)
 source("02_pred_classes.R")
 # source("ev_nlp_eda_lib.R")
 
-fulldata <- F
+fulldata <- T ; memory.limit(size = 24000)
 silent <- T
 # eda_re_init()
 ```
@@ -58,7 +61,7 @@ require(kableExtra)
 
 # 1 gram coverage
 ```{r 1gram, echo = FALSE, results='markup'}
-
+gc()
 
 produce_ngram_bare_dtf()
 

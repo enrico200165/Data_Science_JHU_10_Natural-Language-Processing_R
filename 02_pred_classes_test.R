@@ -8,8 +8,8 @@ source("02_pred_classes.R")
 #                           TEST
 #####################################################################
 
-
-fulldata <- F
+clean_rds("*rds")
+fulldata <- T ;  memory.limit(size = 24000)
 silent <- F
 strict(F)
 
@@ -43,10 +43,6 @@ print(o_3grams_basic$coverageGraphs()[[2]]); keypress()
 print(o_3grams_basic$coverageGraphs()[[1]]); keypress()
 
 
-
-
-x <- DTF_Basic$new(dtf_1gram_test)
-plots <- x$coverageGraphs()
 
 grid.arrange( plots[[1]], plots[[2]], nrow = 1)
     
