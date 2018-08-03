@@ -233,7 +233,7 @@ test_types_freq_an_wordcloud <- function(qc, fct)
   
 silent <- F
 fulldata <- T
-keypressWait <- F 
+keypressWait <- T 
 
 profileFilePath <- file.path("profiler","ev_nlp_eda_test.txt")
 Rprof(profileFilePath, memory.profiling=T)
@@ -243,8 +243,8 @@ use_full_corpus(T, eda_re_init)
 test_ev_nlp_eda_lib.R()
 
 Rprof(NULL);
-prof <- summaryRprof("path_to_hold_output")
-print(prof)
+prof <- summaryRprof(profileFilePath)
+print(head(prof$by.self))
 
 # require(profr)
 # x <- profr({use_full_corpus(T, eda_re_init)})

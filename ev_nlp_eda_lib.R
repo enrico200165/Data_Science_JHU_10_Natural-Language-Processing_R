@@ -559,44 +559,44 @@ types_freq_plot_q <- function(frq_grp, faceted, lng
 
 
 # ---------------------------------------------------------------------  
-types_freq_an_q <- function(qc, fct) 
+types_freq_an_q <- function(qc, fct , r_stopw = F) 
 # ---------------------------------------------------------------------  
 {
   if((missing(fct))) fct <- FALSE
   xlab <- "Frequency"
   
-  # rie(types_freq_an_de ,types_distrib ,qc,"de",1,rem_stopw = T, faceted = fct)
+  # rie(types_freq_an_de ,types_distrib ,qc,"de",1,rem_stopw = r_stopw, faceted = fct)
   # types_freq_an_de_plot_q <- types_freq_plot_q(types_freq_an_de[[2]], faceted = fct
   #                                              ,"de" , ,xlab, ,"",1)
-  # rie(types_freq_an_de_3,types_distrib,qc,"de",3,rem_stopw = T, faceted = fct)
+  # rie(types_freq_an_de_3,types_distrib,qc,"de",3,rem_stopw = r_stopw, faceted = fct)
   # types_freq_an_de_plot_3_q <- types_freq_plot_q(types_freq_an_de_3[[2]],faceted = fct 
   #                                                ,"de" , ,xlab, ,"",3)
   
   
-  rie(types_freq_an_en ,types_distrib ,qc ,"en" ,1,rem_stopw = T, faceted = fct)  
+  rie(types_freq_an_en ,types_distrib ,qc ,"en" ,1,rem_stopw = r_stopw, faceted = fct)  
   types_freq_an_en_plot_q <- types_freq_plot_q(types_freq_an_en[[2]] ,faceted = fct 
                                                ,"en" , ,xlab, ,"",1)
-  rie(types_freq_an_en_2 ,types_distrib ,qc,"en",2,rem_stopw = T, faceted = fct)
+  rie(types_freq_an_en_2 ,types_distrib ,qc,"en",2,rem_stopw = r_stopw, faceted = fct)
   types_freq_an_en_plot_2_q <- types_freq_plot_q(types_freq_an_en_2[[2]] ,faceted = fct
                                                 ,"en" , ,xlab, ,"",2)
-  rie(types_freq_an_en_3 ,types_distrib ,qc,"en",3,rem_stopw = T, faceted = fct)
+  rie(types_freq_an_en_3 ,types_distrib ,qc,"en",3,rem_stopw = r_stopw, faceted = fct)
   types_freq_an_en_plot_3_q <- types_freq_plot_q(types_freq_an_en_3[[2]] ,faceted = fct
                                                 ,"en" , ,xlab, ,"",3)
   
   
-  # rie(types_freq_an_fi ,types_distrib ,qc ,"fi" ,1,rem_stopw = T, faceted = fct)
+  # rie(types_freq_an_fi ,types_distrib ,qc ,"fi" ,1,rem_stopw = r_stopw, faceted = fct)
   # types_freq_an_fi_plot_q <- types_freq_plot_q(types_freq_an_fi[[2]] ,faceted = fct 
                                                # ,"fi" , ,xlab, ,"",1)
   
-  # rie(types_freq_an_fi_3 ,types_distrib ,qc,"fi",3,rem_stopw = T, faceted = fct)
+  # rie(types_freq_an_fi_3 ,types_distrib ,qc,"fi",3,rem_stopw = r_stopw, faceted = fct)
   # types_freq_an_fi_plot_3_q <- types_freq_plot_q(types_freq_an_fi_3 ,faceted = fct 
   #                                                ,"fi" , ,xlab, ,"",3)
   
   
-  # rie(types_freq_an_ru ,types_distrib ,qc ,"ru" ,1,rem_stopw = T, faceted = fct)
+  # rie(types_freq_an_ru ,types_distrib ,qc ,"ru" ,1,rem_stopw = r_stopw, faceted = fct)
   # types_freq_an_ru_plot_q <- types_freq_plot_q(types_freq_an_ru[[2]] ,faceted = fct 
   #                                              ,"ru" , ,xlab, ,"",1)
-  # rie(types_freq_an_ru_3 ,types_distrib ,qc,"ru",3,rem_stopw = T, faceted = fct)
+  # rie(types_freq_an_ru_3 ,types_distrib ,qc,"ru",3,rem_stopw = r_stopw, faceted = fct)
   # types_freq_an_ru_plot_3_q <- types_freq_plot_q(types_freq_an_ru_3, faceted = fct 
   #                                                ,"ru" , ,xlab, ,"",3)
   
@@ -667,48 +667,48 @@ types_freq_plot_wordcloud <- function(types_freq_dfm ,lng ,fct ,title ,words_nr)
 
 
 # ---------------------------------------------------------------------  
-types_freq_an_wcloud <- function(qc, fct ,nwords) 
+types_freq_an_wcloud <- function(qc, fct ,nwords, r_stopw = F) 
 # ---------------------------------------------------------------------  
 {
   if((missing(fct))) fct <- FALSE
   if((missing(nwords))) nwords <- 100
   
   # German
-  # rie(types_freq_an_de ,types_distrib ,qc ,"de",1,rem_stopw = T, faceted = fct)
+  # rie(types_freq_an_de ,types_distrib ,qc ,"de",1,rem_stopw = r_stopw, faceted = fct)
   # types_freq_an_de_plot_wcloud <- types_freq_plot_wordcloud(
   #   types_freq_an_de ,"de" ,fct , ,nwords)
   # keypress()
   # 
-  # rie(types_freq_an_de_3,types_distrib,qc,"de",3,rem_stopw = T, faceted = fct)
+  # rie(types_freq_an_de_3,types_distrib,qc,"de",3,rem_stopw = r_stopw, faceted = fct)
   # types_freq_an_de_plot_3_wcloud <- types_freq_plot_wordcloud(
   #   types_freq_an_de_3, "de" , fct , ,nwords/3)
   # keypress()
   
-  rie(types_freq_an_en ,types_distrib ,qc ,"en",1,rem_stopw = T, faceted = fct)
+  rie(types_freq_an_en ,types_distrib ,qc ,"en",1,rem_stopw = r_stopw, faceted = fct)
   types_freq_an_en_plot_wcloud <- types_freq_plot_wordcloud(
     types_freq_an_en ,"en" , fct, ,nwords)
   keypress()
-  rie(types_freq_an_en_3,types_distrib,qc,"en",3,rem_stopw = T, faceted = fct)
+  rie(types_freq_an_en_3,types_distrib,qc,"en",3,rem_stopw = r_stopw, faceted = fct)
   types_freq_an_en_plot_3_wcloud <- types_freq_plot_wordcloud(
     types_freq_an_en_3, "en" , fct , ,nwords/3)
   keypress()
 
   
-  # rie(types_freq_an_fi ,types_distrib ,qc ,"fi",1,rem_stopw = T, faceted = fct)
+  # rie(types_freq_an_fi ,types_distrib ,qc ,"fi",1,rem_stopw = r_stopw, faceted = fct)
   # types_freq_an_fi_plot_wcloud <- types_freq_plot_wordcloud(
   #   types_freq_an_fi ,"fi" , fct , ,nwords)
   # keypress()
-  # rie(types_freq_an_fi_3,types_distrib,qc,"fi",3,rem_stopw = T, faceted = fct)
+  # rie(types_freq_an_fi_3,types_distrib,qc,"fi",3,rem_stopw = r_stopw, faceted = fct)
   # types_freq_an_fi_plot_3_wcloud <- types_freq_plot_wordcloud(
   #   types_freq_an_fi_3, "fi" , fct , ,nwords/3)
   # keypress()
   # 
   # 
-  # rie(types_freq_an_ru ,types_distrib ,qc ,"ru",1,rem_stopw = T, faceted = fct)
+  # rie(types_freq_an_ru ,types_distrib ,qc ,"ru",1,rem_stopw = r_stopw, faceted = fct)
   # types_freq_an_ru_plot_wcloud <- types_freq_plot_wordcloud(
   #   types_freq_an_ru ,"ru" , fct, ,nwords)
   # keypress()
-  # rie(types_freq_an_ru_3,types_distrib,qc,"ru",3,rem_stopw = T, faceted = fct)
+  # rie(types_freq_an_ru_3,types_distrib,qc,"ru",3,rem_stopw = r_stopw, faceted = fct)
   # types_freq_an_ru_plot_3_wcloud <- types_freq_plot_wordcloud(
   #   types_freq_an_ru_3, "ru" , fct , ,nwords/3)
   # keypress()

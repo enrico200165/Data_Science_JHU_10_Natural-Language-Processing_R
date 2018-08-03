@@ -203,8 +203,3 @@ remove_punctuation <- function() {
 }
 
 
-require(data.table)
-dt <- data.table( a = 1:3 , b = 11:13)
-newcols_names <- c("newcol1" ,"newcol2")
-dt[ , newcols_names[1:2] := list(a+5, b+5) ] ; print(dt)
-dt[ , newcols_names := list(a+5, b+5) ]; print(dt)

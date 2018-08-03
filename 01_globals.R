@@ -552,7 +552,7 @@ keypress <- function (message = "Press [enter] to continue"
     invisible(readline(prompt=message))
   } else {
     prt(message)
-    System.wait(5)
+    Sys.sleep(5)
   }
 
   invisible(T)
