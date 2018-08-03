@@ -176,19 +176,16 @@ ggplot2_bin_pars <- function() {
 
 explore_ngrams_punct <- function() {
   
-  qc <- corpus("Hello, Hello. Bye, Bye")
-  #tokens(qc, ngrams = 2)
-  ntoken(tokens(qc, ngrams = 2))
-  qc_sent <- corpus_reshape(qc, to = "sentences")
+  qc <- corpus("one two. Three.")
+  print(tokens(qc, ngrams = 2))
+
+  qc_sentenc <- corpus_reshape(qc, to = "sentences")
+  print(tokens(qc_sentenc, ngrams = 2))
   texts(qc_sent)
-  ntoken(tokens(qc_sent, ngrams = 2))
-  ntoken(tokens(qc_sent, ngrams = 2
-    ,remove_punc = T))
+  # ntoken(tokens(qc_sent, ngrams = 2))
+  # ntoken(tokens(qc_sent, ngrams = 2,remove_punc = T))
+
   
-  tokens(qc, ngrams = 2)
-  tokens(qc_sent, ngrams = 2)
-  tokens(qc_sent, ngrams = 2
-    ,remove_punc = T)
 }
 # explore_ngrams_punct()
 
@@ -202,4 +199,5 @@ remove_punctuation <- function() {
   tokens(txt, remove_numbers = TRUE,remove_punct = TRUE)
 }
 
+explore_ngrams_punct()
 

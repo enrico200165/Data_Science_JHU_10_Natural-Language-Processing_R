@@ -78,7 +78,7 @@ map_acro <- function(x) ..map_values[
 # variable (more laborious to manage)
 
 # --------------------------------------------------------------------
-use_full_corpus <- function(vPar, reinit_funct = NULL 
+use_full_corpus <- function(vPar = NULL, reinit_funct = NULL 
   ,...)
 # --------------------------------------------------------------------
 {
@@ -155,7 +155,15 @@ data_dir_corpus_full <-   file.path(data_dir_cap,"data_in","corpus_full")
 data_dir_corpus_subset <- file.path(data_dir_cap,"data_in","corpus_subset")
 
 data_dir_corpus_in <- function() {
-    if (use_full_corpus()) 
+  full <- use_full_corpus() 
+  
+  if (is.null(full)) {
+    m <- "you must initialize the variable fulldata, it is NULL"
+    prt_error(m) # in case I use it as brakpoint
+    stop("you must initialize the variable fulldata, it is NULL")
+  }
+
+  if (full) 
       data_dir_corpus_full 
   else
     data_dir_corpus_subset

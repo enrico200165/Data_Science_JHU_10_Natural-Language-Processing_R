@@ -54,6 +54,7 @@ rsconnect/
 
 # data texts files
 *.txt
+*.png
 # saved non code files
 *SAVED
 itaur_copy_modify
