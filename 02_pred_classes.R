@@ -1,6 +1,7 @@
 
 require(R6)
 require(gridExtra)
+require(ggplot2)
 
 source("02_pred_globals.R")
 source("02_pred_ngram_bare_dtf.R")
@@ -72,7 +73,7 @@ DTF_Basic <- R6Class("DTF_Basic"
    # -----------------------------------------------------------------
   ,coverageGraphs = function() {
     
-    info <- paste(self$ngram(),"gram nr features: ",self$nfeat())
+    info <- paste0(self$ngram(),"gram_",self$nfeat(),"features")
     
     df_cov_idx <- data.frame(qt = qtiles_vec, idx = self$coverers()[[1]]) 
     
@@ -81,22 +82,20 @@ DTF_Basic <- R6Class("DTF_Basic"
     p_cov_idx <- p_cov_idx +  geom_abline(intercept = 0
       ,slope = max(self$coverers()[[1]]), color = "blue" )
     p_cov_idx <- p_cov_idx +  ggtitle(paste("Coverage",info))
-    ggsave("coverage_nrfeatures.png", plot = p_cov_idx
+    ggsave(paste0(info,"_nr",".png"), plot = p_cov_idx
       ,width = 10, height = 8, units = "cm")
 
     # percentuale coperta, diviso percentuale elementi per coprire
-    df_cov_prop <- data.frame(qt = qtiles_vec, idx = self$coverers()[[2]]) 
-    p_cov_prop <- ggplot(df_cov_prop , aes(x = qt, y = idx)) 
-    p_cov_prop <- p_cov_prop +  geom_point(size = 3) 
     df_cov_ratio <- data.frame(qt = qtiles_vec, idx = self$coverers()[[2]],
-    qtf = paste(qtiles_vec,as.character(self$coverers()[[2]]),sep = ">")) 
+    qtf = paste(qtiles_vec ,round(self$coverers()[[1]],4)
+      ,as.character(round(self$coverers()[[2]],4)) ,sep = " ")) 
     p_cov_ratio <- ggplot(df_cov_ratio ,aes(x = qt, y = qt/idx,label = qtf)) 
     p_cov_ratio <- p_cov_ratio +  geom_text(check_overlap = TRUE ,hjust = 0) 
     p_cov_ratio <- p_cov_ratio +  scale_x_continuous(limits = c(0.5,1.1))
     p_cov_ratio <- p_cov_ratio +  geom_hline(yintercept = 1 ,color = "red" 
       ,size = 2)
     p_cov_ratio <- p_cov_ratio +ggtitle(paste("Coverage",info))
-    ggsave("coverage_power.png", plot = p_cov_ratio
+    ggsave(paste0(info,"_ratio",".png"), plot = p_cov_ratio
     ,width = 10, height = 8, units = "cm")
 
     list(p_cov_idx = p_cov_idx

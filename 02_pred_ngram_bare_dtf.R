@@ -216,7 +216,7 @@ pred_ngrams_re_init <- function()
 
 
 # --------------------------------------------------------------------  
-  produce_ngram_bare_dtf <- function()
+  produce_ngram_bare_dtf <- function(n)
 # --------------------------------------------------------------------
 {
 

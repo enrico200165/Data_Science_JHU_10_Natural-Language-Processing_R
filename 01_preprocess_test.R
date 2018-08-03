@@ -19,10 +19,10 @@ source("01_preprocess_lib.R")
   silent <<- F
 
   T && subsetTextFilesByLines(data_dir_corpus_full 
-      ,data_dir_corpus_subset ,5,10000 , forceIt = F)
+      ,data_dir_corpus_subset ,50,1000 , forceIt = F)
 
 
-  if(T) {
+  if(F) {
     print(list.files(data_dir_corpus_full))
 
     start_time <- proc.time()
