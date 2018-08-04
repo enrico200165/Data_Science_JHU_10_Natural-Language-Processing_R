@@ -5,7 +5,7 @@ source("02_pred_ngram_bare_dtf.R")
 
 
 
-fulldata <- T
+fulldata <- T; memory.limit(size = 24000)
 silent <- F
 
 ret <- produce_ngram_bare_dtf()

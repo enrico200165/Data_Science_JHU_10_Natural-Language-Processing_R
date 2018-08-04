@@ -47,17 +47,29 @@ build_dfm_ngrams <- function(txts_par, n)
   
   # stopifnot(class)
   
-  dfm_ret <- dfm(txts_par
+  # dfm_ret <- dfm(txts_par
+  #   ,ngrams = n
+  #   ,remove_numbers = T
+  #   ,remove_punct = T
+  #   ,remove_symbols = T
+  #   ,remove_separators = T
+  #   ,remove_twitter = T
+  #   ,remove_hyphens = FALSE
+  #   ,remove_url = FALSE,
+  #   )
+
+    dfm_ret <- dfm(txts_par
     ,ngrams = n
-    ,remove_numbers = T
-    ,remove_punct = T
-    ,remove_symbols = T
-    ,remove_separators = T
-    ,remove_twitter = T
-    ,remove_hyphens = FALSE
-    ,remove_url = FALSE,
+    ,remove_numbers = F
+    ,remove_punct = F
+    ,remove_symbols = F
+    ,remove_separators = F
+    ,remove_twitter = F
+    ,remove_hyphens = F
+    ,remove_url = F,
     )
-  
+
+    
   prt("docs: ",ndoc(dfm_ret), "features",nfeat(dfm_ret))
   
   dfm_ret
@@ -69,16 +81,19 @@ dtf_ngram <- function(txts_merged , n)
 # --------------------------------------------------------------------
 # NOT SURE IT IS USED, It may crash for lack of memory
 {
-  
+  prt("dtf_ngram() - begininning - n=",n)
   stopifnot(1 <= n && n <= 3)
-  
+
+  prt("dtf_ngram() - calling build_dfm_ngrams(txts_merged, n) - n=",n)
   dfm_ngram <- build_dfm_ngrams(txts_merged, n)
+
   # textstats
-  texstat_ngram <- textstat_frequency(dfm_ngram)
-  # free memory because it crashes with 3grams and full data
-  rm(dfm_ngram); gc()
-  # get the data table
-  dtf_ngram <- data.table(texstat_ngram)
+  prt("dtf_ngram() - textstat_frequency(dfm_ngram) - n=",n)
+  texstat_ngram <- textstat_frequency(dfm_ngram); rm(dfm_ngram); gc()
+
+  prt("dtf_ngram() - setDT(texstat_ngram) - n=",n)
+
+  setDT(texstat_ngram)
 }
 
 
