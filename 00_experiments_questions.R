@@ -201,3 +201,15 @@ remove_punctuation <- function() {
 
 explore_ngrams_punct()
 
+
+
+
+dfm1 <- dfm(corpus(c("one", "two two","three three three")))
+featnames(dfm1)
+df <- textstat_frequency(dfm1)
+colSums(df)
+
+
+dfm_all <- rbind(dfm1,dfm2, dfm3)
+dfm_all2 <- dfm1 + dfm2 + dfm3
+

@@ -6,6 +6,7 @@ require(readtext)
 
 source("01_globals.R")
 source("02_pred_globals.R")
+source("01_preprocess_lib.R")
 
 
 # ####################################################################
@@ -45,31 +46,19 @@ build_dfm_ngrams <- function(txts_par, n)
 # --------------------------------------------------------------------
 {
   
-  # stopifnot(class)
-  
-  # dfm_ret <- dfm(txts_par
-  #   ,ngrams = n
-  #   ,remove_numbers = T
-  #   ,remove_punct = T
-  #   ,remove_symbols = T
-  #   ,remove_separators = T
-  #   ,remove_twitter = T
-  #   ,remove_hyphens = FALSE
-  #   ,remove_url = FALSE,
-  #   )
+  # stopifnot(class(txts_par) %in% c("tokens","character"))
 
-    dfm_ret <- dfm(txts_par
-    ,ngrams = n
-    ,remove_numbers = F
-    ,remove_punct = F
-    ,remove_symbols = F
-    ,remove_separators = F
-    ,remove_twitter = F
-    ,remove_hyphens = F
-    ,remove_url = F,
-    )
+  dfm_ret <- dfm(txts_par
+   ,ngrams = n
+   ,remove_numbers = T
+   ,remove_punct = T
+   ,remove_symbols = T
+   ,remove_separators = T
+   ,remove_twitter = T
+   ,remove_hyphens = FALSE
+   ,remove_url = FALSE,
+   )
 
-    
   prt("docs: ",ndoc(dfm_ret), "features",nfeat(dfm_ret))
   
   dfm_ret
@@ -134,9 +123,10 @@ produce_ngram_bare_dtf <- function()
 #
 {
 
-  prt("reading files into single text")
-  rie(txts_merged ,read_texts ,data_dir_corpus_in())
+  # prt("reading files into single text")
+  # rie(txts_merged ,read_texts ,data_dir_corpus_in())
 
+  txts_merged <- readQCorp(data_dir_corpus_in())
   
   feature <- "feature"
 
@@ -198,7 +188,7 @@ produce_ngram_bare_dtf <- function()
       ter  <- sapply(splits,function(x) x[3])
 
       # dt[ , TYPES_COLNAMES[1:3] := list(prim, sec , ter) ] # seems to corrupt memory
-      dt[ , `:=`(primo = prim, secondo = sec , terzo = ter) ]
+      dt[ , `:=`(primo = prim, secondo = sec, terzo = ter) ]
       dt[, feature := NULL]
       rm(splits , prim , sec , ter); gc()
 
@@ -225,4 +215,38 @@ produce_ngram_bare_dtf <- function()
   
   }
 
+
+# --------------------------------------------------------------------
+dtf_info <- function(dtf)
+# --------------------------------------------------------------------
+{
+  prt("info about",deparse(substitute(dtf))
+    ,"size",XiB(pryr::object_size(dtf))
+    ,"nr features:",nrow(dtf)
+    ,"memory/feature ratio", round(pryr::object_size(dtf)/nrow(dtf),0)
+    )
+}
+
+
+# ====================================================================
+#   Global initialization - MUST BE IN Lib, to be passed when changing
+#   data from full to subset and the other way round, that requires
+#   reinitializing
+#   Can NOT do very first initializations
+# ====================================================================
+ngram_bare_re_init <- function() {
+# --------------------------------------------------------------------  
+  
+
+  prt("start ngram_bare_re_init()")
+  set_parallelism(6,NULL)
+
+  read_dir <- read_dir()
+
+  rie(qc_full,readQCorp,read_dir, FALSE)
+  # qc_full <<- qc_full
+ 
+
+  prt("completed ngram_bare_re_init()")
+}
 
