@@ -601,7 +601,7 @@ prt_warn <- function(...) do.call(prt,prepend(list(...),"# WARNING:"))
 prt_error <- function(...) do.call(prt,prepend(list(...),"### ERROR:"))
 
 # --------------------------------------------------------------------
-coverage_of_freq_list <- function(frq_vect, qtiles_vec)
+coverage_of_freq_list <- function(frq_vect, qtiles_vec, size = NULL)
 # --------------------------------------------------------------------
 {
   
@@ -621,7 +621,8 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec)
     idxs <- numeric(length =length(qtiles_vec))
     pcts <- numeric(length =length(qtiles_vec))
     frqs <- numeric(length =length(qtiles_vec))
-    
+    sizs <- numeric(length =length(qtiles_vec))
+
     for (i in seq_along(qtiles_vec)) {
       
       qtile <- qtiles_vec[i]
@@ -634,6 +635,7 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec)
       idxs[i] <- idx_set[1]
       pcts[i] <- idxs[i]/length(frq_vect)
       frqs[i] <- frq_vect[idx_set[1]]
+      sizs[i] <- pcts[i]*size
       
       #prt(qtile,"somma:",round(sum(props[1:idxs[i]])/molt ,2))
       #print("")
@@ -642,7 +644,8 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec)
     list(
       idxs = idxs
       ,pcts = pcts
-      ,frq = frqs)
+      ,frq = frqs
+      ,sizs = sizs)
 }
 
 

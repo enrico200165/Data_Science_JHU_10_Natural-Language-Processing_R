@@ -33,9 +33,9 @@ DTF_Basic <- R6Class("DTF_Basic"
     
     private$..dtf <- dtf_par
     private$..nfeat <- nrow(private$..dtf );
-    private$..coverage <- coverage_of_freq_list(
-      private$..dtf$frequency ,qtiles_vec)
     # browser()
+    private$..coverage <- coverage_of_freq_list(
+      private$..dtf$frequency ,qtiles_vec ,self$size())
     if (all(TYPES_COLNAMES %in% names(private$..dtf))) {
       prt("building 3 grams object")
       private$..ngram = 3
@@ -72,8 +72,21 @@ DTF_Basic <- R6Class("DTF_Basic"
     gc()
   }
    
-  ,coverers = function() private$..coverage
- 
+  ,size = function() pryr::object_size(self)
+   
+  ,coverage_tables = function() private$..coverage
+
+  ,print_coverage = function() {
+    prt(" ---IDXS ---" ,paste(formatC(private$..coverage[[1]]
+      ,format="d", big.mark=",", digits=0), collapse = " "))
+    prt("--- PCTS ---" ,paste(formatC(private$..coverage[[2]]
+      ,format="f", big.mark=",", digits=2), collapse = " "))
+    prt("--- FRQS ----" ,paste(formatC(private$..coverage[[3]]
+      ,format="f", big.mark=",", digits=0), collapse = " "))
+    prt("--- SIZS ---",paste(XiB(private$..coverage[[4]])
+        ,collapse = " "))
+  }
+   
   ,nfeat = function() private$..nfeat
 
   ,ngram = function() private$..ngram
@@ -86,22 +99,22 @@ DTF_Basic <- R6Class("DTF_Basic"
                    ,"_features")
     
     
-    df_cov_idx <- data.frame(qt = qtiles_vec, idx = self$coverers()[[1]]) 
+    df_cov_idx <- data.frame(qt = qtiles_vec, idx = self$coverage_tables()[[1]]) 
     
     p_cov_idx <- ggplot(df_cov_idx , aes(x = qt, y = idx)) 
     p_cov_idx <- p_cov_idx +  geom_point(size = 3) 
     p_cov_idx <- p_cov_idx +  geom_abline(intercept = 0
-      ,slope = max(self$coverers()[[1]]), color = "blue" )
+      ,slope = max(self$coverage_tables()[[1]]), color = "blue" )
     p_cov_idx <- p_cov_idx +  ggtitle(paste("Coverage",info))
     ggsave(paste0(info,"_nr",".png"), plot = p_cov_idx
       ,width = 10, height = 8, units = "cm")
 
     # percentuale coperta, diviso percentuale elementi per coprire
-    df_cov_ratio <- data.frame(qt = qtiles_vec, idx = self$coverers()[[2]],
-    # qtf = paste(qtiles_vec ,round(self$coverers()[[1]],4)
-    # ,as.character(round(self$coverers()[[2]],4)) ,sep = " "))
-    qtf = paste(qtiles_vec ,formatC(self$coverers()[[1]], format="f", big.mark=",", digits=0)
-       ,as.character(round(self$coverers()[[2]],4)) ,sep = " "))
+    df_cov_ratio <- data.frame(qt = qtiles_vec, idx = self$coverage_tables()[[2]],
+    # qtf = paste(qtiles_vec ,round(self$coverage_tables()[[1]],4)
+    # ,as.character(round(self$coverage_tables()[[2]],4)) ,sep = " "))
+    qtf = paste(qtiles_vec ,formatC(self$coverage_tables()[[1]], format="f", big.mark=",", digits=0)
+       ,as.character(round(self$coverage_tables()[[2]],4)) ,sep = " "))
     p_cov_ratio <- ggplot(df_cov_ratio ,aes(x = qt, y = qt/idx,label = qtf)) 
     p_cov_ratio <- p_cov_ratio +  geom_text(check_overlap = TRUE ,hjust = 0) 
     p_cov_ratio <- p_cov_ratio +  scale_x_continuous(limits = c(0.5,1.1))
