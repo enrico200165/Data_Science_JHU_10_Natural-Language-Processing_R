@@ -34,8 +34,10 @@ DTF_Basic <- R6Class("DTF_Basic"
     private$..dtf <- dtf_par
     private$..nfeat <- nrow(private$..dtf );
     # browser()
-    private$..coverage <- coverage_of_freq_list(
+    tmp <- coverage_of_freq_list(
       private$..dtf$frequency ,qtiles_vec ,self$size())
+    browser()
+    private$..coverage <- data.frame(tmp)
     if (all(TYPES_COLNAMES %in% names(private$..dtf))) {
       prt("building 3 grams object")
       private$..ngram = 3
@@ -77,6 +79,9 @@ DTF_Basic <- R6Class("DTF_Basic"
   ,coverage_tables = function() private$..coverage
 
   ,print_coverage = function() {
+    
+    print(private$..coverage)
+    return(T)
     prt(" ---IDXS ---" ,paste(formatC(private$..coverage[[1]]
       ,format="d", big.mark=",", digits=0), collapse = " "))
     prt("--- PCTS ---" ,paste(formatC(private$..coverage[[2]]
