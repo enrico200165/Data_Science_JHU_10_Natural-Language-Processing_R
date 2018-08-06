@@ -1,5 +1,5 @@
 ---
-title: "Explorative Data Analysis"
+title: "CoverageAnalysis"
 author: "Enrico"
 date: "July 2018"
 output: html_document
@@ -40,7 +40,7 @@ require(knitr)
 source("02_pred_classes.R")
 # source("ev_nlp_eda_lib.R")
 
-fulldata <- F 
+fulldata <- T
 silent <- T
 # eda_re_init()
 ```
@@ -48,9 +48,15 @@ silent <- T
 
 
 ## Temp
-table ???    
+
+Date: `r format(Sys.time(), '%Y-%m-%d %H:%M:%S')`
+Full Data: `r fulldata`
+
+    
 ```{r physical_analysis_ls, echo = FALSE, results ='markup'}
 require(kableExtra)
+
+print(paste("fulldata =",fulldata))
 
 # invisible(rie(phys_an_df,physicalAnalysis,data_dir_corpus_full))
 
