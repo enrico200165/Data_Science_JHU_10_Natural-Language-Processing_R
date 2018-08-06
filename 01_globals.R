@@ -11,7 +11,6 @@ keypressWait <- if (exists("keypressWait")) keypressWait else FALSE
 strict_ <- T ; strict <- function(val) { 
   if (!missing(val)) 
     strict_ <<- val
-  
   (exists("strict_") && strict_)
 }
 
@@ -498,6 +497,7 @@ mem_health <- function(survivors = character(0) ,dry_run = F
   # remove local, should be unnecessary
   local_vars <- ls()
   delete_vars_df <- all_vars_df[!(all_vars_df$ID %in% local_vars), ]
+
   # variables to save
   delete_vars_df <- all_vars_df[!(all_vars_df$ID %in% survivors), ]
   # don't remove small variables
@@ -511,7 +511,7 @@ mem_health <- function(survivors = character(0) ,dry_run = F
 
   mem_delete_vars <- sum(delete_vars_df$Size)
   
-  if (verbose) {
+  if (!is.null(verbose) && verbose) {
     prt("deleting", length(delete_vars_df$ID),"vars:",paste(delete_vars_df$ID))
     prt(" sparing", length(survivors),"vars:", paste(survivors))
   }
@@ -620,6 +620,7 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec)
     
     idxs <- numeric(length =length(qtiles_vec))
     pcts <- numeric(length =length(qtiles_vec))
+    frqs <- numeric(length =length(qtiles_vec))
     
     for (i in seq_along(qtiles_vec)) {
       
@@ -632,6 +633,7 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec)
       }
       idxs[i] <- idx_set[1]
       pcts[i] <- idxs[i]/length(frq_vect)
+      frqs[i] <- frq_vect[idx_set[1]]
       
       #prt(qtile,"somma:",round(sum(props[1:idxs[i]])/molt ,2))
       #print("")
@@ -639,7 +641,8 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec)
     
     list(
       idxs = idxs
-      ,pcts = pcts)
+      ,pcts = pcts
+      ,frq = frqs)
 }
 
 

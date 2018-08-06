@@ -149,13 +149,14 @@ test_coverage_of_freq_list <- function()
 {
   qtiles_vec <- c(0.5,0.6,0.7,0.8,0.9,0.95,0.96,0.97,0.98,0.99)
 
-  x <- rep(1,1000)
+  # x <- rep(1,1000)
+  x <- 100:1
   ret <- coverage_of_freq_list(x, qtiles_vec)
-  print(rbind(qtiles_vec ,ret[[1]],ret[[2]]))
+  print(rbind(qtiles_vec ,ret[[1]],ret[[2]],ret[[3]]))
   
   y <- x[1:10] # unable to satisfy  
   ret <- coverage_of_freq_list(y, qtiles_vec)
-  print(rbind(qtiles_vec ,ret[[1]],ret[[2]]))
+  print(rbind(qtiles_vec ,ret[[1]],ret[[2]],ret[[3]]))
 
 }
     

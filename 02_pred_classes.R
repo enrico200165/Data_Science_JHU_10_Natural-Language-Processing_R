@@ -6,48 +6,56 @@ require(ggplot2)
 source("02_pred_globals.R")
 source("02_pred_ngram_bare_dtf.R")
 
-qtiles_vec <- c(0.5,0.6,0.7,0.8,0.9,0.95,0.96,0.97,0.98,0.99, 0.995)
+
+qtiles_vec <- c(0.5, 0.55 ,0.6 ,0.65 ,0.7 ,0.75 ,0.8,0.85 ,0.9, 0.95
+  ,0.96,0.97,0.98,0.99, 0.995)
 
 # --------------------------------------------------------------------
 DTF_Basic <- R6Class("DTF_Basic"
 # wraps an ngram frequency data table
 # -------------------------------------------------------------------
-
+  
   # ==================================================================
  ,public = list(
   # ==================================================================
    
   # ------------------------------------------------------------------
    initialize = function(dtf_par) {
+    
     prt("in initialize")
 
+    stopifnot(any("data.table" %in% class(dtf_par)))
     stopifnot(nrow(dtf_par$primo) > 0)
+    
+    
+    # remove unneeded columns
+    # dtf_par[ ,  c("docfreq","group","rank"):=NULL]
     
     private$..dtf <- dtf_par
     private$..nfeat <- nrow(private$..dtf );
     private$..coverage <- coverage_of_freq_list(
       private$..dtf$frequency ,qtiles_vec)
+    # browser()
     if (all(TYPES_COLNAMES %in% names(private$..dtf))) {
-      # trigrams
+      prt("building 3 grams object")
       private$..ngram = 3
-      setkeyv(private$..dtf ,TYPES_COLNAMES)
+      # setkeyv(private$..dtf ,TYPES_COLNAMES[1:3])
       # below here maybe redundant or just unnecessary
       setindexv(private$..dtf ,TYPES_COLNAMES[1:2])
       setindexv(private$..dtf ,TYPES_COLNAMES[1])
       setindexv(private$..dtf ,TYPES_COLNAMES[2])
-    }
-    else if (all(TYPES_COLNAMES[1:2] %in% names(private$..dtf))) {
-      # bigrams
+    } else if (all(TYPES_COLNAMES[1:2] %in% names(private$..dtf))) {
+      prt("building 2 grams object")
       private$..ngram = 2
-      setkeyv(private$..dtf ,TYPES_COLNAMES[1:2])
+      # setkeyv(private$..dtf ,TYPES_COLNAMES[1:2])
       # below here maybe redundant or just unnecessary
       setindexv(private$..dtf ,TYPES_COLNAMES[1])
       setindexv(private$..dtf ,TYPES_COLNAMES[2])
     }
     else if (TYPES_COLNAMES[1] %in% names(private$..dtf)) {
-      # 1grams
+      prt("building 1 grams object")
       private$..ngram = 1
-      setkeyv(private$..dtf ,TYPES_COLNAMES[1])
+      # setkeyv(private$..dtf ,TYPES_COLNAMES[1])
       # nearly surely unnecessary
       setindexv(private$..dtf ,TYPES_COLNAMES[1])
     }
@@ -56,7 +64,7 @@ DTF_Basic <- R6Class("DTF_Basic"
       stop()      
     }
     # 
-    prt("key",key(private$..dtf))
+    prt("key",key(private$..dtf),"indexes",indices(private$..dtf))
   }
    
   ,finalize = function() {
@@ -73,7 +81,10 @@ DTF_Basic <- R6Class("DTF_Basic"
    # -----------------------------------------------------------------
   ,coverageGraphs = function() {
     
-    info <- paste0(self$ngram(),"gram_",self$nfeat(),"features")
+    # info <- paste0(self$ngram(),"gram_",self$nfeat(),"_features")
+    info <- paste0(self$ngram(),"gram_",formatC(self$nfeat(), format="f", big.mark=",", digits=0)
+                   ,"_features")
+    
     
     df_cov_idx <- data.frame(qt = qtiles_vec, idx = self$coverers()[[1]]) 
     
@@ -87,8 +98,10 @@ DTF_Basic <- R6Class("DTF_Basic"
 
     # percentuale coperta, diviso percentuale elementi per coprire
     df_cov_ratio <- data.frame(qt = qtiles_vec, idx = self$coverers()[[2]],
-    qtf = paste(qtiles_vec ,round(self$coverers()[[1]],4)
-      ,as.character(round(self$coverers()[[2]],4)) ,sep = " ")) 
+    # qtf = paste(qtiles_vec ,round(self$coverers()[[1]],4)
+    # ,as.character(round(self$coverers()[[2]],4)) ,sep = " "))
+    qtf = paste(qtiles_vec ,formatC(self$coverers()[[1]], format="f", big.mark=",", digits=0)
+       ,as.character(round(self$coverers()[[2]],4)) ,sep = " "))
     p_cov_ratio <- ggplot(df_cov_ratio ,aes(x = qt, y = qt/idx,label = qtf)) 
     p_cov_ratio <- p_cov_ratio +  geom_text(check_overlap = TRUE ,hjust = 0) 
     p_cov_ratio <- p_cov_ratio +  scale_x_continuous(limits = c(0.5,1.1))
@@ -161,5 +174,4 @@ DTF_Basic <- R6Class("DTF_Basic"
 o_1grams_basic <- if (exists("o_1grams_basic")) o_1grams_basic else NULL
 o_2grams_basic <- if (exists("o_2grams_basic")) o_2grams_basic else NULL
 o_3grams_basic <- if (exists("o_3grams_basic")) o_3grams_basic else NULL
-
 

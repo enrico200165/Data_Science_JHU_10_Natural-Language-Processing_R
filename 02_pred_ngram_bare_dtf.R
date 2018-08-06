@@ -117,21 +117,16 @@ pred_ngrams_re_init <- function()
 
   
 # --------------------------------------------------------------------
-produce_ngram_bare_dtf <- function() 
+produce_ngram_bare_dtf_1 <- function() 
 # --------------------------------------------------------------------
 # https://stackoverflow.com/questions/20345022/convert-a-data-frame-to-a-data-table-without-copy
 #
 {
-
-  # prt("reading files into single text")
-  # rie(txts_merged ,read_texts ,data_dir_corpus_in())
-
-  txts_merged <- readQCorp(data_dir_corpus_in())
-  
+  rie(qc_full, readQCorp ,data_dir_corpus_in())
   feature <- "feature"
 
   prt("builfrequency data tables sigle-string _sep")
-  rie(dtf_1gram ,dtf_ngram ,txts_merged , 1)
+  rie(dtf_1gram ,dtf_ngram ,qc_full , 1)
   prt("splitting dts 1grams")
   
   if (feature %in% colnames(dtf_1gram)) {
@@ -144,14 +139,25 @@ produce_ngram_bare_dtf <- function()
     stop()
   }
   assign("dtf_1gram_sep" ,dtf_1gram_sep, .GlobalEnv)
-  # mem_health(c("dtf_1gram_sep","dtf_2gram_sep","dtf_3gram_sep"))
   if (nrow(dtf_1gram) != nrow(dtf_1gram_sep))
-    prt_error("different nr rows splitting unigram:",nrow(dtf_sstring1),nrow(dtf_1gram_sep))
+    prt_error("different nr rows splitting unigram:",nrow(dtf_1gram),nrow(dtf_1gram_sep))
+
   kill_var(dtf_1gram)
-  
-  
+  NULL
+}
+
+
+# --------------------------------------------------------------------
+produce_ngram_bare_dtf_2 <- function() 
+# --------------------------------------------------------------------
+# https://stackoverflow.com/questions/20345022/convert-a-data-frame-to-a-data-table-without-copy
+#
+{
+  rie(qc_full, readQCorp ,data_dir_corpus_in())
+  feature <- "feature"
+
   prt("splitting dts 2grams")
-  rie(dtf_2gram ,dtf_ngram ,txts_merged , 2)
+  rie(dtf_2gram ,dtf_ngram ,qc_full , 2)
   if (feature %in% colnames(dtf_2gram)) {
     dt2_fun <- function(dt) {
       
@@ -171,12 +177,25 @@ produce_ngram_bare_dtf <- function()
     stop()
   }
   if (nrow(dtf_2gram) != nrow(dtf_2gram_sep))
-    prt("different nr rows splitting unigram:",nrow(dtf_sstring2),nrow(dtf_2gram_sep))
+    prt("different nr rows splitting unigram:",nrow(dtf_2gram),nrow(dtf_2gram_sep))
+
   kill_var(dtf_2gram)
-  mem_health(c("dtf_1gram_sep","dtf_2gram_sep","dtf_3gram_sep"))
-  
-  
-  rie(dtf_3gram ,dtf_ngram ,txts_merged , 3)
+  NULL
+  }
+
+
+
+# --------------------------------------------------------------------
+produce_ngram_bare_dtf_3 <- function() 
+# --------------------------------------------------------------------
+# https://stackoverflow.com/questions/20345022/convert-a-data-frame-to-a-data-table-without-copy
+#
+{
+  rie(qc_full, readQCorp ,data_dir_corpus_in())
+  feature <- "feature"
+
+
+  rie(dtf_3gram ,dtf_ngram ,qc_full , 3)
   prt("splitting dts 3grams")
   if (feature %in% colnames(dtf_3gram)) {
 
@@ -201,19 +220,22 @@ produce_ngram_bare_dtf <- function()
     stop()
   }
   if (nrow(dtf_3gram) != nrow(dtf_3gram_sep))
-    prt("different nr rows splitting unigram:",nrow(dtf_sstring3),nrow(dtf_3gram_sep))
-  kill_var(dtf_3gram)
-  mem_health(c("dtf_sep_1gram","dtf_sep_2gram","dtf_sep_3gram"))
-  
-  kill_var(txts_merged)
+    prt("different nr rows splitting unigram:",nrow(dtf_3gram),nrow(dtf_3gram_sep))
 
-  list(
-    dtf_1gram = dtf_1gram
-   ,dtf_2gram = dtf_2gram
-   ,dtf_3gram = dtf_3gram
-    )
-  
+  kill_var(dtf_3_gram)
+  NULL  
   }
+
+# --------------------------------------------------------------------
+produce_ngram_bare_dtf <- function() 
+# --------------------------------------------------------------------
+{
+  produce_ngram_bare_dtf_1()
+  produce_ngram_bare_dtf_2()
+  produce_ngram_bare_dtf_3()
+  
+  NULL
+}
 
 
 # --------------------------------------------------------------------
@@ -243,8 +265,8 @@ ngram_bare_re_init <- function() {
 
   read_dir <- read_dir()
 
-  rie(qc_full,readQCorp,read_dir, FALSE)
-  # qc_full <<- qc_full
+  rie(qc_full,readQCorp,data_dir_corpus_in(), FALSE)
+  qc_full <<- qc_full
  
 
   prt("completed ngram_bare_re_init()")

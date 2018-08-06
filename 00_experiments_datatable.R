@@ -14,9 +14,22 @@ colnames_in_variables <- function() {
   print(dt)
 }
 
-# vignette at: 
-# https://cran.r-project.org/web/packages/data.table/vignettes/datatable-secondary-indices-and-auto-indexing.html
 
-flights <- flights[ ,-c(4 ,5 ,7 ,8 ,11 ,12 ,18 ,19)]
-flights
+keys_and_indexes <- function() {
+  
+  keys <- c("a","b","c")
+
+  d <- data.table(a = 1, b = 2, c = 3)
+  
+  # set key ok
+  setkeyv(d,keys); print(key(d))
+  
+  # indexes seem to fail when key is present
+  setindexv(d,keys); print(indices(d))
+
+  # without key indexes work  
+  d <- data.table(a = 1, b = 2, c = 3)
+  setindexv(d,keys); print(indices(d))
+
+}
 
