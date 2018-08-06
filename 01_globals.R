@@ -645,7 +645,7 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec, size = NULL)
        qtls = qtiles_vec
       ,idxs = idxs
       ,pcts = pcts
-      ,frq = frqs
+      ,frqs = frqs
       ,sizs = sizs)
 }
 
