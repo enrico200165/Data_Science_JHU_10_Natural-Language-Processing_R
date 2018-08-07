@@ -170,7 +170,7 @@ test_coverage_of_freq_list <- function()
   fulldata <<- F
 
 
-  
+  # test_XiB()  
   # testRemoveAllVarExcept()
   # testReadIfEmpty()
   # test_rie()
@@ -178,7 +178,7 @@ test_coverage_of_freq_list <- function()
 
   # testAddToCoreDF()
   # test_getSerializeFName()
-  test_coverage_of_freq_list()
+  # test_coverage_of_freq_list()
 }
 
 # 

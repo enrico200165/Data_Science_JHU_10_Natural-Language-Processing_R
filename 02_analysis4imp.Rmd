@@ -49,17 +49,14 @@ silent <- T
 
 ## Temp
 
-Date: `r format(Sys.time(), '%Y-%m-%d %H:%M:%S')`
+Date: `r format(Sys.time(), '%Y-%m-%d %H:%M:%S')`   
 Full Data: `r fulldata`
 
     
 ```{r physical_analysis_ls, echo = FALSE, results ='markup'}
 require(kableExtra)
 
-print(paste("fulldata =",fulldata))
-
 # invisible(rie(phys_an_df,physicalAnalysis,data_dir_corpus_full))
-
 #phys_an_df$file <- gsub("_?subset.*\\.", ".", phys_an_df$file)
 #row.names(phys_an_df) <- NULL
 #phys_an_df %>%  kable(row.names = FALSE) %>% kable_styling()

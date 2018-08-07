@@ -537,15 +537,17 @@ mem_health <- function(survivors = character(0) ,dry_run = F
 
 
 # --------------------------------------------------------------------
-  XiB <- function (x, digits = 2)
+  XiB <- function (x, digits = 2, separ = "_")
 # --------------------------------------------------------------------
 # for printing
 {
   unit <- "b"
+  
   if (x < 2^(10) )   return(paste(x,"b"))
-  if (x < 2^(10*2) ) return(paste(round(x/2^10    ,digits),"KiB"))
-  if (x < 2^(10*3) ) return(paste(round(x/2^(10*2),digits),"MiB"))
-                     return(paste(round(x/2^(10*3),digits),"GiB"))
+  if (x < 2^(10*2) ) return(paste(round(x/2^10    ,digits),"KiB",sep = separ))
+  if (x < 2^(10*3) ) return(paste(round(x/2^(10*2),digits),"MiB",sep = separ))
+  
+  return(paste(round(x/2^(10*3),digits),"GiB",sep = separ))
 }
 
 
@@ -600,8 +602,9 @@ prt_last_call_time <- Sys.time()
 prt_warn <- function(...) do.call(prt,prepend(list(...),"# WARNING:"))
 prt_error <- function(...) do.call(prt,prepend(list(...),"### ERROR:"))
 
+
 # --------------------------------------------------------------------
-coverage_of_freq_list <- function(frq_vect, qtiles_vec, size = NULL)
+coverage_of_freq_list <- function(frq_vect, qtiles_vec, size = 0)
 # --------------------------------------------------------------------
 {
   
@@ -635,7 +638,7 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec, size = NULL)
       idxs[i] <- idx_set[1]
       pcts[i] <- idxs[i]/length(frq_vect)
       frqs[i] <- frq_vect[idx_set[1]]
-      sizs[i] <- pcts[i]*size
+      sizs[i] <- XiB(pcts[i]*size)
       
       #prt(qtile,"somma:",round(sum(props[1:idxs[i]])/molt ,2))
       #print("")

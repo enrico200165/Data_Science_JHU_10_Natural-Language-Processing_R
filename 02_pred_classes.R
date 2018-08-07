@@ -77,15 +77,42 @@ DTF_Basic <- R6Class("DTF_Basic"
    
   ,coverage_tables = function() private$..coverage
 
-  ,print_coverage = function() {
-    
-    print(private$..coverage)
-  }
-   
+  ,print_coverage = function() { print(private$..coverage) }
+
+  ,get_frq_df = function() { private$..dtf }
+
   ,nfeat = function() private$..nfeat
 
   ,ngram = function() private$..ngram
+
    
+   # -----------------------------------------------------------------
+   ,nfeat_freq_for_size = function (target_size_bytes)
+   # -----------------------------------------------------------------
+   # Estimates, probably very inaccurately, number of features that
+   # should correspond to a given size
+   # assumes frequencies in decreasing order
+   # returns nr of features and minimum frequency
+   {
+     ratio <- as.numeric(target_size_bytes/self$size())
+     if (ratio >= 1) {
+       prt_warn("ratio > = 1, forcing to 0.98")
+       ratio <- 0.98
+     }
+     last_idx <- floor((nrow(private$..dtf)*ratio))
+     lower_freq <- private$..dtf$frequency[last_idx] -1 #conservative, 
+     # several elems might have 
+     
+     # they might be misaligned, because of both rounding and
+     # memory measure being inaccurate due to sharing, optimizations
+     list(
+       last_idx = last_idx
+      ,lower_freq = lower_freq
+     )
+   }
+   
+   
+         
    # -----------------------------------------------------------------
   ,coverageGraphs = function() {
     
@@ -107,10 +134,12 @@ DTF_Basic <- R6Class("DTF_Basic"
 
     # percentuale coperta, diviso percentuale elementi per coprire
     df_cov_ratio <- data.frame(qt = qtiles_vec
-      , idx = self$coverage_tables()[["pcts"]],
-    qtf = paste(qtiles_vec ,formatC(self$coverage_tables()[["frqs"]]
-      ,format="f", big.mark=",", digits=0)
-      ,as.character(round(self$coverage_tables()[["pcts"]],4)) ,sep = " "))
+      ,idx = self$coverage_tables()[["pcts"]]
+      ,qtf = paste(qtiles_vec 
+      ,as.character(round(self$coverage_tables()[["pcts"]],4)) 
+      ,formatC(self$coverage_tables()[["frqs"]],format="f", big.mark=",", digits=0)
+      ,self$coverage_tables()[["sizs"]] ,sep = " ")
+    )
     p_cov_ratio <- ggplot(df_cov_ratio ,aes(x = qt, y = qt/idx,label = qtf)) 
     p_cov_ratio <- p_cov_ratio +  geom_text(check_overlap = TRUE ,hjust = 0) 
     p_cov_ratio <- p_cov_ratio +  scale_x_continuous(limits = c(0.5,1.1))
