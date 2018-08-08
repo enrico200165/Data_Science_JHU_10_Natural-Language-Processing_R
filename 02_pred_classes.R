@@ -33,7 +33,6 @@ DTF_Basic <- R6Class("DTF_Basic"
     
     private$..dtf <- dtf_par
     private$..nfeat <- nrow(private$..dtf );
-    # browser()
     tmp <- coverage_of_freq_list(
       private$..dtf$frequency ,qtiles_vec ,self$size())
     private$..coverage <- data.frame(tmp)
@@ -81,10 +80,27 @@ DTF_Basic <- R6Class("DTF_Basic"
 
   ,get_frq_df = function() { private$..dtf }
 
+  ,get_min_frq = function() { self$get_frq_df()$frequency[self$nfeat()] }
+
   ,nfeat = function() private$..nfeat
 
   ,ngram = function() private$..ngram
 
+   
+   # -----------------------------------------------------------------
+   ,create_subset_4min_freq = function(frq)
+   # -----------------------------------------------------------------
+   # returns nr of features and minimum frequency
+   {
+     cut_idx <- self$freq_ge_feat_idx(frq)
+     subset_frqs <- self$get_frq_df()
+     
+     new_o <- DTF_Basic$new(subset_frqs[1:cut_idx])
+     
+     new_o
+   }
+   
+   
    
    # -----------------------------------------------------------------
    ,nfeat_freq_for_size = function (target_size_bytes)
@@ -120,7 +136,6 @@ DTF_Basic <- R6Class("DTF_Basic"
     info <- paste0(self$ngram(),"gram_",formatC(self$nfeat(), format="f", big.mark=",", digits=0)
                    ,"_features")
     
-    # browser()
     df_cov_idx <- data.frame(qt = qtiles_vec
       ,idx = self$coverage_tables()[["idxs"]]) 
     
@@ -168,7 +183,24 @@ DTF_Basic <- R6Class("DTF_Basic"
     private$..coverage$idxs[idx]
    }
    
+
+  # -----------------------------------------------------------------
+  ,freq_ge_feat_idx = function(frq) 
+  # greatest index, inclusive, of frequencies >= frq
+  # created to use to cut down data volume
+  {
+    
+    stopifnot(!is.null(frq) && frq > 1)
+    
+    frqs_vect <- self$get_frq_df()$frequency # just alias
+    
+    idx <- which(frqs_vect < frq )[1] # first smaller index
+    stopifnot(idx > 0) # paranoid check
+    idx <- if (idx >= 2) (idx-1) else idx
+   }
+
    
+      
    # -----------------------------------------------------------------
    ,dump = function() {
      ret <- ""

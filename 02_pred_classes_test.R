@@ -52,6 +52,46 @@ test_nfeat_for_size <- function(o1, o2, o3) {
 }
 
 
+
+# --------------------------------------------------------------------
+test_freq_ge_feat_idx <- function(o1, o2, o3) {
+
+  f <- 100
+  idx = o1$freq_ge_feat_idx(f)
+  prt("index",ret$last_idx,"for frequencies >= ",ret$lower_freq)
+  frqs <- o1$get_frq_df()$frequency
+  stopifnot(frqs[idx] >= f)
+  stopifnot(frqs[idx+1] < f)
+  prt("min frq",min(frqs[frqs >= f]))
+  new_o <- o1$create_subset_4min_freq(f)
+  prt("minimum frequency",new_o$get_min_frq())
+  
+    
+  f <- 50
+  idx = o2$freq_ge_feat_idx(f)
+  prt("index",ret$last_idx,"for frequencies >= ",ret$lower_freq)
+  frqs <- o2$get_frq_df()$frequency
+  stopifnot(frqs[idx] >= f)
+  stopifnot(frqs[idx+1] < f)
+  prt("min frq",min(frqs[frqs >= f]))
+  new_o <- o2$create_subset_4min_freq(f)
+  prt("minimum frequency",new_o$get_min_frq())
+  
+
+  f <- 10
+  idx = o3$freq_ge_feat_idx(f)
+  prt("index",ret$last_idx,"for frequencies >= ",ret$lower_freq)
+  frqs <- o3$get_frq_df()$frequency
+  stopifnot(frqs[idx] >= f)
+  stopifnot(frqs[idx+1] < f)
+  prt("min frq",min(frqs[frqs >= f]))
+  new_o <- o3$create_subset_4min_freq(f)
+  prt("minimum frequency",new_o$get_min_frq())
+
+}
+
+
+
 # --------------------------------------------------------------------
 test_pred_classes <- function()
 # --------------------------------------------------------------------
@@ -66,14 +106,16 @@ test_pred_classes <- function()
   #o_2grams_basic <- DTF_Basic$new(dtf_2gram_sep)
   rie(o_2grams_basic, DTF_Basic$new, dtf_2gram_sep)
   assign("o_2grams_basic" , o_2grams_basic, .GlobalEnv)
-
   
   rie(dtf_3gram_sep , produce_ngram_bare_dtf_3)
   # o_3grams_basic <- DTF_Basic$new(dtf_3gram_sep)
   rie(o_3grams_basic, DTF_Basic$new, dtf_3gram_sep)
   assign("o_3grams_basic" , o_3grams_basic, .GlobalEnv)
 
-  test_nfeat_for_size(o_1grams_basic ,o_2grams_basic ,o_3grams_basic)
+  # test_nfeat_for_size(o_1grams_basic ,o_2grams_basic ,o_3grams_basic)
+  
+  test_freq_ge_feat_idx(o_1grams_basic ,o_2grams_basic 
+    ,o_3grams_basic)
   
   if (F) {
 
