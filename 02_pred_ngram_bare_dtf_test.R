@@ -4,8 +4,7 @@ source("02_pred_ngram_bare_dtf.R")
 
 
 
-fulldata <- T; memory.limit(size = 24000)
-silent <- F
+nsilent <- F
 keypressWait <- T 
 
 use_full_corpus(F,ngram_bare_re_init)
