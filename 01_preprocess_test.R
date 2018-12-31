@@ -21,7 +21,6 @@ source("01_preprocess_lib.R")
   T && subsetTextFilesByLines(data_dir_corpus_full 
       ,data_dir_corpus_subset ,50,1000 , forceIt = F)
 
-
   if(F) {
     print(list.files(data_dir_corpus_full))
 

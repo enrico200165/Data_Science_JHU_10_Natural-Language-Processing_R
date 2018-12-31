@@ -24,6 +24,10 @@ DTF_Basic <- R6Class("DTF_Basic"
     
     prt("in initialize")
 
+    if (!(any("data.table" %in% class(dtf_par)))) {
+      prt_error("class(dtf_par) = ",class(dtf_par))
+      browser()
+    }
     stopifnot(any("data.table" %in% class(dtf_par)))
     stopifnot(nrow(dtf_par$primo) > 0)
     

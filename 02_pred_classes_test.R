@@ -33,6 +33,7 @@ build_small_test_objects <- function() {
 
 # --------------------------------------------------------------------
 test_nfeat_for_size <- function(o1, o2, o3) {
+
   s1 <- o1$size()
   s1_target <- s1 * 0.75
   ret <- o1$nfeat_freq_for_size(s1_target)
@@ -160,9 +161,8 @@ use_full_corpus(F)
 build_small_test_objects()
 
 
-# 
-test_pred_classes()
-stop("ok")
+# test_pred_classes()
+# stop("ok SUCCESSO")
 
 # --------------------------------------------------------------------
 test_that("test_pred_classes"
@@ -187,7 +187,7 @@ test_that("test_pred_classes"
     test_freq_ge_feat_idx(o_1grams_basic, o_2grams_basic
       , o_3grams_basic)
     
-    if (F) {
+    if (T) {
       print(o_1grams_basic$coverageGraphs()[[1]])
       keypress()
       print(o_1grams_basic$coverageGraphs()[[2]])
@@ -202,8 +202,4 @@ test_that("test_pred_classes"
       keypress()
     }
   })
-
-
-
-stop("OK OK OK")
 

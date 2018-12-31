@@ -128,19 +128,23 @@ dfm_auto <- function() {
 
 
 dev_data_dir <- function() {
-  if (Sys.info()["nodename"] == "LTPGJSDPX1") {
+  
+  host <- Sys.info()["nodename"]
+  
+  if ( host == "LTPGJSDPX1") {
     "C:\\Users\\e_viali\\Documents\\dev\\ITAUR"
-  } else if (Sys.info()["nodename"] == "DESKTOP-B40LLN4" ) {
-    #"C:\\Users\\enrico\\Documents\\dev\\dev_data"
+  } else if (host == "DESKTOP-B40LLN4" ) {
     file.path("C:","Users","enrico","Documents","dev","dev_data")
-  } else if (Sys.info()["nodename"] == "THPAD-W530") {
+  } else if (host == "THPAD-W530") {
     "V:\\data\\pers_dev\\data_dev"
-  } else if (Sys.info()["nodename"] == "enrico-ThinkPad-W530") {  
+  } else if (host == "enrico-ThinkPad-W530") {  
     file.path("/","media","enrico","usbdata","data","pers_dev","data_dev")
+  } else if (host == "VT-VIALIEN") {  
+    file.path("C:","users","vialien","Documents","00_ev_data","04_pers_dev","data_dev")
   } else {
-    NA
+      stop(paste("dummy data_dir host non trovato per host",host))
   }
-}
+} 
 
 
 # superdir= ".."
@@ -599,6 +603,7 @@ prt_last_call_time <- Sys.time()
   }
 }
 
+# --------------------------------------------------------------------
 prt_warn <- function(...) do.call(prt,prepend(list(...),"# WARNING:"))
 prt_error <- function(...) do.call(prt,prepend(list(...),"### ERROR:"))
 

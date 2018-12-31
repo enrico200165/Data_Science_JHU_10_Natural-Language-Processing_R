@@ -2,6 +2,9 @@
 
 source("01_globals.R")
 
+require(pryr)
+
+
 # illegal position, ease frequent access
 
 silent <- F
@@ -13,8 +16,7 @@ fulldata <- F
 # ====================================================================
 
 # --------------------------------------------------------------------
-  test_prt <- function() 
-{
+  test_prt <- function() {
   # check if it serializes correctly
   silent <<-F
   prt("pippo", "pluto")
@@ -29,7 +31,12 @@ fulldata <- F
 
 # --------------------------------------------------------------------
 testRemoveAllVarExcept <- function() {
-  a <- 1;  b <-2; c <- 3; d <- 4; e <- 99; f <- 5
+  
+  a <- 1;  
+  b <-2; 
+  c <- 3; 
+  d <- 4; 
+  e <- 99; f <- 5
   removed <- removeAllVarExcept(c("d","previous_names"))
   print(paste("vars removed: ",paste(removed,collapse = " ")))
 }
@@ -70,8 +77,7 @@ testAddToCoreDF <- function() {
 
 
 # --------------------------------------------------------------------
-  testReadIfEmpty <- function() 
-{
+  testReadIfEmpty <- function() {
   
   mydf <- NULL
   if (readIfEmpty(mydf)) {
@@ -90,8 +96,7 @@ testAddToCoreDF <- function() {
 
 
 # --------------------------------------------------------------------
-  test_rie <- function() 
-{
+  test_rie <- function() {
   # check if it serializes correctly
   mydf <- data.frame(x = 1:3)
   rie(mydf, function() data.frame(x = 1:3))
@@ -104,8 +109,7 @@ testAddToCoreDF <- function() {
 
     
 # --------------------------------------------------------------------
-  test_getSerializeFName <- function()
-  {
+  test_getSerializeFName <- function() {
     name <- "pippo"
     prt(name,"->",getSerializFName(name))
 
@@ -145,8 +149,8 @@ testAddToCoreDF <- function() {
 
   
 # --------------------------------------------------------------------
-test_coverage_of_freq_list <- function() 
-{
+test_coverage_of_freq_list <- function() {
+  
   qtiles_vec <- c(0.5,0.6,0.7,0.8,0.9,0.95,0.96,0.97,0.98,0.99)
 
   # x <- rep(1,1000)
@@ -161,25 +165,24 @@ test_coverage_of_freq_list <- function()
 }
     
 # -----------------------------------------------------------------------
-  test_Globals.R <- function() 
-# -----------------------------------------------------------------------
-  
+  test_Globals <- function()
 {
   
   silent <<- F
   fulldata <<- F
 
 
-  # test_XiB()  
-  # testRemoveAllVarExcept()
-  # testReadIfEmpty()
-  # test_rie()
-  # test_prt()
+  test_XiB()  
+  testRemoveAllVarExcept()
+  testReadIfEmpty()
+  test_rie()
+  test_prt()
 
-  # testAddToCoreDF()
-  # test_getSerializeFName()
-  # test_coverage_of_freq_list()
+  testAddToCoreDF()
+  test_getSerializeFName()
+  test_coverage_of_freq_list()
 }
 
 # 
-test_Globals.R()
+test_Globals()
+
