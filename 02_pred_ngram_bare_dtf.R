@@ -26,10 +26,8 @@ read_texts <- function(data_dir_corpus)
 # --------------------------------------------------------------------
 # lazy reads text files matching pattern into a single Quanteda corpus
 {    
-  prt("reading from dir:",data_dir_corpus)
+  prt("reading text files from dir:",data_dir_corpus, "fulldata", fulldata)
   stopifnot(dir.exists(data_dir_corpus))
-
-  prt("reading text files, fulldata", fulldata)
   read_pattern <- file.path(data_dir_corpus,"en_US*txt")
   txt <- readtext(read_pattern)
   
@@ -226,6 +224,7 @@ produce_ngram_bare_dtf_3 <- function()
   NULL  
   }
 
+
 # --------------------------------------------------------------------
 produce_ngram_bare_dtf <- function() 
 # --------------------------------------------------------------------
@@ -272,3 +271,24 @@ ngram_bare_re_init <- function() {
   prt("completed ngram_bare_re_init()")
 }
 
+
+
+# --------------------------------------------------------------------
+test_ngram_bare_dtf <- function() 
+# --------------------------------------------------------------------
+{
+  silent <<- F
+  keypressWait <<- T 
+  
+  use_full_corpus(F,ngram_bare_re_init)
+  
+  
+  ret <- produce_ngram_bare_dtf()
+  
+  dtf_info(dtf_1gram_sep)
+  dtf_info(dtf_2gram_sep)
+  dtf_info(dtf_3gram_sep)
+  
+}
+
+# test_ngram_bare_dtf()
