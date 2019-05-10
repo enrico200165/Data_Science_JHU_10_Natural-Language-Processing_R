@@ -11,7 +11,8 @@ source("01_preprocess_lib.R")
 
 # ####################################################################
 #                       MODULE MISSION
-# from text files produce ngrams data.tables - nothing more
+# from text files produce 3 (global ngrams) data.tables 
+# nothing more
 # 
 # ####################################################################
 #                     EXTERNAL FUNCIONS
@@ -20,23 +21,6 @@ source("01_preprocess_lib.R")
 #
 ######################################################################
 
-
-# --------------------------------------------------------------------
-read_texts <- function(data_dir_corpus) 
-# --------------------------------------------------------------------
-# lazy reads text files matching pattern into a single Quanteda corpus
-{    
-  prt("reading text files from dir:",data_dir_corpus, "fulldata", fulldata)
-  stopifnot(dir.exists(data_dir_corpus))
-  read_pattern <- file.path(data_dir_corpus,"en_US*txt")
-  txt <- readtext(read_pattern)
-  
-  prt("pasting texts into single huge text")
-  full_txt <- paste(texts(txt), collapse = ". ")
-  rm(txt); invisible(gc())
-
-  full_txt
-}
 
 
 # --------------------------------------------------------------------
@@ -279,6 +263,7 @@ test_ngram_bare_dtf <- function()
 {
   silent <<- F
   keypressWait <<- T 
+  fulldata <<- F
   
   use_full_corpus(F,ngram_bare_re_init)
   
