@@ -1,3 +1,9 @@
+# Objective: 
+# Store dataframes (with frequencies) to sqlite DB
+# probably created for eventual usage on shyny
+# Status: currently abandoned
+#
+
 require(dplyr)
 require(quanteda)
 # help(package = "quanteda")

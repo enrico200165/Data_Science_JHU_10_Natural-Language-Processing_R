@@ -1,0 +1,9 @@
+
+
+Files da classificare
+
+00_database.R
+# Objective: 
+# Store dataframes (with frequencies) to sqlite DB
+# probably created for eventual usage on shyny
+# Status: currently abandoned
