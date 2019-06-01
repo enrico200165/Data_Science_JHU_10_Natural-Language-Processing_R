@@ -27,23 +27,24 @@ fulldata <- F
   Sys.sleep(5)
   prt()
 }
-
+# test_prt()
 
 # --------------------------------------------------------------------
 testRemoveAllVarExcept <- function() {
   
   a <- 1;  
-  b <-2; 
+  b <- 2; 
   c <- 3; 
   d <- 4; 
-  e <- 99; f <- 5
-  removed <- removeAllVarExcept(c("d","previous_names"))
+  e <- 99; 
+  f <- 5
+  removed <- removeAllVarExcept(c("d","previous_names") )
   print(paste("vars removed: ",paste(removed,collapse = " ")))
 }
-
+#testRemoveAllVarExcept()
 
 # --------------------------------------------------------------------
-testAddToCoreDF <- function() {
+test_setCoreDF <- function() {
   
   d <- data.frame(language = c(rep("EN",3),rep("RU",3)
     ,rep("FI",3),rep("DE",3))
@@ -74,38 +75,63 @@ testAddToCoreDF <- function() {
   
   print(d)
 }
+# test_setCoreDF()
+
+
+
+# --------------------------------------------------------------------
+test_getSerializFName <- function() {
+  
+  name <- "enrico"
+  sname <- getSerializFName("enrico")
+  print(paste("serialization name for",name,"is",sname))
+
+  name <- "enrico"
+  sname <- getSerializFName("enrico","forced_worked")
+  print(paste("serialization name for",name,"is",sname))
+  
+}
+# test_getSerializFName()
 
 
 # --------------------------------------------------------------------
   testReadIfEmpty <- function() {
   
+  mydf <- data.frame(10:1)
+  serializeIfNeeded(mydf,T)
+  
   mydf <- NULL
   if (readIfEmpty(mydf)) {
-    # print("ok, I could read it")
+    print("ok, I could read it")
   } else {
-    print("NO, I could NOT read it")
-    # mydf <- data.frame(a = 1:3,b = 11:13)
+    print("FAILURE I could NOT read it")
   }
   
-  serializeIfNeeded(mydf,FALSE)
-  mydf <<- NULL
   readIfEmpty(mydf)
-  print(mydf)
 }
-
+#
+testReadIfEmpty()
 
 
 # --------------------------------------------------------------------
   test_rie <- function() {
-  # check if it serializes correctly
-  mydf <- data.frame(x = 1:3)
-  rie(mydf, function() data.frame(x = 1:3))
+    
+    
+    mydf <- data.frame(10:1)
+    serializeIfNeeded(mydf,TRUE)
+    
+    # check if it serializes correctly
+    if (rie(mydf, function() data.frame(10:1))) {
+      print("ERROR I did not read it")
+    }
 
-  mydf <<- NULL
-  rie(mydf, function() data.frame(x = 1:3))
-  print(mydf)
+    mydf <<- NULL
+    if (!rie(mydf, function() data.frame(10:1))) {
+      print("ERROR I did not read it")
+    }
+    str(mydf)
 }
-
+test_rie()
 
     
 # --------------------------------------------------------------------
@@ -136,6 +162,13 @@ testAddToCoreDF <- function() {
     
   }
 
+
+
+# --------------------------------------------------------------------
+test_clean_rds <- function() {
+    clean_rds()
+}
+#test_clean_rds()
   
 # --------------------------------------------------------------------
   test_XiB <- function() {

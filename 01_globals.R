@@ -104,7 +104,7 @@ use_full_corpus <- function(vPar = NULL, reinit_funct = NULL
 
 
 
-data_type_prefix <- function() if (fulldata) "full" else "subs"
+data_type_prefix <- function() if (fulldata) "full" else "subset"
 
 
 
@@ -172,8 +172,10 @@ data_dir_corpus_in <- function() {
     data_dir_corpus_subset
 }
 
-
-read_dir <- function() {
+#-------------------------------------------------------------------------
+  read_dir <- function() 
+# ------------------------------------------------------------------------
+{
   val <- use_full_corpus()
   if (val) 
     data_dir_corpus_full 
@@ -219,7 +221,7 @@ itaur_dir <- function()
 # --------------------------------------------------------------------
   inc <- function(e1) eval.parent(substitute(e1 <- e1+1))
 # --------------------------------------------------------------------
-# ot terribly necessary :-)
+# Not terribly necessary :-)
 
 
 #---------------------------------------------------------------------
@@ -274,11 +276,9 @@ getSerializFName <- function(var_id, force_name)
 
 
 #---------------------------------------------------------------------
-  serializeIfNeeded <- function(dfPar, forceIt, rdsFName) 
+  serializeIfNeeded <- function(dfPar, forceIt = FALSE, rdsFName) 
 #---------------------------------------------------------------------
 {
-  if (missing(forceIt)) forceIt <- FALSE
-  
   varName <- deparse(substitute(dfPar))
   if (missing(rdsFName) || is.null(rdsFName) || nchar(rdsFName) <= 0)
     rdsFName <- getSerializFName(varName)
@@ -304,23 +304,19 @@ getSerializFName <- function(var_id, force_name)
 
 
 #---------------------------------------------------------------------
-  readIfEmpty <- function(df, rdsFName, forceIt) 
+  readIfEmpty <- function(df, rdsFName, forceSerialization = FALSE) 
 #---------------------------------------------------------------------
 # probably should be rewritten (to use a better subfunction I will
 # probably write soon)
 # return:
 # TRUE if it was or has bee filled
 {
-  if (missing(forceIt)) forceIt <- FALSE
- 
   ret <- FALSE
    
   varName <- deparse(substitute(df))
   rdsFName <- getSerializFName(varName,rdsFName)
   
-  if (!exists(varName)
-      || is.null(df)
-      || (length(df) <= 0 && nrow(df) <= 0)) {
+  if (!exists(varName) || is.null(df) || (length(df) <= 0 && nrow(df) <= 0)) {
     prt(paste(varName,"is empty", rdsFName))
     if (file.exists(rdsFName)) {
       # print(paste("reading serialization for:",varName," file:", rdsFName))
@@ -333,14 +329,14 @@ getSerializFName <- function(var_id, force_name)
       ret <- FALSE
     }
   } else {
-    prt(paste(varName,"alread filled, size:"
-      ,GiB(pryr::object_size(df))),"fulldata:",fulldata)
+    prt(paste(varName,"alread filled, size GB (rounded down):"
+      ,XiB(pryr::object_size(df))),"fulldata:",fulldata)
     ret <- TRUE
   }
   # print(paste("exit",varName, ))
   
   if (ret) {
-    serializeIfNeeded(df,forceIt,rdsFName)
+    serializeIfNeeded(df, forceSerialization, rdsFName)
   }
   
   ret
@@ -350,12 +346,13 @@ getSerializFName <- function(var_id, force_name)
 #---------------------------------------------------------------------
   rie <- function(df ,calc_function ,...) 
 #---------------------------------------------------------------------
-# trying to develop a more automated version of readIfENpty
-# TRUE if it was or has bee filled
+#' @description trying to develop a more automated version of readIfENpty
+#' @param variable
+#' @param function to produce variable value if missing
+#' @param arguments for calc_function
+#' @return TRUE if it was or has bee filled
 {
-  
   args <- list(...)
-  
   ret <- FALSE
    
   varName <- deparse(substitute(df))
@@ -386,6 +383,7 @@ getSerializFName <- function(var_id, force_name)
   }
   # print(paste("exit",varName, ))
   
+  # if the value exists, serialize it if needed
   if (ret) {
     serializeIfNeeded(df,,rdsFName)
   }
@@ -440,8 +438,13 @@ lsos <- function(..., n=100) {
 
 
 # --------------------------------------------------------------------
-  removeAllVarExcept <- function (survivors = character(0), e)
+  removeAllVarExcept <- function(survivors = character(0), e)
 # --------------------------------------------------------------------
+#' @description removes variables from environment e
+#' @param variable names NOT to be remved
+#' @param environment
+#' @return names of removed variables
+# -------------------------------------------------------------------
 {
   if (missing(e)) e <- parent.frame()
   
@@ -458,14 +461,9 @@ lsos <- function(..., n=100) {
   kill_var <- function (variablesPar, serializ = F)
 # --------------------------------------------------------------------
 {
-  
-  # e <- parent.frame()
-  
   varName <- deparse(substitute(variablesPar))
 
-  var_size <- if (exists(varName)) pryr::object_size(variablesPar)
-  else 0
-  
+  var_size <- if (exists(varName)) pryr::object_size(variablesPar) else 0
   
   # rm(list = varName, pos = ".GlobalEnv")
   if (exists(varName)) {
@@ -538,8 +536,6 @@ mem_health <- function(survivors = character(0) ,dry_run = F
 # --------------------------------------------------------------------
   GiB <- function (x, digits = 2)   round(x/(2^30),digits)
 # --------------------------------------------------------------------
-
-
 # --------------------------------------------------------------------
   XiB <- function (x, digits = 2, separ = "_")
 # --------------------------------------------------------------------
@@ -576,10 +572,10 @@ keypress <- function (message = "Press [enter] to continue"
 
 
 # --------------------------------------------------------------------
-  clean_rds <- function(patt = "sub.*")
+  clean_rds <- function(ser_prefix = data_type_prefix())
 # --------------------------------------------------------------------
 {
-  patt <- paste0(patt,".rds")
+  patt <- paste0(ser_prefix,"*",".rds")
   # prt(patt); prt(list.files(".",patt))
   file.remove(list.files(".",patt))
 }
@@ -658,3 +654,8 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec, size = 0)
 }
 
 
+###########################################################
+# HERE TEMPORARILY OPY TEST FUNCTIONS FOR EASY DEBUG
+###########################################################
+
+  clean_rds()
