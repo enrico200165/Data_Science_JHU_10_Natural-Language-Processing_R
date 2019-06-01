@@ -1,3 +1,7 @@
+# OBJECTIVE 
+# EVGuess after long time: subset corpora files by rading the original 
+# and writing subsetted copies with a subset of lines
+
 
 require(quanteda) # for docvars
 require(readtext)
@@ -68,7 +72,6 @@ source("01_globals.R")
 }
   
 
-
 # ---------------------------------------------------------
   subsetLines <- function(fname, in_dir, out_dir, nrLinesKept
   ,nrLinesRead,forceIt) {
@@ -77,7 +80,6 @@ source("01_globals.R")
     stopifnot(dir.exists(in_dir))
     stopifnot(dir.exists(out_dir))
     stopifnot(nrLinesKept <= nrLinesRead)
-    
     
     descr <- paste0("_", nrLinesKept, "_", nrLinesRead)
     # remove/clean up eventual prexisting subset
@@ -299,26 +301,10 @@ source("01_globals.R")
 }
 
 
-# --------------------------------------------------------------------
-zap_files_serializations <- function(patternPar) 
-# --------------------------------------------------------------------
+# ---------------------------------------------------------
+  checkUSANewsFileProblem <- function(fname, nrLinesToRead)
+# ---------------------------------------------------------
 {
-  
-  if (missing(patternPar)) patternPar <- "*txt*.rds"
-  
-  fnames_to_delete <- list.files(".", patternPar)
-  file.remove(fnames_to_delete)
-  length(fnames_to_delete)
-}
-# zap_files_serializations()
-
-
-
-# ---------------------------------------------------------
-  checkUSANewsFileProblem <- function(fname, nrLinesToRead) {
-# ---------------------------------------------------------
-  
-    
   stopifnot(file.exists(fname))
     
   enc <- getOption("encoding")

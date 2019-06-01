@@ -1,5 +1,7 @@
 
 
+
+
 Files da classificare
 
 00_database.R
@@ -7,3 +9,36 @@ Files da classificare
 # Store dataframes (with frequencies) to sqlite DB
 # probably created for eventual usage on shyny
 # Status: currently abandoned
+
+00_globals,R 
+alll global defs, sometimes via functions
+
+00_utils.R
+all reusable functions
+
+01_preprocess_lib.R
+functions to copy subset of lines from original files to copies
+- subsetTextFilesByLines(in_dir, out_dir, nrLinesKept,nrLinesRead, forceIt)
+- readQCorp(data_dir_corpus, subsetPar)
+
+02_pred_globals.R
+globals for predicton model - nothing more. trivial tiny  content
+
+02_pred_ngram_bare_dtf.R
+produces 3 (global ngrams) data.tables, nothing more
+- public funcction: produce_ngram_bare_dtf
+
+
+=================================================
+PIPELINE  
+=================================================
+
+controllore della pipe in:  ???????
+
+
+
+IN: original files
+### 01_preprocess.R ###
+subset copiesof text files:   ??? subsetTextFilesByLines()
+read quanteda corpus in qc:   readQCorp(data_dir_corpus, subsetPar) 
+OUT: qc in memory

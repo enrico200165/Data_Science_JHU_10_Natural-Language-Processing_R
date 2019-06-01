@@ -15,19 +15,6 @@ fulldata <- F
 #                               Tests
 # ====================================================================
 
-# --------------------------------------------------------------------
-  test_prt <- function() {
-  # check if it serializes correctly
-  silent <<-F
-  prt("pippo", "pluto")
-  Sys.sleep(1)
-  prt("")
-  Sys.sleep(2)
-  prt()
-  Sys.sleep(5)
-  prt()
-}
-# test_prt()
 
 # --------------------------------------------------------------------
 testRemoveAllVarExcept <- function() {
@@ -79,106 +66,30 @@ test_setCoreDF <- function() {
 
 
 
-# --------------------------------------------------------------------
-test_getSerializFName <- function() {
-  
-  name <- "enrico"
-  sname <- getSerializFName("enrico")
-  print(paste("serialization name for",name,"is",sname))
-
-  name <- "enrico"
-  sname <- getSerializFName("enrico","forced_worked")
-  print(paste("serialization name for",name,"is",sname))
-  
-}
-# test_getSerializFName()
 
 
 # --------------------------------------------------------------------
-  testReadIfEmpty <- function() {
-  
-  mydf <- data.frame(10:1)
-  serializeIfNeeded(mydf,T)
-  
-  mydf <- NULL
-  if (readIfEmpty(mydf)) {
-    print("ok, I could read it")
-  } else {
-    print("FAILURE I could NOT read it")
-  }
-  
-  readIfEmpty(mydf)
-}
-#
-testReadIfEmpty()
+#   testReadIfEmpty <- function() {
+#   
+#   mydf <- data.frame(10:1)
+#   serializeIfNeeded(mydf,T)
+#   
+#   mydf <- NULL
+#   if (readIfEmpty(mydf)) {
+#     print("ok, I could read it")
+#   } else {
+#     print("FAILURE I could NOT read it")
+#   }
+#   
+#   readIfEmpty(mydf)
+# }
+# #
+# testReadIfEmpty()
 
 
-# --------------------------------------------------------------------
-  test_rie <- function() {
-    
-    
-    mydf <- data.frame(10:1)
-    serializeIfNeeded(mydf,TRUE)
-    
-    # check if it serializes correctly
-    if (rie(mydf, function() data.frame(10:1))) {
-      print("ERROR I did not read it")
-    }
-
-    mydf <<- NULL
-    if (!rie(mydf, function() data.frame(10:1))) {
-      print("ERROR I did not read it")
-    }
-    str(mydf)
-}
-test_rie()
 
     
-# --------------------------------------------------------------------
-  test_getSerializeFName <- function() {
-    name <- "pippo"
-    prt(name,"->",getSerializFName(name))
 
-    name <- "pluto"
-    prt(name,"->",getSerializFName(name,paste0("forcefile_",name)))
-
-    name <- ""
-    prt(name,"->",getSerializFName(name,paste0("forcefile_",name)))
-    
-    name <- NULL
-    prt(name,"->",getSerializFName(name,"forcefile_xxx"))
-
-            
-    # below here should stop/abort
-    
-    # name <- ""
-    # prt(name,"->",getSerializFName(name))
-    
-    
-    # name <- ""
-    # prt(name,"->",getSerializFName(name,""))
-    
-    # prt(name,"->",getSerializFName(NULL))
-    
-  }
-
-
-
-# --------------------------------------------------------------------
-test_clean_rds <- function() {
-    clean_rds()
-}
-#test_clean_rds()
-  
-# --------------------------------------------------------------------
-  test_XiB <- function() {
-
-  silent <<- F
-  prt(XiB(1*2^(10+3)))
-  prt(XiB(1*2^(20+3)))
-  prt(XiB(2.1*2^(30+3)))
-
-}
 
   
 # --------------------------------------------------------------------
@@ -204,16 +115,7 @@ test_coverage_of_freq_list <- function() {
   silent <<- F
   fulldata <<- F
 
-
-  test_XiB()  
-  testRemoveAllVarExcept()
-  testReadIfEmpty()
-  test_rie()
-  test_prt()
-
-  testAddToCoreDF()
-  test_getSerializeFName()
-  test_coverage_of_freq_list()
+  test_setCoreDF()
 }
 
 # 

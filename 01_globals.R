@@ -2,18 +2,17 @@ require(dplyr)
 require(beepr)
 require(rlang)
 
-# illegal position and dummy assignments 4 ease frequent access
+
+#  dummy assignments 4 ease frequent access
 
 silent       <- if (exists("silent"))       silent       else NULL
 fulldata     <- if (exists("fulldata"))     fulldata     else NULL
 keypressWait <- if (exists("keypressWait")) keypressWait else FALSE
 
-strict_ <- T ; strict <- function(val) { 
-  if (!missing(val)) 
-    strict_ <<- val
-  (exists("strict_") && strict_)
-}
+strict <- function() FALSE
 
+
+  
 # --------------------------------------------------------------------
 #                   CONSTANTS
 # --------------------------------------------------------------------
@@ -49,21 +48,24 @@ SERIAL_PREFIX <- "" # "SERIALIZATION_"
 
 # ---------- mapping terms, for internal purposes --------------------
 
+# .. prefix: private fields naming convention
+
+# empty private data.frame
 ..map_values = data.frame(
   acronym = character(0)
   ,full = character(0)
   , stringsAsFactors = F
 )
+# add rows to empty data frame
 ..map_values <- bind_rows(..map_values,
   c(acronym = LNG_DE, full = "German")
  ,c(acronym = LNG_EN,full = "English")
  ,c(acronym = LNG_FI,full = "Finnish")
  ,c(acronym = LNG_RU,full = "Russian")
-  
  )
+# function that returns the word for the acronym
 map_acro <- function(x) ..map_values[
   ..map_values$acronym == char_toupper(x),2]
-#map_acro(LNG_EN )
 
 
 
@@ -80,13 +82,16 @@ map_acro <- function(x) ..map_values[
 use_full_corpus <- function(vPar = NULL, reinit_funct = NULL 
   ,...)
 # --------------------------------------------------------------------
+#' @description change usage of data, full or partial, and reinit
+#' @param 
+#' @usage 
+#' @return 
 {
-
   if (missing(vPar) || is.null(vPar)) 
     return(fulldata) 
 
   previous <- fulldata
-  fulldata <<- vPar
+  fulldata <<- vPar # update global var 
   if (previous != fulldata) {
     qc_full <<- NULL
     dfm_full <<- NULL
@@ -103,9 +108,10 @@ use_full_corpus <- function(vPar = NULL, reinit_funct = NULL
 }
 
 
-
-data_type_prefix <- function() if (fulldata) "full" else "subset"
-
+# ---------------------------------------------------------
+  data_type_prefix <- function() 
+# ---------------------------------------------------------
+if (fulldata) "full" else "subset"
 
 
 # qc: quanteda corpus
@@ -131,7 +137,9 @@ dev_data_dir <- function() {
   
   host <- Sys.info()["nodename"]
   
-  if ( host == "LTPGJSDPX1") {
+  if ( host == "VT-VIALIEN") {
+    file.path("C:","Users","vialien","Documents","00_ev_data","08_dev","dev_data")
+  } else if ( host == "LTPGJSDPX1") {
     "C:\\Users\\e_viali\\Documents\\dev\\ITAUR"
   } else if (host == "DESKTOP-B40LLN4" ) {
     file.path("C:","Users","enrico","Documents","dev","dev_data")
@@ -139,8 +147,6 @@ dev_data_dir <- function() {
     "V:\\data\\pers_dev\\data_dev"
   } else if (host == "enrico-ThinkPad-W530") {  
     file.path("/","media","enrico","usbdata","data","pers_dev","data_dev")
-  } else if (host == "VT-VIALIEN") {  
-    file.path("C:","users","vialien","Documents","00_ev_data","04_pers_dev","data_dev")
   } else {
       stop(paste("dummy data_dir host non trovato per host",host))
   }
@@ -172,6 +178,7 @@ data_dir_corpus_in <- function() {
     data_dir_corpus_subset
 }
 
+
 #-------------------------------------------------------------------------
   read_dir <- function() 
 # ------------------------------------------------------------------------
@@ -185,7 +192,7 @@ data_dir_corpus_in <- function() {
 
 
 # -------------------------------------------------------------------------
-itaur_dir <- function() 
+  itaur_dir <- function() 
 # -------------------------------------------------------------------------
 {
   if (Sys.info()["nodename"] == "LTPGJSDPX1") {
@@ -202,26 +209,6 @@ itaur_dir <- function()
 }
 
 
-
-# --------------------------------------------------------------------
-  set_parallelism <- function(ncores, onLinux)
-# --------------------------------------------------------------------
-# stub to be developed later when implementing predictions
-{
-  require(parallel)
-  require(doParallel)
-  
-  ncores <- 6 # detectCores() - 1
-  # Initiate cluster
-  cl <- makeCluster(ncores)
-  registerDoParallel(cl)
-}
-
-
-# --------------------------------------------------------------------
-  inc <- function(e1) eval.parent(substitute(e1 <- e1+1))
-# --------------------------------------------------------------------
-# Not terribly necessary :-)
 
 
 #---------------------------------------------------------------------
@@ -257,405 +244,10 @@ itaur_dir <- function()
 }
 
 
-#---------------------------------------------------------------------
-getSerializFName <- function(var_id, force_name) 
-#---------------------------------------------------------------------
-{
-  if (missing(force_name) || is.null(force_name) || nchar(force_name) <= 0) {
-    stopifnot(!is.null(var_id) && nchar(var_id) > 0)
-    rds_fname <- var_id
-  } else  {
-    rds_fname <- force_name
-  } 
-  
-  if (nchar(SERIAL_PREFIX) > 0 && !grepl(SERIAL_PREFIX, rds_fname))
-    rds_fname <- paste0(SERIAL_PREFIX,rds_fname)
-  
-  rds_fname <- paste0(data_type_prefix(),"_",rds_fname,".rds") 
-}
 
-
-#---------------------------------------------------------------------
-  serializeIfNeeded <- function(dfPar, forceIt = FALSE, rdsFName) 
-#---------------------------------------------------------------------
-{
-  varName <- deparse(substitute(dfPar))
-  if (missing(rdsFName) || is.null(rdsFName) || nchar(rdsFName) <= 0)
-    rdsFName <- getSerializFName(varName)
-  
-  if (grepl("full_full",rdsFName)) {
-    printf("asino")
-  }
-  
-  if (!file.exists(rdsFName) || forceIt) {
-    # if(exists(varName)) {
-    if(TRUE) {
-      # 
-      prt(paste("serializing var:",varName,"to file:",rdsFName,"..."))
-      saveRDS(dfPar, file = rdsFName)
-      prt(paste("FINISHED serializing",varName))
-    } else {
-      # print(paste("not serializing because not exists var: ",varName))
-    }
-  } else {
-    dummy <- 3 # just to debug
-  }
-}
-
-
-#---------------------------------------------------------------------
-  readIfEmpty <- function(df, rdsFName, forceSerialization = FALSE) 
-#---------------------------------------------------------------------
-# probably should be rewritten (to use a better subfunction I will
-# probably write soon)
-# return:
-# TRUE if it was or has bee filled
-{
-  ret <- FALSE
-   
-  varName <- deparse(substitute(df))
-  rdsFName <- getSerializFName(varName,rdsFName)
-  
-  if (!exists(varName) || is.null(df) || (length(df) <= 0 && nrow(df) <= 0)) {
-    prt(paste(varName,"is empty", rdsFName))
-    if (file.exists(rdsFName)) {
-      # print(paste("reading serialization for:",varName," file:", rdsFName))
-      df <- readRDS(rdsFName)
-      #assign(varName,df,.GlobalEnv) # pass it outside
-      assign(varName,df,parent.frame(n = 1)) # pass it outside
-      ret <- TRUE
-    } else {
-      print(paste(varName,"cannot read, no file: ", rdsFName))
-      ret <- FALSE
-    }
-  } else {
-    prt(paste(varName,"alread filled, size GB (rounded down):"
-      ,XiB(pryr::object_size(df))),"fulldata:",fulldata)
-    ret <- TRUE
-  }
-  # print(paste("exit",varName, ))
-  
-  if (ret) {
-    serializeIfNeeded(df, forceSerialization, rdsFName)
-  }
-  
-  ret
-}
-
-
-#---------------------------------------------------------------------
-  rie <- function(df ,calc_function ,...) 
-#---------------------------------------------------------------------
-#' @description trying to develop a more automated version of readIfENpty
-#' @param variable
-#' @param function to produce variable value if missing
-#' @param arguments for calc_function
-#' @return TRUE if it was or has bee filled
-{
-  args <- list(...)
-  ret <- FALSE
-   
-  varName <- deparse(substitute(df))
-  rdsFName <- getSerializFName(varName)
-  
-  if (!exists(varName)
-      || is.null(df)
-      || (length(df) <= 0 && nrow(df) <= 0)) {
-    # print(paste(varName,"is empty", rdsFName))
-    if (file.exists(rdsFName)) {
-      prt("reading serialization for:",varName," file:", rdsFName)
-      df <- readRDS(rdsFName)
-      #assign(varName,df,.GlobalEnv) # pass it outside
-    } else {
-      # must calculate it
-      prt(varName,"no" ,rdsFName,"file, calling function to calculate it: "
-        ,deparse(substitute(calc_function)) )
-      df <- do.call(calc_function, args) 
-      prt("completed call to",deparse(substitute(calc_function)))
-    }
-    assign(varName,df,parent.frame(n = 1)) # pass it outside
-    ret <- TRUE
-  } else {
-    prt(varName,"alread filled, size GiB:"
-      ,GiB(pryr::object_size(df)), "size: " 
-      ,XiB(pryr::object_size(df)))
-    ret <- TRUE
-  }
-  # print(paste("exit",varName, ))
-  
-  # if the value exists, serialize it if needed
-  if (ret) {
-    serializeIfNeeded(df,,rdsFName)
-  }
-  
-  invisible(ret)
-}
-
-
-# --------------------------------------------------------------------
-# https://stackoverflow.com/questions/1358003/tricks-to-manage-the-available-memory-in-an-r-session
-# improved by me
-# --------------------------------------------------------------------
-.ls.objects <- function (pos = 1, pattern, order.by ,no_funct = T
-                        ,decreasing=FALSE, head=FALSE, n=5) 
-# --------------------------------------------------------------------
-{
-    napply <- function(names, fn) sapply(names, function(x)
-                                         fn(get(x, pos = pos)))
-    
-    names <- ls(pos = pos, pattern = pattern)
-    
-    obj.class <- napply(names, function(x) as.character(class(x))[1])
-    obj.mode <- napply(names, mode)
-    obj.type <- ifelse(is.na(obj.class), obj.mode, obj.class)
-    obj.prettysize <- napply(names, function(x) {
-                           format(pryr::object_size(x), units = "auto") })
-    obj.size <- napply(names, pryr::object_size)
-    obj.dim <- t(napply(names, function(x)
-                        as.numeric(dim(x))[1:2]))
-    vec <- is.na(obj.dim)[, 1] & (obj.type != "function")
-    obj.dim[vec, 1] <- napply(names, length)[vec]
-    out <- data.frame(obj.type, obj.size, obj.prettysize, obj.dim)
-    names(out) <- c("Type", "Size", "PrettySize", "Length/Rows", "Columns")
-    if (!missing(order.by))
-        out <- out[order(out[[order.by]], decreasing=decreasing), ]
-    if (head)
-        out <- head(out, n)
-    
-    if (no_funct)
-      out <- out[ out$Type != "function", ]
-    
-    out$ID <- rownames(out)
-    
-    out
-}
-
-# shorthand
-lsos <- function(..., n=100) {
-    .ls.objects(..., order.by="Size", decreasing=TRUE, head=TRUE, n=n)
-}
-
-
-
-# --------------------------------------------------------------------
-  removeAllVarExcept <- function(survivors = character(0), e)
-# --------------------------------------------------------------------
-#' @description removes variables from environment e
-#' @param variable names NOT to be remved
-#' @param environment
-#' @return names of removed variables
-# -------------------------------------------------------------------
-{
-  if (missing(e)) e <- parent.frame()
-  
-  names_initial <- rlang::env_names(e)
-
-  victims <- setdiff(rlang::env_names(e),survivors)
-  rlang::env_unbind(e, victims)
-
-  names_removed <- setdiff(names_initial, rlang::env_names(e))
-}
-
-
-# --------------------------------------------------------------------
-  kill_var <- function (variablesPar, serializ = F)
-# --------------------------------------------------------------------
-{
-  varName <- deparse(substitute(variablesPar))
-
-  var_size <- if (exists(varName)) pryr::object_size(variablesPar) else 0
-  
-  # rm(list = varName, pos = ".GlobalEnv")
-  if (exists(varName)) {
-    rm(list = varName, pos =  .GlobalEnv)
-    if (var_size >= 1024*1024) { gc() }
-  } else {
-    prt_warn("killing variable:" ,varName , "does NOT exist")
-  }
-    
-    
-  if (serializ) {
-    fname <- getSerializFName(varName)
-    if (serializ && file.exists(fname)) {
-      ret <- file.remove(fname)
-    }
-  }
-}
-
-
-# --------------------------------------------------------------------
-mem_health <- function(survivors = character(0) ,dry_run = F 
-  ,save_size = -1 ,verbose = F)
-# --------------------------------------------------------------------
-# named by var ID array of sizes of existing variables
-{
-  
-  if (dry_run) verbose <- T
-
-  gc_first <- gc()
-    
-  all_vars_df <- lsos()
-  
-  # remove local, should be unnecessary
-  local_vars <- ls()
-  delete_vars_df <- all_vars_df[!(all_vars_df$ID %in% local_vars), ]
-
-  # variables to save
-  delete_vars_df <- all_vars_df[!(all_vars_df$ID %in% survivors), ]
-  # don't remove small variables
-  delete_vars_df <- all_vars_df[delete_vars_df$size > save_size, ]
-
-  
-  wrong_vars <- setdiff(survivors,all_vars_df$ID)
-  if (length(wrong_vars) > 0) {
-    prt("ERRORS: saving non existing vars",paste(wrong_vars))
-  }
-
-  mem_delete_vars <- sum(delete_vars_df$Size)
-  
-  if (!is.null(verbose) && verbose) {
-    prt("deleting", length(delete_vars_df$ID),"vars:",paste(delete_vars_df$ID))
-    prt(" sparing", length(survivors),"vars:", paste(survivors))
-  }
-
-  prt("Delete vars tot. mem:" ,XiB(mem_delete_vars))
-  if (!dry_run) {
-    do.call(rm, as.list(delete_vars_df$ID))
-  }
-
-  (gc() - gc_first)
-}
-# silent <- F
-# x <- mem_health(c("fulldata"), dry_run = F)
-
-
-
-# --------------------------------------------------------------------
-  MiB <- function (x, digits = 2) round(x/(2^20),digits)
-# --------------------------------------------------------------------
-# --------------------------------------------------------------------
-  GiB <- function (x, digits = 2)   round(x/(2^30),digits)
-# --------------------------------------------------------------------
-# --------------------------------------------------------------------
-  XiB <- function (x, digits = 2, separ = "_")
-# --------------------------------------------------------------------
-# for printing
-{
-  unit <- "b"
-  
-  if (x < 2^(10) )   return(paste(x,"b"))
-  if (x < 2^(10*2) ) return(paste(round(x/2^10    ,digits),"KiB",sep = separ))
-  if (x < 2^(10*3) ) return(paste(round(x/2^(10*2),digits),"MiB",sep = separ))
-  
-  return(paste(round(x/2^(10*3),digits),"GiB",sep = separ))
-}
-
-
-# --------------------------------------------------------------------
-keypress <- function (message = "Press [enter] to continue"
-  , sound_nr = 1)
-# --------------------------------------------------------------------
-{
-  beep(sound = sound_nr, expr = NULL)
-
-  if (keypressWait) {
-    invisible(readline(prompt=message))
-  } else {
-    prt(message)
-    Sys.sleep(5)
-  }
-
-  invisible(T)
-}
-
-
-
-
-# --------------------------------------------------------------------
-  clean_rds <- function(ser_prefix = data_type_prefix())
-# --------------------------------------------------------------------
-{
-  patt <- paste0(ser_prefix,"*",".rds")
-  # prt(patt); prt(list.files(".",patt))
-  file.remove(list.files(".",patt))
-}
-
-
-prt_last_call_time <- Sys.time()
-# --------------------------------------------------------------------
-  prt <- function(...) 
-# --------------------------------------------------------------------
-{
-  if (silent) {
-    invisible("")
-  } else {
-    time_diff <- as.numeric(difftime(Sys.time(), prt_last_call_time))
-    time_diff <- paste(round(time_diff, 2), "secs -")
-    time_diff <- paste(format(Sys.time(), "%X"), time_diff)
-    
-    pars <- list(...)
-    print(paste(time_diff, paste(pars, collapse = " ")))
-    prt_last_call_time <<- Sys.time()
-  }
-}
-
-# --------------------------------------------------------------------
-prt_warn <- function(...) do.call(prt,prepend(list(...),"# WARNING:"))
-prt_error <- function(...) do.call(prt,prepend(list(...),"### ERROR:"))
-
-
-# --------------------------------------------------------------------
-coverage_of_freq_list <- function(frq_vect, qtiles_vec, size = 0)
-# --------------------------------------------------------------------
-{
-  
-    stopifnot(!is.null(frq_vect) && exists("frq_vect"))
-    stopifnot(!is.null(qtiles_vec) && exists("qtiles_vec"))
-  
-    # naive attempt to avoid underflow
-    molt <- 100 * 1000
-  
-    # get proportions
-    props <- frq_vect*molt/sum(frq_vect);
-    stopifnot(!strict() || round(sum(props)-(1*molt),5) == 0)
-    # cumulative
-    cumul <- cumsum(props)
-    
-    
-    idxs <- numeric(length =length(qtiles_vec))
-    pcts <- numeric(length =length(qtiles_vec))
-    frqs <- numeric(length =length(qtiles_vec))
-    sizs <- numeric(length =length(qtiles_vec))
-
-    for (i in seq_along(qtiles_vec)) {
-      
-      qtile <- qtiles_vec[i]
-      idx_set <- which(cumul >= qtile*molt)
-      if (length(idx_set) <= 0) {
-        prt_warn("unable to find quantile")
-        prt_warn("freq vector:", frq_vect)
-        stop()
-      }
-      idxs[i] <- idx_set[1]
-      pcts[i] <- idxs[i]/length(frq_vect)
-      frqs[i] <- frq_vect[idx_set[1]]
-      sizs[i] <- XiB(pcts[i]*size)
-      
-      #prt(qtile,"somma:",round(sum(props[1:idxs[i]])/molt ,2))
-      #print("")
-    }
-    
-    list(
-       qtls = qtiles_vec
-      ,idxs = idxs
-      ,pcts = pcts
-      ,frqs = frqs
-      ,sizs = sizs)
-}
 
 
 ###########################################################
 # HERE TEMPORARILY OPY TEST FUNCTIONS FOR EASY DEBUG
 ###########################################################
 
-  clean_rds()
