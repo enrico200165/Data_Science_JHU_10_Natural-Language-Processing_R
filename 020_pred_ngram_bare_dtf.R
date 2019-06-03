@@ -4,9 +4,9 @@ require(data.table)
 require(quanteda)
 require(readtext)
 
-source("01_globals.R")
-source("00_utils.R")
-
+source("006_globals.R")
+source("007_utils.R")
+source("020_pred_globals.R")
 
 # ####################################################################
 #                       MODULE MISSION
@@ -20,7 +20,21 @@ source("00_utils.R")
 ######################################################################
 
 
+# --------------------------------------------------------------------
+produce_ngram_bare_dtf <- function(qcorpus) 
+  # --------------------------------------------------------------------
+{
+  dtf_1gram_sep <- produce_ngram_bare_dtf_1(qcorpus)
+  dtf_2gram_sep <- produce_ngram_bare_dtf_2(qcorpus)
+  dtf_3gram_sep <- produce_ngram_bare_dtf_3(qcorpus)
+  
+  OK = T
+  return(list(OK, dtf_1gram_sep, dtf_2gram_sep, dtf_3gram_sep))
+}
 
+###########################################################
+#               private
+###########################################################
 # --------------------------------------------------------------------
 build_dfm_ngrams <- function(txts_par, n) 
 # --------------------------------------------------------------------
@@ -93,16 +107,15 @@ pred_ngrams_re_init <- function()
 
   
 # --------------------------------------------------------------------
-produce_ngram_bare_dtf_1 <- function() 
+produce_ngram_bare_dtf_1 <- function(qcorpus) 
 # --------------------------------------------------------------------
 # https://stackoverflow.com/questions/20345022/convert-a-data-frame-to-a-data-table-without-copy
 #
 {
-  rie(qc_full, readQCorp ,data_dir_corpus_in())
   feature <- "feature"
 
   prt("builfrequency data tables sigle-string _sep")
-  rie(dtf_1gram ,dtf_ngram ,qc_full , 1)
+  rie(dtf_1gram ,dtf_ngram ,qcorpus , 1)
   prt("splitting dts 1grams")
   
   if (feature %in% colnames(dtf_1gram)) {
@@ -124,16 +137,15 @@ produce_ngram_bare_dtf_1 <- function()
 
 
 # --------------------------------------------------------------------
-produce_ngram_bare_dtf_2 <- function() 
+produce_ngram_bare_dtf_2 <- function(qcorpus) 
 # --------------------------------------------------------------------
 # https://stackoverflow.com/questions/20345022/convert-a-data-frame-to-a-data-table-without-copy
 #
 {
-  rie(qc_full, readQCorp ,data_dir_corpus_in())
   feature <- "feature"
 
   prt("splitting dts 2grams")
-  rie(dtf_2gram ,dtf_ngram ,qc_full , 2)
+  rie(dtf_2gram ,dtf_ngram ,qcorpus , 2)
   if (feature %in% colnames(dtf_2gram)) {
     dt2_fun <- function(dt) {
       
@@ -162,16 +174,14 @@ produce_ngram_bare_dtf_2 <- function()
 
 
 # --------------------------------------------------------------------
-produce_ngram_bare_dtf_3 <- function() 
+produce_ngram_bare_dtf_3 <- function(qcorpus) 
 # --------------------------------------------------------------------
 # https://stackoverflow.com/questions/20345022/convert-a-data-frame-to-a-data-table-without-copy
 #
 {
-  rie(qc_full, readQCorp ,data_dir_corpus_in())
   feature <- "feature"
 
-
-  rie(dtf_3gram ,dtf_ngram ,qc_full , 3)
+  rie(dtf_3gram ,dtf_ngram ,qcorpus , 3)
   prt("splitting dts 3grams")
   if (feature %in% colnames(dtf_3gram)) {
 
@@ -203,17 +213,6 @@ produce_ngram_bare_dtf_3 <- function()
   }
 
 
-# --------------------------------------------------------------------
-produce_ngram_bare_dtf <- function() 
-# --------------------------------------------------------------------
-{
-  dtf_1gram_sep <- produce_ngram_bare_dtf_1()
-  dtf_2gram_sep <- produce_ngram_bare_dtf_2()
-  dtf_3gram_sep <- produce_ngram_bare_dtf_3()
-  
-  OK = T
-  return(list(OK, dtf_1gram_sep, dtf_2gram_sep, dtf_3gram_sep))
-}
 
 
 # --------------------------------------------------------------------
@@ -234,17 +233,15 @@ dtf_info <- function(dtf)
 #   reinitializing
 #   Can NOT do very first initializations
 # ====================================================================
-ngram_bare_re_init <- function() {
+ngram_bare_re_init <- function(qcorpus)
 # --------------------------------------------------------------------  
-  
-
+{
   prt("start ngram_bare_re_init()")
   set_parallelism(6,NULL)
 
   read_dir <- read_dir()
 
-  rie(qc_full,readQCorp,data_dir_corpus_in(), FALSE)
-  qc_full <<- qc_full
+  qc_full <<- qcorpus
  
   prt("completed ngram_bare_re_init()")
 }

@@ -1,6 +1,7 @@
 
 
-source("02_pred_ngram_bare_dtf.R")
+source("020_pred_ngram_bare_dtf.R")
+source("014_corpus.r")
 
 # --------------------------------------------------------------------
 test_ngram_bare_dtf <- function() 
@@ -12,9 +13,10 @@ test_ngram_bare_dtf <- function()
   
   use_full_corpus(F,ngram_bare_re_init)
   
+  rie(qc_full, readQCorp ,data_dir_corpus_in())
   
 
-  dtfs_gram_Sep <- produce_ngram_bare_dtf()
+  dtfs_gram_Sep <- produce_ngram_bare_dtf(qc_full)
 
   ret = dtfs_gram_Sep[1]
   dtf_info(dtfs_gram_Sep[2]) 

@@ -7,7 +7,7 @@ require(readtext)
 
 require(spacyr)
 
-#source("01_globals.R")
+source("006_globals.R")
 
 
 # ---------------------------------------------------------
@@ -379,8 +379,8 @@ keypress <- function (message = "Press [enter] to continue"
 clean_rds <- function(ser_prefix = data_type_prefix())
   # --------------------------------------------------------------------
 {
-  patt <- paste0(ser_prefix,"*",".rds")
-  # prt(patt); prt(list.files(".",patt))
+  patt <- paste0(ser_prefix,".*",".rds")
+  prt(patt); prt(list.files(".",patt))
   file.remove(list.files(".",patt))
 }
 
