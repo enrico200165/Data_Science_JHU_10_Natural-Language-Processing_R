@@ -25,8 +25,14 @@ functions to copy subset of lines from original files to copies
 globals for predicton model - nothing more. trivial tiny  content
 
 02_pred_ngram_bare_dtf.R
-produces 3 (global ngrams) data.tables, nothing more
-- public funcction: produce_ngram_bare_dtf
+using 01_preprocess_lib.R
+produces 3 global ngram data.tables nothing more:
+dtf_1gram_sep, dtf_2gram_sep, dtf_3gram_sep
+where _sep means that there is a column for each position
+(primo secondo  : chr  "sss" "eee" "sss" "sss" ...
+ $ terzo    : chr  "eee" "sss" "i" "the" ...
+ - attr(*, ".internal.selfref")=<externalptr> 
+- public funcction: produce_ngram_bare_dtf()
 
 
 =================================================

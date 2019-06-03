@@ -11,7 +11,6 @@ source("00_utils.R")
 # ####################################################################
 #                       MODULE MISSION
 # from text files produce 3 (global ngrams) data.tables 
-# nothing more
 # 
 # ####################################################################
 #                     EXTERNAL FUNCIONS

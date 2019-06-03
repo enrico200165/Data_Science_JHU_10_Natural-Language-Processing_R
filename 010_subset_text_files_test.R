@@ -1,6 +1,6 @@
 
-source("01_preprocess_lib.R")
-source("00_utils.R")
+source("007_utils.R")
+source("010_subset_text_files.R")
 
 
 # ====================================================================
@@ -54,7 +54,6 @@ test_readQCorp <- function()
   print(" --- Unit Testing --- ")
 
   test_subsetTextFilesByLines()
-  qc <<- test_readQCorp()
 
   print(" --- Tests Completed --- ")
 }
