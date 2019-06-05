@@ -3,6 +3,32 @@ require(quanteda)
 # https://github.com/quanteda/quanteda/issues/48
 
 
+trivial_3_texts <- c("a aa aaa", "b bb bbb", "d dd ddd dddd")
+
+extremely_minimal_overview <- function() {
+
+  # corpus with 3 texts
+  qc <- corpus(trivial_3_texts)
+  
+  #dfm
+  dfm_ret <- dfm(qc
+                 ,ngrams = 1
+                 ,remove_numbers = T
+                 ,remove_punct = T
+                 ,remove_symbols = T
+                 ,remove_separators = T
+                 ,remove_twitter = T
+                 ,remove_hyphens = FALSE
+                 ,remove_url = FALSE,
+  )
+
+  # get 3rd feature NON sicuro è modo giusto
+  featnames(dfm_ret)[3]
+    
+}
+
+extremely_minimal_overview()
+
 experiment_01 <- function() {
 
   for (n in 1:2) {
@@ -17,6 +43,9 @@ experiment_01 <- function() {
     }
   }
 }
+
+
+
 
 
 
@@ -48,5 +77,6 @@ sample_code <- function() {
 }
 
 
-sample_code()
+# sample_code()
+
 

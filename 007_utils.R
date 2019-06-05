@@ -376,11 +376,16 @@ keypress <- function (message = "Press [enter] to continue"
 
 
 # --------------------------------------------------------------------
-clean_rds <- function(ser_prefix = data_type_prefix())
-  # --------------------------------------------------------------------
+clean_rds <- function(regex_to_remove = NULL, ser_prefix = data_type_prefix())
+# --------------------------------------------------------------------
 {
-  patt <- paste0(ser_prefix,".*",".rds")
-  prt(patt); prt(list.files(".",patt))
+  if (is.null(regex_to_remove)) {
+    prt_warn("asked to remove nothing")
+    return(F)
+  }
+  patt <- paste0(ser_prefix,".*?",regex_to_remove,".*?","\\.rds")
+   
+  prt("pattern", patt, " removing: ", paste(list.files(".",patt),collapse = " "))
   file.remove(list.files(".",patt))
 }
 

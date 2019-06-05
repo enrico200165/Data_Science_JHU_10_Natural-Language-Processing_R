@@ -6,6 +6,7 @@ require(readtext)
 
 source("006_globals.R")
 source("007_utils.R")
+source("014_corpus.R")
 source("020_pred_globals.R")
 
 # ####################################################################
@@ -22,8 +23,10 @@ source("020_pred_globals.R")
 
 # --------------------------------------------------------------------
 produce_ngram_bare_dtf <- function(qcorpus) 
-  # --------------------------------------------------------------------
+# --------------------------------------------------------------------
 {
+  set_parallelism(6,NULL)
+  
   dtf_1gram_sep <- produce_ngram_bare_dtf_1(qcorpus)
   dtf_2gram_sep <- produce_ngram_bare_dtf_2(qcorpus)
   dtf_3gram_sep <- produce_ngram_bare_dtf_3(qcorpus)
@@ -35,24 +38,26 @@ produce_ngram_bare_dtf <- function(qcorpus)
 ###########################################################
 #               private
 ###########################################################
+
+
 # --------------------------------------------------------------------
 build_dfm_ngrams <- function(txts_par, n) 
 # --------------------------------------------------------------------
 {
   
   # stopifnot(class(txts_par) %in% c("tokens","character"))
-
+  
   dfm_ret <- dfm(txts_par
-   ,ngrams = n
-   ,remove_numbers = T
-   ,remove_punct = T
-   ,remove_symbols = T
-   ,remove_separators = T
-   ,remove_twitter = T
-   ,remove_hyphens = FALSE
-   ,remove_url = FALSE,
-   )
-
+                 ,ngrams = n
+                 ,remove_numbers = T
+                 ,remove_punct = T
+                 ,remove_symbols = T
+                 ,remove_separators = T
+                 ,remove_twitter = T
+                 ,remove_hyphens = FALSE
+                 ,remove_url = FALSE,
+  )
+  
   prt("docs: ",ndoc(dfm_ret), "features",nfeat(dfm_ret))
   
   dfm_ret
@@ -60,7 +65,7 @@ build_dfm_ngrams <- function(txts_par, n)
 
 
 # --------------------------------------------------------------------
-dtf_ngram <- function(txts_merged , n)
+dtf_ngram <- function(qcorpus , n)
 # --------------------------------------------------------------------
 # NOT SURE IT IS USED, It may crash for lack of memory
 {
@@ -68,7 +73,7 @@ dtf_ngram <- function(txts_merged , n)
   stopifnot(1 <= n && n <= 3)
 
   prt("dtf_ngram() - calling build_dfm_ngrams(txts_merged, n) - n=",n)
-  dfm_ngram <- build_dfm_ngrams(txts_merged, n)
+  dfm_ngram <- build_dfm_ngrams(qcorpus, n)
 
   # textstats
   prt("dtf_ngram() - textstat_frequency(dfm_ngram) - n=",n)
@@ -77,31 +82,6 @@ dtf_ngram <- function(txts_merged , n)
   prt("dtf_ngram() - setDT(texstat_ngram) - n=",n)
 
   setDT(texstat_ngram)
-}
-
-
-# --------------------------------------------------------------------
-#   Global initialization - MUST BE IN Lib, to be passed when changing
-#   data from full to subset and the other way round, that requires
-#   reinitializing
-#   Can NOT do very first initializations
-#
-pred_ngrams_re_init <- function() 
-# --------------------------------------------------------------------  
-{
-  prt("start pred_ngrams_re_init()")
-
-  set_parallelism(6,NULL)
-
-  # read_dir <- read_dir()
-
-  txts_merged <- NULL
-
-  # data table frequencies
-  dtf_1gram <- NULL ;dtf_2gram <- NULL ;dtf_3gram <- NULL
-
-  
-  prt("completed pred_ngrams_re_init()")
 }
 
 
@@ -227,24 +207,36 @@ dtf_info <- function(dtf)
 }
 
 
-# ====================================================================
-#   Global initialization - MUST BE IN Lib, to be passed when changing
-#   data from full to subset and the other way round, that requires
-#   reinitializing
-#   Can NOT do very first initializations
-# ====================================================================
-ngram_bare_re_init <- function(qcorpus)
-# --------------------------------------------------------------------  
+
+
+###########################################################
+#             Temporary Test (Just to use debug)
+###########################################################
+
+# --------------------------------------------------------------------
+test_ngram_bare_dtf <- function() 
+  # --------------------------------------------------------------------
 {
-  prt("start ngram_bare_re_init()")
-  set_parallelism(6,NULL)
-
-  read_dir <- read_dir()
-
-  qc_full <<- qcorpus
- 
-  prt("completed ngram_bare_re_init()")
+  silent <<- F
+  keypressWait <<- T 
+  fulldata <<- F
+  
+  use_full_corpus(F,ngram_bare_re_init)
+  
+  rie(qc_full, readQCorp ,data_dir_corpus_in())
+  
+  
+  dtfs_gram_Sep <- produce_ngram_bare_dtf(qc_full)
+  
+  ret = dtfs_gram_Sep[1]
+  dtf_info(dtfs_gram_Sep[2]) 
+  dtf_info(dtfs_gram_Sep[3]) 
+  dtf_info(dtfs_gram_Sep[4]) 
+  
+  dtf_info(dtf_1gram_sep)
+  dtf_info(dtf_2gram_sep)
+  dtf_info(dtf_3gram_sep)
 }
 
-
-
+# 
+test_ngram_bare_dtf()

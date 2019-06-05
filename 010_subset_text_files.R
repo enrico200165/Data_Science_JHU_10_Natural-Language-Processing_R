@@ -25,10 +25,10 @@ require(pryr)
 source("006_globals.R")
 
 # ---------------------------------------------------------
-buildWordsDBFromFile <- function(words_file, db_fname) {
-  # ---------------------------------------------------------
-  # reads text file and put words in an sqlite table
-  
+buildWordsDBFromFile <- function(words_file, db_fname)
+# ---------------------------------------------------------
+# reads text file and put words in an sqlite table
+{
   words_table <- "words_en"
   words_col = "words"
   
@@ -181,78 +181,6 @@ subsetTextFilesByLines <- function(in_dir, out_dir, nrLinesKept
 
 
 
-# --------------------------------------------------------------------
-readtextIfEmpty <- function(mydf, in_dir, nFile)
-  # --------------------------------------------------------------------
-# 
-{
-  varName <- deparse(substitute(mydf))
-  
-  if ( missing(in_dir) || is.na(in_dir) || (nchar(in_dir) <= 0)) {
-    nomeFile <- nFile
-  } else {
-    stopifnot(dir.exists(in_dir))
-    nomeFile <- file.path(in_dir,nFile)
-  }
-  
-  exists <- exists(varName)
-  filled <- exists && (!is.null(nrow(mydf)) &&  nrow(mydf)> 0)
-  if (filled) {
-    prt(paste(varName,"exists and is filled, do nothing"))
-    return(mydf)
-  }
-  
-  if (!exists || !filled) {
-    rdsFName <- paste0(SERIAL_PREFIX,nFile,".rds")
-    hasSerialization <- file.exists(rdsFName)
-    if (hasSerialization) {
-      # print(paste(varName,"reading serialization from:",rdsFName))
-      mydf <- readRDS(rdsFName)
-      # assign(varName,mydf,.GlobalEnv) # pass it outside,
-      assign(varName,mydf,envir=parent.frame(n = 1))
-      return(mydf)
-    } 
-    if (is.null(nomeFile) || length(nomeFile) <= 0  || !file.exists(nomeFile)) {
-      print(paste("no files found for:",nomeFile))
-      return(NA)
-    }
-    
-    prt(paste(varName,"reading file from",nomeFile," and writing serialization"))
-    my_rt <- readtext(nomeFile
-                      , docvarsfrom = "filenames", docvarnames = c(TXT_LNG,TXT_CTR, TXT_TYP,
-                                                                   "dummy1", "lines_in", "lines_tot") ,dvsep = "[_.]"
-                      , encoding = "UTF-8"
-                      , verbosity = 1)
-    sampled_pctg <- 100*docvars(my_rt)$lines_in/docvars(my_rt)$lines_tot
-    my_rt <- select(my_rt,-c(6:ncol(my_rt)))
-    my_rt$sample_pctg <- sampled_pctg
-  }
-  
-  if (!file.exists(rdsFName)) {
-    # prt(paste("saving serialization to: ",rdsFName))
-    saveRDS(my_rt, file = rdsFName)
-  }
-  
-  my_rt
-}
-
-
-# --------------------------------------------------------------------
-readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
-                                    ,fnamePattern) 
-  # --------------------------------------------------------------------
-# Reads a single file at a time even though we use a pattern
-{
-  stopifnot(dir.exists(data_dir_corpus))
-  
-  fname <- list.files(data_dir_corpus,paste0(fnamePattern,".*\\.txt"))
-  if (!(length(fname) == 1)) {
-    print(length(fname))
-  }
-  stopifnot(length(fname) == 1)
-  
-  readtextIfEmpty(text_df,data_dir_corpus,fname)
-}
 
 
 
