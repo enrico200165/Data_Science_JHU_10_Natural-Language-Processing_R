@@ -5,8 +5,8 @@ require(rlang)
 
 #  dummy assignments 4 ease frequent access
 
-silent       <- if (exists("silent"))       silent       else NULL
-fulldata     <- if (exists("fulldata"))     fulldata     else NULL
+silent       <- if (exists("silent"))       silent       else FALSE
+fulldata     <- if (exists("fulldata"))     fulldata     else FALSE
 keypressWait <- if (exists("keypressWait")) keypressWait else FALSE
 
 strict <- function() FALSE
@@ -111,7 +111,7 @@ use_full_corpus <- function(vPar = NULL, reinit_funct = NULL
 # ---------------------------------------------------------
   data_type_prefix <- function() 
 # ---------------------------------------------------------
-if (fulldata) "full" else "subset"
+if (exists("fulldata")) "full" else "subset"
 
 
 # qc: quanteda corpus

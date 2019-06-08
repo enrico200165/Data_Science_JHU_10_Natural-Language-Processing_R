@@ -33,7 +33,7 @@ pred_ngrams_re_init <- function()
   
   # data table frequencies
   dtf_1gram <<- NULL ;dtf_2gram <<- NULL ;dtf_3gram <<- NULL
-  dfm_ngram <<- NULL  
+  dfm_ngram <<- c(NULL, NULL, NULL) 
   prt("completed pred_ngrams_re_init()")
   pre_ngram_bare_dtf_inited <<- T
 }
@@ -92,20 +92,27 @@ build_dfm_ngrams <- function(qcorpus, n)
 
 
 # --------------------------------------------------------------------
-dtf_ngram <- function(qcorpus , n, force_calc)
+dtf_ngram <- function(qcorpus, n, force_calc)
 # --------------------------------------------------------------------
 # NOT SURE IT IS USED, It may crash for lack of memory
 {
   prt("dtf_ngram() - begininning - n=",n)
   stopifnot(1 <= n && n <= 3)
 
+  if (n==2) {
+    prt("debug")
+  }
   prt("dtf_ngram() - lazy calling build_dfm_ngrams(txts_merged, n) - n=",n)
-  rie(dfm_ngram, force_calc, paste("dtf_ngram","n",collapse = "")
-      ,build_dfm_ngrams,qcorpus,n)
+  
+  alias <- paste0("dfm_ngram", n)
+  rie_str(alias, force_calc, paste0("dtf_ngram",n,collapse = "")
+      ,build_dfm_ngrams, qcorpus,n)
 
-  # textstats
+    # textstats
   prt("dtf_ngram() - textstat_frequency(dfm_ngram) - n=",n)
-  texstat_ngram <- textstat_frequency(dfm_ngram); rm(dfm_ngram); 
+  texstat_ngram <- textstat_frequency(environment()[[alias]]); 
+  rm(dfm_ngram, envir = global_env()); 
+  rm(dfm_ngram, envir = environment()); 
   gc()
 
   prt("dtf_ngram() - setDT(texstat_ngram) - n=",n)
@@ -243,8 +250,10 @@ dtf_info <- function(dtf)
 ###########################################################
 
 
-silent <- F
-fulldata <- F
+
+
+clean_rds("[1-3]")
+
 
 # --------------------------------------------------------------------
 test_ngram_bare_dtf <- function(force_calc = F) 
@@ -262,13 +271,16 @@ test_ngram_bare_dtf <- function(force_calc = F)
   dtfs_gram_Sep <- produce_ngram_bare_dtf(qc_full, force_calc)
   
   ret = dtfs_gram_Sep[1]
-  dtf_info(dtfs_gram_Sep[2]) 
-  dtf_info(dtfs_gram_Sep[3]) 
-  dtf_info(dtfs_gram_Sep[4]) 
+
+  dtf_1gram_sep <- dtfs_gram_Sep[[2]]
+  dtf_2gram_sep <- dtfs_gram_Sep[[3]]
+  dtf_3gram_sep <- dtfs_gram_Sep[[4]]
   
-  dtf_info(dtf_1gram_sep)
-  dtf_info(dtf_2gram_sep)
-  dtf_info(dtf_3gram_sep)
+  
+  dtf_info(dtfs_gram_Sep[[2]]) 
+  dtf_info(dtfs_gram_Sep[[3]]) 
+  dtf_info(dtfs_gram_Sep[[4]]) 
+  
 }
 pred_ngrams_re_init()
 #

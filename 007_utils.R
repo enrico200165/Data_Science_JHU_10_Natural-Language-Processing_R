@@ -62,6 +62,9 @@ if (missing(force_name) || is.null(force_name) || nchar(force_name) <= 0) {
   
   rds_fname <- paste0(data_type_prefix(),"_",rds_fname,".rds")
   
+  rds_fname <- gsub("\\[", "_", rds_fname)
+  rds_fname <- gsub("\\]", "_", rds_fname)
+  
   rds_fname
 }
 
@@ -166,6 +169,52 @@ rie <- function(df, force_calc, force_fname, calc_function,...)
       prt("completed call to",deparse(substitute(calc_function)))
     }
     assign(varName, df, parent.frame(n = 1)) # pass it outside
+    ret <- TRUE
+  } else {
+    prt(varName,"alread filled, size GiB:"
+        ,GiB(pryr::object_size(df)), "size: " 
+        ,XiB(pryr::object_size(df)))
+    ret <- TRUE
+  }
+  # print(paste("exit",varName, ))
+  
+  # if the value exists, serialize it if needed
+  if (ret) {
+    serializeIfNeeded(df,,rdsFName)
+  }
+  
+  invisible(ret)
+}
+
+
+
+#---------------------------------------------------------------------
+rie_str <- function(vname, force_calc, force_fname, calc_function,...) 
+  #---------------------------------------------------------------------
+#' @description identical to rie but var name is not deparsed
+{
+  args <- list(...)
+  ret <- FALSE
+  
+  varName <- vname
+  
+  # rdsFName <- if (is.null(force_fname)) getSerializFName(varName) else getSerializFName(force_fname)
+  rdsFName <- getSerializFName(varName, force_fname)
+  if (any(!exists(varName, where = global_env()), is.null(df), (length(df) <= 0 && nrow(df) <= 0))) {
+    # print(paste(varName,"is empty", rdsFName))
+    if (all(file.exists(rdsFName), !force_calc) ) {
+      prt("reading serialization for:",varName," file:", rdsFName)
+      df <- readRDS(rdsFName)
+      #assign(varName,df,.GlobalEnv) # pass it outside
+    } else {
+      # must calculate it
+      prt(varName,"no" ,rdsFName,"or forced file, calling function to calculate it: "
+          ,deparse(substitute(calc_function)) )
+      df <- do.call(calc_function, args) 
+      prt("completed call to",deparse(substitute(calc_function)))
+    }
+    assign(varName, df, parent.frame(n = 1)) # pass it outside
+    #assign(varName, df, global_env()) # pass it outside
     ret <- TRUE
   } else {
     prt(varName,"alread filled, size GiB:"
@@ -472,6 +521,13 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec, size = 0)
 test_rie <- function() {
   
   
+  myvec <- LETTERS
+  if (!rie(myvec[5], F, , function() myvec[5])) {
+    print("ERROR I did not read it")
+  }
+  str(myvec)
+  
+  
   mydf <- data.frame(10:1)
   serializeIfNeeded(mydf,TRUE)
   
@@ -485,5 +541,7 @@ test_rie <- function() {
     print("ERROR I did not read it")
   }
   str(mydf)
+  
 }
+# 
 # test_rie()
