@@ -51,7 +51,7 @@ getSerializFName <- function(var_id, force_name)
 #---------------------------------------------------------------------
 {
 if (missing(force_name) || is.null(force_name) || nchar(force_name) <= 0) {
-stopifnot(!is.null(var_id) && nchar(var_id) > 0)
+  stopifnot(!is.null(var_id) && nchar(var_id) > 0)
   rds_fname <- var_id
   } else  {
     rds_fname <- force_name
@@ -60,7 +60,9 @@ stopifnot(!is.null(var_id) && nchar(var_id) > 0)
   if (nchar(SERIAL_PREFIX) > 0 && !grepl(SERIAL_PREFIX, rds_fname))
     rds_fname <- paste0(SERIAL_PREFIX,rds_fname)
   
-  rds_fname <- paste0(data_type_prefix(),"_",rds_fname,".rds") 
+  rds_fname <- paste0(data_type_prefix(),"_",rds_fname,".rds")
+  
+  rds_fname
 }
 
 
@@ -133,11 +135,13 @@ serializeIfNeeded <- function(dfPar, forceIt = FALSE, rdsFName)
 
 
 #---------------------------------------------------------------------
-rie <- function(df ,calc_function ,...) 
+rie <- function(df, force_calc, force_fname, calc_function,...) 
 #---------------------------------------------------------------------
 #' @description trying to develop a more automated version of readIfENpty
-#' @param variable
-#' @param function to produce variable value if missing
+#' @param variable to read or calculate
+#' @param force_calc calculate even if there is a file
+#' @param force_name filename to use
+#' @param calc_function to produce variable value if missing
 #' @param arguments for calc_function
 #' @return TRUE if it was or has bee filled
 {
@@ -145,24 +149,23 @@ rie <- function(df ,calc_function ,...)
   ret <- FALSE
   
   varName <- deparse(substitute(df))
-  rdsFName <- getSerializFName(varName)
   
-  if (!exists(varName)
-      || is.null(df)
-      || (length(df) <= 0 && nrow(df) <= 0)) {
+  # rdsFName <- if (is.null(force_fname)) getSerializFName(varName) else getSerializFName(force_fname)
+  rdsFName <- getSerializFName(varName, force_fname)
+  if (any(!exists(varName), is.null(df), (length(df) <= 0 && nrow(df) <= 0))) {
     # print(paste(varName,"is empty", rdsFName))
-    if (file.exists(rdsFName)) {
+    if (all(file.exists(rdsFName), !force_calc) ) {
       prt("reading serialization for:",varName," file:", rdsFName)
       df <- readRDS(rdsFName)
       #assign(varName,df,.GlobalEnv) # pass it outside
     } else {
       # must calculate it
-      prt(varName,"no" ,rdsFName,"file, calling function to calculate it: "
+      prt(varName,"no" ,rdsFName,"or forced file, calling function to calculate it: "
           ,deparse(substitute(calc_function)) )
       df <- do.call(calc_function, args) 
       prt("completed call to",deparse(substitute(calc_function)))
     }
-    assign(varName,df,parent.frame(n = 1)) # pass it outside
+    assign(varName, df, parent.frame(n = 1)) # pass it outside
     ret <- TRUE
   } else {
     prt(varName,"alread filled, size GiB:"
@@ -415,7 +418,7 @@ prt_error <- function(...) do.call(prt,prepend(list(...),"### ERROR:"))
 
 # --------------------------------------------------------------------
 coverage_of_freq_list <- function(frq_vect, qtiles_vec, size = 0)
-  # --------------------------------------------------------------------
+# --------------------------------------------------------------------
 {
   
   stopifnot(!is.null(frq_vect) && exists("frq_vect"))
@@ -463,3 +466,24 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec, size = 0)
 }
 
 
+###########################################################
+#                      TEMP TEST
+###########################################################
+test_rie <- function() {
+  
+  
+  mydf <- data.frame(10:1)
+  serializeIfNeeded(mydf,TRUE)
+  
+  # check if it serializes correctly
+  if (rie(mydf, T, ,function() data.frame(10:1))) {
+    print("ERROR I did not read it")
+  }
+  
+  mydf <<- NULL
+  if (!rie(mydf, F,"forcingit", function() data.frame(10:1))) {
+    print("ERROR I did not read it")
+  }
+  str(mydf)
+}
+# test_rie()

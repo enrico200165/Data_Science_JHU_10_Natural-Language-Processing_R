@@ -9,11 +9,12 @@ source("01_globals.R")
 # -------------------------------------------------------------
 #☺ Note da http://xiangxing98.github.io/R_Learning/data.table-data_analysis_with_data.table.html
 # Create my_first_data_table
-my_first_data_table <- data.table(x = c("a", "b", "c", "d", "e"), 
-                                  y = c(1, 2, 3, 4, 5))  
+my_first_data_table <- data.table(
+  x = letters[1:5]
+ ,y = 1:5)  
 
 # Create a data.table using recycling
-DT <- data.table(a = c(1L, 2L), b = LETTERS[1:4])
+DT <- data.table(a = 1, b = LETTERS[1:4])
 # Print the third row to the console
 print(DT[3])
 # Print the second and third row to the console without using commas
@@ -47,7 +48,7 @@ DT[nrow(DT)]
 DT = data.table(A = 1:3, C = 21:23) # EV creato da me
 DT[, .(Total = sum(A), Mean = mean(C))]
 
-
+# recycling in j
 DT = data.table(A = 1:5, B = letters[1:5], C = 6:10)
 DT[, .(B, C = sum(C))]
 
@@ -58,15 +59,18 @@ DT[, .(B, C = sum(C))]
 # not necessary to wrap in .() when not interested in its return (NULL)
 DT[, plot(A, C)]
 
-# Curly Braces to evaluate a series of expressions (separated by new lines or semicolons) and return only the last expression:
+# Curly Braces to evaluate a series of expressions 
+# (separated by new lines or semicolons) and 
+# return only the last expression:
 DT[, {print(A); hist(C); NULL}]
 
 
 
 # DT[ , .(B) ] vs. DT[ , .B]
-dt <- data.table(x = 1:5, y = 10*1:5)
+dt <- data.table(x = 1:5
+ ,y = 10*1:5)
 str(dt[,x])
-str(dt[,.(x)])                    
+str(dt[,.(x)])            
 
 
 # Create a subset containing the columns B and C for rows 1 and 3 of DT. 
@@ -118,7 +122,9 @@ DT[, ..D]
 # in J "very important in dt that groups"
 # are returned in the order that they first appear" [DT creator]
 
-DT1 <- data.table(A = c("c","b","a"), B =c(1, 2, 3, 4, 5, 6))
+DT1 <- data.table(
+  A = c("c","b","a")
+ ,B =c(1, 2, 3, 4, 5, 6))
 DT1
 
 # can use functions in J/by?
@@ -135,14 +141,17 @@ DT1[, .(MySum = sum(B),
 
 
 # Function calls in by
-DT2 <- data.table(A = 1:5, B = 10:14)
+DT2 <- data.table(
+  A = 1:5
+ ,B = 10:14)
 #    A  B
 # 1: 1 10
 # 2: 2 11
 # 3: 3 12
 # 4: 4 13
 # 5: 5 14
-DT2[, .(Mysum = sum(B)), by = .(Grp = A%%2)]
+DT2[ , .(Mysum = sum(B))
+     ,by = .(Grp = A%%2)]
 # even and odd number group
 #    Grp Mysum
 # 1:   1    36
@@ -177,15 +186,17 @@ DT2[2:4, sum(B), by = A%%2]
 
 # For each Species, print the mean Sepal.Length
 DT <- data.table(iris)
-DT[, mean(Sepal.Length), by = Species]
+DT[ ,mean(Sepal.Length)
+    ,by = Species]
 # Species    V1
 # 1:     setosa 5.006
 # 2: versicolor 5.936
 # 3:  virginica 6.588
 
 
-# Print mean Sepal.Length, grouping by first letter of Species
-DT[, mean(Sepal.Length), by = substr(Species,1,1)]
+# mean Sepal.Length, grouping by first letter of Species
+DT[ ,mean(Sepal.Length)
+    ,by = substr(Species,1,1)]
 # substr    V1
 # 1:      s 5.006
 # 2:      v 6.262
@@ -218,7 +229,7 @@ DT[, .(Count = .N), .(Area = 10 * round(Sepal.Length * Sepal.Width / 10))]
 
 
 # UTILE assieme a sort, per le N miliori frequenze ...
-# can you return multiple numbers in J
+# can you return multiple numbers when using J
 # Create the data.table DT
 DT <- data.table(A = rep(letters[2:1], each = 4L), 
                  B = rep(1:4, each = 2L), 
@@ -276,8 +287,9 @@ DT[, mean(na.omit(ArrDelay))]
 
 
 # not using ‘.()’ in j return 
-#only returns a vector
-DT[, .(mean(na.omit(DepDelay)), mean(na.omit(ArrDelay)))]
+# only returns a vector
+DT[, .(mean(na.omit(DepDelay))
+   , mean(na.omit(ArrDelay)))]
 # V1       V2
 # 1: 9.444951 7.094334
 
@@ -346,17 +358,29 @@ DT[, .(C = cumsum(C)), by = .(A, B)][, .(C = tail(C, 2)), by = A]
 # unique values from a group of rows
 # https://stackoverflow.com/questions/44945646/for-r-data-table-how-to-use-uniquen-in-order-count-unique-distinct-values-in
 # value of A irrilevant, count distinct B,C
-DT <- data.table(A = 1:8,
-                 B = rep(letters[1:2], each = 4L),
-                 C = rep(1:4, each = 2L)) 
+DT <- data.table(
+  A = 1:8
+ ,B = rep(letters[1:2], each = 4L)
+ ,C = rep(1:4, each = 2L)) 
 # unique returns a data.table with duplicated rows removed, by columns 
 # specified in by argument. 
 # When no by then duplicated rows by all columns are removed.
-DT[, .(distinct_groups = uniqueN(A)), by = .(B, C)]
+DT[ , .(distinct_groups = uniqueN(A))
+    , by = .(B, C)]
+
+
+
+DT <- data.table(head(cars,3))
+
+
 
 # -------------------------------------------------------------
 #         Fine corso data-camp
 # -------------------------------------------------------------
+
+
+
+
 
 
 dt4tests <- function() {
@@ -402,3 +426,50 @@ check_keys_and_indexes_compatibilty <- function() {
 
 }
 check_keys_and_indexes_compatibilty()
+
+
+
+dt <- data.table(
+  x = 1:3
+  ,y = 10*1:3
+  ,z = 100*1:3)
+dt
+myfun <- function(x) { 
+  print(paste(x,collapse="-"))}
+dt2 <- dt[ , lapply(.SD ,FUN = myfun) ]
+dt2
+
+myfun2 <- function(x) { 
+  print(paste(x,collapse="-"))}
+
+dt[ , lapply(.SD ,FUN = sum) ]
+
+DT = data.table(A = 1:3, C = 21:23) 
+
+DT[, .(Total = sum(A), Mean = mean(C))]
+
+DT <- data.table( 
+  a = 1
+,b = LETTERS[1:4])
+
+
+DT <- data.table(
+  A=c(rep("a",8),rep("b",8))
+  ,B = rep(c("x","y"),c(4,4))
+  ,C = rep(c("#","*"),c(2,2))
+  ,D = 1:16
+  )
+DT
+DT[, .(extract = tail(D,1)) 
+   ,by = .(A, B,C)]
+
+DT[, .(extract = tail(D,1)) 
+   ,by = .(A, B)]
+
+DT[, .(extract = tail(D,1)) 
+   ,by = .(A)]
+
+
+DT[, .(C = sum(D)) 
+   ,by = .(A, B,C)]
+DT

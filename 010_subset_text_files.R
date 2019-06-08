@@ -156,7 +156,7 @@ readTxtFileToStringVectors <- function(fname, nrLinesToRead) {
 # --------------------------------------------------------------------
 subsetTextFilesByLines <- function(in_dir, out_dir, nrLinesKept
                                    ,nrLinesRead, forceIt)
-  # --------------------------------------------------------------------
+# --------------------------------------------------------------------
 {    
   print(paste("out dir:",out_dir," - in dir: ",in_dir))
   

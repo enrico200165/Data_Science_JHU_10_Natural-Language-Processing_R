@@ -17,6 +17,16 @@ myF(myVar, "character")
 print(myVar)
 
 
+namespaces <- function () 
+{
+  x <- 1
+  x <- function() { print("f")}
+  print(x)
+  x()
+}
+namespaces()
+
+
 # -------------------------------------------
 
 f <- function(x) {

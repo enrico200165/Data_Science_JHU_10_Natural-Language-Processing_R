@@ -21,7 +21,7 @@ test_subsetTextFilesByLines <- function()
   }
   
   T && subsetTextFilesByLines(data_dir_corpus_full 
-                              ,data_dir_corpus_subset ,50,1000 , forceIt = F)
+                              ,data_dir_corpus_subset ,10,10000 , forceIt = T)
   
   if(F) {
     print(list.files(data_dir_corpus_full))

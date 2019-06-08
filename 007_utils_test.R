@@ -1,4 +1,5 @@
 
+
 source("007_utils.R")
 
 # --------------------------------------------------------------------
@@ -25,7 +26,7 @@ test_rie <- function() {
   serializeIfNeeded(mydf,TRUE)
   
   # check if it serializes correctly
-  if (rie(mydf, function() data.frame(10:1))) {
+  if (rie(mydf, T, ,function() data.frame(10:1))) {
     print("ERROR I did not read it")
   }
   
@@ -103,12 +104,12 @@ test_utils <- function()
   
   
   test_XiB()  
-  testRemoveAllVarExcept()
+  #testRemoveAllVarExcept()
   test_rie()
   test_prt()
   
   test_getSerializeFName()
-  test_coverage_of_freq_list()
+  # test_coverage_of_freq_list()
 }
 
 # 

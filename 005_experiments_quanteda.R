@@ -1,7 +1,7 @@
 require(quanteda)
 
 # https://github.com/quanteda/quanteda/issues/48
-
+https://github.com/quanteda/quanteda/issues/1321
 
 trivial_3_texts <- c("a aa aaa", "b bb bbb", "d dd ddd dddd")
 
@@ -24,7 +24,8 @@ extremely_minimal_overview <- function() {
 
   # get 3rd feature NON sicuro è modo giusto
   featnames(dfm_ret)[3]
-    
+  
+  freq <- textstat_frequency(dfm_ret)
 }
 
 extremely_minimal_overview()

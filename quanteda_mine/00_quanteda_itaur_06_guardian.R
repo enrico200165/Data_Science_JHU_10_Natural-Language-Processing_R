@@ -4,6 +4,7 @@ require(quanteda, quietly = TRUE, warn.conflicts = FALSE)
 require(readtext)
 #install.packages("devtools")
 #
+# 
 # devtools::install_github("quanteda/quanteda.corpora")
 require(quanteda.corpora)
 #install.packages("spacyr")
@@ -12,7 +13,7 @@ library(ggplot2)
 
 # --- external files ---
 
-source("01_globals.R")
+source("006_globals.R")
 prj_dir()
 
 
@@ -38,7 +39,9 @@ prj_dir()
 require(quanteda)
 
 
-setwd(file.path(itaur_dir(),"6_advanced"))
+itaur_dir <- function() { "./quanteda_mine"}
+
+setwd(file.path(itaur_dir()))
 
 load('guardianSample.RData')
 toks <- tokens(guardianSample, remove_punct = TRUE)
@@ -109,7 +112,7 @@ head(toks_multi[[1]], 50)
 
 # fine
 # ---------------------------------------------------------
-prj_dir()
+prj_dir <- function() {}
 
 
 # ---------------------------------------------------------
