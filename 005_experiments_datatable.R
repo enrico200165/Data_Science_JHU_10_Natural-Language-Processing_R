@@ -1,6 +1,7 @@
 require(data.table)
 require(dplyr)
-source("01_globals.R")
+
+source("006_globals.R")
 
 
 
@@ -98,10 +99,10 @@ D <- 5
 #   j (the 2nd argument inside [...]) is a single symbol but column 
 # name 'D' is not found. Perhaps you intended DT[, ..D]. 
 # This difference to data.frame is deliberate and explained in FAQ 1.1.
-class(DT[, .(D)])
+# class(DT[, .(D)])
 # [1] "data.table" "data.frame"
-class(DT[, D]) # in my version gives same error as DT[, D]
-DT[, ..D]
+# class(DT[, D]) # in my version gives same error as DT[, D]
+# DT[, ..D]
 # Error in `[.data.table`(DT, , ..D) : 
 #   Item 1 of j is 5 which is outside the column number 
 # range [1,ncol=3]
@@ -416,14 +417,20 @@ check_keys_and_indexes_compatibilty <- function() {
   
   # set key ok
   key_cols <- c("a","b","c")
-  setkeyv(mydt,key_cols); print(mykey(dt))
+  setkeyv(mydt,key_cols); 
+  prt(key(mydt))
+
   # indexes seem to fail when key is present
-  setindexv(mydt,key_cols); print(indices(mydt))
+  setindexv(mydt,key_cols);
+  my_indices <- indices(mydt)
+  print(my_indices)
 
   # without key indexes work  
   mydt <- dt4tests()
-  setindexv(mydt,key_cols); print(indices(d))
-
+  setindexv(mydt,key_cols); 
+  my_indices <- indices(mydt)
+  print(my_indices)
+  
 }
 check_keys_and_indexes_compatibilty()
 
@@ -473,3 +480,5 @@ DT[, .(extract = tail(D,1))
 DT[, .(C = sum(D)) 
    ,by = .(A, B,C)]
 DT
+
+

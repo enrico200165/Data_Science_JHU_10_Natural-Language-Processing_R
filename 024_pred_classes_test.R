@@ -2,20 +2,24 @@
 require(lintr)
 require(testthat)
 
+source("006_globals.R")
+source("024_pred_classes.R")
+
+
 
 # --------------------------------------------------------------------
-build_small_test_objects <- function() {
+build_small_test_objects <- function(force_calc) {
 # --------------------------------------------------------------------
 
   prt("build_small_test_objects() - start")
 
-  rie(dtf_1gram_sep, produce_ngram_bare_dtf_1)
+  rie(dtf_1gram_sep, force_calc, , produce_ngram_bare_dtf_1)
   o_1gram_test <- DTF_Basic$new(dtf_1gram_sep[1:100, ])
 
-  rie(dtf_2gram_sep, produce_ngram_bare_dtf_2)
+  rie(dtf_2gram_sep, force_calc, , produce_ngram_bare_dtf_2)
   o_2gram_test <- DTF_Basic$new(dtf_2gram_sep[1:100, ])
 
-  rie(dtf_3gram_sep, produce_ngram_bare_dtf_3)
+  rie(dtf_3gram_sep, force_calc, , produce_ngram_bare_dtf_3)
   o_3gram_test <- DTF_Basic$new(dtf_3gram_sep[1:100, ])
 
   if (F) {
@@ -99,22 +103,22 @@ test_freq_ge_feat_idx <- function(o1, o2, o3) {
 
 
 # --------------------------------------------------------------------
-test_pred_classes <- function()
+test_pred_classes <- function(force_calc)
 # --------------------------------------------------------------------
 {
-  rie(dtf_1gram_sep, produce_ngram_bare_dtf_1)
+  rie(dtf_1gram_sep,force_calc, ,  produce_ngram_bare_dtf_1)
   # o_1grams_basic <- DTF_Basic$new(dtf_1gram_sep)
-  rie(o_1grams_basic, DTF_Basic$new, dtf_1gram_sep)
+  rie(o_1grams_basic, force_calc, ,  DTF_Basic$new, dtf_1gram_sep)
   assign("o_1grams_basic", o_1grams_basic, .GlobalEnv)
 
-  rie(dtf_2gram_sep, produce_ngram_bare_dtf_2)
+  rie(dtf_2gram_sep, force_calc, , produce_ngram_bare_dtf_2)
   # o_2grams_basic <- DTF_Basic$new(dtf_2gram_sep)
-  rie(o_2grams_basic, DTF_Basic$new, dtf_2gram_sep)
+  rie(o_2grams_basic, force_calc, , DTF_Basic$new, dtf_2gram_sep)
   assign("o_2grams_basic", o_2grams_basic, .GlobalEnv)
 
-  rie(dtf_3gram_sep, produce_ngram_bare_dtf_3)
+  rie(dtf_3gram_sep, force_calc, , produce_ngram_bare_dtf_3)
   # o_3grams_basic <- DTF_Basic$new(dtf_3gram_sep)
-  rie(o_3grams_basic, DTF_Basic$new, dtf_3gram_sep)
+  rie(o_3grams_basic, force_calc, , DTF_Basic$new, dtf_3gram_sep)
   assign("o_3grams_basic", o_3grams_basic, .GlobalEnv)
 
   # test_nfeat_for_size(o_1grams_basic ,o_2grams_basic ,o_3grams_basic)
@@ -147,15 +151,11 @@ test_pred_classes <- function()
 #####################################################################
 
 
-source("01_globals.R")
-source("02_pred_classes.R")
-
 
 fulldata <- T
-memory.limit(size = 24000)
+# memory.limit(size = 24000)
 silent <- F
 keypressWait <- T
-strict(F)
 use_full_corpus(F)
 
 build_small_test_objects()
@@ -164,22 +164,24 @@ build_small_test_objects()
 # test_pred_classes()
 # stop("ok SUCCESSO")
 
+force_calc = F
+
 # --------------------------------------------------------------------
 test_that("test_pred_classes"
   ,{
-    rie(dtf_1gram_sep, produce_ngram_bare_dtf_1)
+    rie(dtf_1gram_sep, force_calc, , produce_ngram_bare_dtf_1)
     # o_1grams_basic <- DTF_Basic$new(dtf_1gram_sep)
-    rie(o_1grams_basic, DTF_Basic$new, dtf_1gram_sep)
+    rie(o_1grams_basic, force_calc, , DTF_Basic$new, dtf_1gram_sep)
     assign("o_1grams_basic", o_1grams_basic, .GlobalEnv)
     
-    rie(dtf_2gram_sep, produce_ngram_bare_dtf_2)
+    rie(dtf_2gram_sep,force_calc, , produce_ngram_bare_dtf_2)
     # o_2grams_basic <- DTF_Basic$new(dtf_2gram_sep)
-    rie(o_2grams_basic, DTF_Basic$new, dtf_2gram_sep)
+    rie(o_2grams_basic, force_calc, , DTF_Basic$new, dtf_2gram_sep)
     assign("o_2grams_basic", o_2grams_basic, .GlobalEnv)
     
-    rie(dtf_3gram_sep, produce_ngram_bare_dtf_3)
+    rie(dtf_3gram_sep,force_calc, , produce_ngram_bare_dtf_3)
     # o_3grams_basic <- DTF_Basic$new(dtf_3gram_sep)
-    rie(o_3grams_basic, DTF_Basic$new, dtf_3gram_sep)
+    rie(o_3grams_basic, force_calc, , DTF_Basic$new, dtf_3gram_sep)
     assign("o_3grams_basic", o_3grams_basic, .GlobalEnv)
     
     # test_nfeat_for_size(o_1grams_basic ,o_2grams_basic ,o_3grams_basic)

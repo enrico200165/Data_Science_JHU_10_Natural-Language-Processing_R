@@ -1,6 +1,6 @@
 require(ggplot2)
 require(quanteda)
-# help(package = "quanteda")
+require(logging)
 
 #install.packages("readtext")
 require(readtext)

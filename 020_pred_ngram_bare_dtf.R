@@ -12,7 +12,9 @@ source("020_pred_globals.R")
 # ####################################################################
 #                       MODULE MISSION
 # from text files produce 3 (global ngrams) data.tables 
-# 
+# "separated"  each token of an ngram in one column  "tok1" "tok2" "tok3"
+# (rather than in a single column "tok1_tok2_to3")
+#
 # ####################################################################
 #                     EXTERNAL FUNCIONS
 #
@@ -44,10 +46,6 @@ produce_ngram_bare_dtf <- function(qcorpus, force_calc)
 # --------------------------------------------------------------------
 {
   set_parallelism(6,NULL)
-  
-  # dtf_1gram_sep <- produce_ngram_bare_dtf_1(qcorpus, force_calc)
-  # dtf_2gram_sep <- produce_ngram_bare_dtf_2(qcorpus, force_calc)
-  # dtf_3gram_sep <- produce_ngram_bare_dtf_3(qcorpus, force_calc)
   
   rie(dtf_1gram_sep, force_calc, , produce_ngram_bare_dtf_1,qcorpus, force_calc)
   rie(dtf_2gram_sep, force_calc, , produce_ngram_bare_dtf_2,qcorpus, force_calc)
@@ -251,10 +249,6 @@ dtf_info <- function(dtf)
 
 
 
-
-clean_rds("[1-3]")
-
-
 # --------------------------------------------------------------------
 test_ngram_bare_dtf <- function(force_calc = F) 
   # --------------------------------------------------------------------
@@ -282,6 +276,7 @@ test_ngram_bare_dtf <- function(force_calc = F)
   dtf_info(dtfs_gram_Sep[[4]]) 
   
 }
-pred_ngrams_re_init()
-#
-test_ngram_bare_dtf(F)
+
+# clean_rds("[1-3]")
+# pred_ngrams_re_init()
+# test_ngram_bare_dtf(F)
