@@ -451,7 +451,7 @@ myfun2 <- function(x) {
 
 dt[ , lapply(.SD ,FUN = sum) ]
 
-DT = data.table(A = 1:3, C = 21:23) 
+DT = data.table(A = letters[1:3],  B = 1:3, C = 101:103) 
 
 DT[, .(Total = sum(A), Mean = mean(C))]
 
@@ -483,7 +483,10 @@ DT
 
 
 
+dt = data.table(A = letters[1:3],  B = 1:3, C = 101:103) 
 
-
+f <- function(a,b,c) paste0(a,b,c, sep = "",collapse = "")
+f("a","b","c")
+dt[   , mapply(f, .SD), .SDCol[1:3] ]
 
 

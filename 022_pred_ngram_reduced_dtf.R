@@ -17,11 +17,11 @@ reduce_dtfs <- function(dtf_ngram_sep_list, n1 = 1000, n2 = 5000, n3 = 10000)
 {
   n <- 3
   ngram <- dtf_ngram_sep_list[[n+1]]
-  dtf_3gram_reduced <- reduce_dtf(ngram, n3)
+  dtf_3gram_reduced <- reduce_dtf(ngram, n, n3)
   
   n <- 2
   ngram <- dtf_ngram_sep_list[[n+1]]
-  dtf_2gram_reduced <- reduce_dtf(ngram, n2)
+  dtf_2gram_reduced <- reduce_dtf(ngram, n, n2)
   
   dtf_1gram_reduced <- NULL
   
@@ -30,7 +30,7 @@ reduce_dtfs <- function(dtf_ngram_sep_list, n1 = 1000, n2 = 5000, n3 = 10000)
 }
 
 
-reduce_dtf <- function(dtf_ngram_sep_list, pdcess_cut)
+reduce_dtf <- function(ngram, n, pdcess_cut)
   #' @param dtf_ngram_sep_list 
   #' list(dtf_1gram_sep, dtf_2gram_sep, dtf_3gram_sep)
   #'
@@ -55,15 +55,20 @@ reduce_dtf <- function(dtf_ngram_sep_list, pdcess_cut)
   unique_predec <- unique(ngram[ , ..extract_cols])
   setkeyv(unique_predec, cols = c(PREDECESSOR_FREQUENCY, TYPES_COLNAMES[1:n-1]))
   key(unique_predec)
-  # get predecess l freq  n3_pdcess_cut (ascending order)
+  # get predecess freq  pdcess_cut (ascending order)
   pred_frequency_to_include <- unique_predec[(.N-pdcess_cut)][[PREDECESSOR_FREQUENCY]]
   
-  # exclude
+  # exclude predecessors
   ngram <- ngram[ ngram[[PREDECESSOR_FREQUENCY]] >= pred_frequency_to_include ] 
   setkeyv(ngram, cols = c(TYPES_COLNAMES[1:n-1], PREDECESSOR_FREQUENCY))
   key(ngram)
   
-  ngram[.("eee","sss")][ , c(TYPES_COLNAMES, FREQUENCY_COL), with = F][1:10]
+  # just for test
+  # ngram[ .("at","the")][, head(.SD,10) ]
+  
+  # limit max predictions for each predecessor
+ 
+  ngram2 <-ngram[ , .SD[1:10], by = c(TYPES_COLNAMES[1:n-1])]
 }
 
 ###########################################################
@@ -75,17 +80,13 @@ force_calc <- F
 rie(qc_full, force_calc, , readQCorp, data_dir_corpus_in())
 # 
 dtf_ngram_sep_list <- produce_ngram_bare_dtf(qc_full, force_calc)
-reduced <- reduce_dtfs(dtf_ngram_sep_list)
+reduced <- reduce_dtfs(dtf_ngram_sep_list,5 , 5 , 5)
 
-head(ngram, 10)
+n3 <- reduced[[4]]
+print(head(n3[ .("at","the")], 20))
+
+n2 <- reduced[[3]]
+print(head(n2[ .("to")], 20))
 
 
-# --- check that grouping works as expected --- 
-# sum single frequencies
-sum_single <- sum(ngram$frequency)
-# sum frequencies of predecessors, for check
-extract_cols <- c(preds_cols, PREDECESSOR_FREQUENCY)
-unique_predec <- unique(ngram[ , ..extract_cols])
-sum_occurencies_predecess <- sum(unique_predec$pred_freq)
-identical(sum_single, sum_occurencies_predecess)
 
