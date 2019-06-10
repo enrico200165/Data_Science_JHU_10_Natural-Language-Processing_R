@@ -13,14 +13,29 @@ source("020_pred_ngram_bare_dtf.R")
 
 
 
-reduce_dtf <- function(dtf_ngram_sep_list, n3_pdcess_cut)
+reduce_dtfs <- function(dtf_ngram_sep_list, n1 = 1000, n2 = 5000, n3 = 10000)
+{
+  n <- 3
+  ngram <- dtf_ngram_sep_list[[n+1]]
+  dtf_3gram_reduced <- reduce_dtf(ngram, n3)
+  
+  n <- 2
+  ngram <- dtf_ngram_sep_list[[n+1]]
+  dtf_2gram_reduced <- reduce_dtf(ngram, n2)
+  
+  dtf_1gram_reduced <- NULL
+  
+  ret <- T
+  return(list(dtf_1gram_reduced, dtf_1gram_reduced, dtf_2gram_reduced, dtf_3gram_reduced))
+}
+
+
+reduce_dtf <- function(dtf_ngram_sep_list, pdcess_cut)
   #' @param dtf_ngram_sep_list 
   #' list(dtf_1gram_sep, dtf_2gram_sep, dtf_3gram_sep)
   #'
   #' @return
 {
-  n = 3
-  ngram <- dtf_ngram_sep_list[[n+1]]
 
   preds_cols <- TYPES_COLNAMES[1:n-1]
 
@@ -28,7 +43,8 @@ reduce_dtf <- function(dtf_ngram_sep_list, n3_pdcess_cut)
   cols_to_remove <- setdiff(names(ngram), cols_to_keep)
   
   # remove unnecessary columns
-  ngram[  ,(cols_to_remove) := NULL]
+  if (length(cols_to_remove) > 0)
+      ngram[  ,(cols_to_remove) := NULL]
   
   # get predecessor's frequency
   # () needed to get variable content
@@ -40,7 +56,7 @@ reduce_dtf <- function(dtf_ngram_sep_list, n3_pdcess_cut)
   setkeyv(unique_predec, cols = c(PREDECESSOR_FREQUENCY, TYPES_COLNAMES[1:n-1]))
   key(unique_predec)
   # get predecess l freq  n3_pdcess_cut (ascending order)
-  pred_frequency_to_include <- unique_predec[(.N-n3_pdcess_cut)][[PREDECESSOR_FREQUENCY]]
+  pred_frequency_to_include <- unique_predec[(.N-pdcess_cut)][[PREDECESSOR_FREQUENCY]]
   
   # exclude
   ngram <- ngram[ ngram[[PREDECESSOR_FREQUENCY]] >= pred_frequency_to_include ] 
@@ -48,7 +64,6 @@ reduce_dtf <- function(dtf_ngram_sep_list, n3_pdcess_cut)
   key(ngram)
   
   ngram[.("eee","sss")][ , c(TYPES_COLNAMES, FREQUENCY_COL), with = F][1:10]
-  print("OK")
 }
 
 ###########################################################
@@ -60,7 +75,7 @@ force_calc <- F
 rie(qc_full, force_calc, , readQCorp, data_dir_corpus_in())
 # 
 dtf_ngram_sep_list <- produce_ngram_bare_dtf(qc_full, force_calc)
-reduce_dtf(dtf_ngram_sep_list, 1000)
+reduced <- reduce_dtfs(dtf_ngram_sep_list)
 
 head(ngram, 10)
 
