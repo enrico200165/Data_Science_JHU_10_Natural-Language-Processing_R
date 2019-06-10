@@ -15,7 +15,7 @@ TYPE3_COLNAME <- "terzo"   # column with type 3 of an ngram
 TYPES_COLNAMES <- c(TYPE1_COLNAME, TYPE2_COLNAME , TYPE3_COLNAME)
 
 PREDECESSOR_FREQUENCY <- "pdcessor_freq"
-
+FREQUENCY_COL <- "frequency"
 
 # --- bare DTF with ngrams probabilities
 if (!exists("dtf_1gram_sep")) dtf_1gram_sep <- NULL
