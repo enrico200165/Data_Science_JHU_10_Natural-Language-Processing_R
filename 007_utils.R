@@ -518,30 +518,5 @@ coverage_of_freq_list <- function(frq_vect, qtiles_vec, size = 0)
 ###########################################################
 #                      TEMP TEST
 ###########################################################
-test_rie <- function() {
-  
-  
-  myvec <- LETTERS
-  if (!rie(myvec[5], F, , function() myvec[5])) {
-    print("ERROR I did not read it")
-  }
-  str(myvec)
-  
-  
-  mydf <- data.frame(10:1)
-  serializeIfNeeded(mydf,TRUE)
-  
-  # check if it serializes correctly
-  if (rie(mydf, T, ,function() data.frame(10:1))) {
-    print("ERROR I did not read it")
-  }
-  
-  mydf <<- NULL
-  if (!rie(mydf, F,"forcingit", function() data.frame(10:1))) {
-    print("ERROR I did not read it")
-  }
-  str(mydf)
-  
-}
-# 
-# test_rie()
+
+clean_rds("qc")

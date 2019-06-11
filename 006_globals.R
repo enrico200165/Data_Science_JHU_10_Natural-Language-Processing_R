@@ -111,7 +111,7 @@ use_full_corpus <- function(vPar = NULL, reinit_funct = NULL
 # ---------------------------------------------------------
   data_type_prefix <- function() 
 # ---------------------------------------------------------
-if (exists("fulldata")) "full" else "subset"
+if (all(exists("fulldata"), !is.null(fulldata),fulldata)) "full" else "subset"
 
 
 # qc: quanteda corpus

@@ -4,12 +4,11 @@
 # and writing subsetted copies with a subset of lines
 
 
-require(DBI); 
-require(RSQLite); 
-require(sqldf)
 require(quanteda) # for docvars
 require(readtext)
 require(pryr)
+
+source("007_utils.R")
 
 #######################################################
 #           DICTIONARY
@@ -34,32 +33,32 @@ readQCorp <- function(data_dir_corpus, subsetPar)
   prt("readQCorp",data_dir_corpus)
   stopifnot(dir.exists(data_dir_corpus))
   filesInDir <- list.files(data_dir_corpus,"*bset*"); 
-  prt(filesInDir)
+  # prt(filesInDir)
   
   en_US_blogs   <- readtextIfEmpty_Wrapper(en_US_blogs,data_dir_corpus,  "en_US.blogs")
   en_US_news    <- readtextIfEmpty_Wrapper(en_US_news,data_dir_corpus,   "en_US.news")
   en_US_twitter <- readtextIfEmpty_Wrapper(en_US_twitter,data_dir_corpus,"en_US.twitter")
   
-  if (F) {
-    de_DE_blogs   <- readtextIfEmpty_Wrapper(de_DE_blogs,data_dir_corpus,  "de_DE.blogs")
-    de_DE_news    <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus,   "de_DE.news")
-    de_DE_twitter <- readtextIfEmpty_Wrapper(de_DE_twitter,data_dir_corpus,"de_DE.twitter")
-    
-    fi_FI_blogs   <- readtextIfEmpty_Wrapper(fi_FI_blogs,data_dir_corpus,"fi_FI.blogs")
-    fi_FI_news    <- readtextIfEmpty_Wrapper(fi_FI_news,data_dir_corpus, "fi_FI.news")
-    fi_FI_twitter <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus, "fi_FI.twitter")
-    
-    ru_RU_blogs   <- readtextIfEmpty_Wrapper(ru_RU_blogs,data_dir_corpus,"ru_RU.blogs")
-    ru_RU_news    <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus, "ru_RU.news")
-    ru_RU_twitter <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus, "ru_RU.twitter")
-    
-    
-    texts_df <- bind_rows(
-      en_US_blogs, en_US_news, en_US_twitter
-      ,de_DE_blogs, de_DE_news, de_DE_twitter
-      ,fi_FI_blogs, fi_FI_news, fi_FI_twitter
-      ,ru_RU_blogs, ru_RU_news, ru_RU_twitter)
-  }
+  # if (F) {
+  #   de_DE_blogs   <- readtextIfEmpty_Wrapper(de_DE_blogs,data_dir_corpus,  "de_DE.blogs")
+  #   de_DE_news    <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus,   "de_DE.news")
+  #   de_DE_twitter <- readtextIfEmpty_Wrapper(de_DE_twitter,data_dir_corpus,"de_DE.twitter")
+  #   
+  #   fi_FI_blogs   <- readtextIfEmpty_Wrapper(fi_FI_blogs,data_dir_corpus,"fi_FI.blogs")
+  #   fi_FI_news    <- readtextIfEmpty_Wrapper(fi_FI_news,data_dir_corpus, "fi_FI.news")
+  #   fi_FI_twitter <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus, "fi_FI.twitter")
+  #   
+  #   ru_RU_blogs   <- readtextIfEmpty_Wrapper(ru_RU_blogs,data_dir_corpus,"ru_RU.blogs")
+  #   ru_RU_news    <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus, "ru_RU.news")
+  #   ru_RU_twitter <- readtextIfEmpty_Wrapper(de_DE_news,data_dir_corpus, "ru_RU.twitter")
+  #   
+  #   
+  #   texts_df <- bind_rows(
+  #     en_US_blogs, en_US_news, en_US_twitter
+  #     ,de_DE_blogs, de_DE_news, de_DE_twitter
+  #     ,fi_FI_blogs, fi_FI_news, fi_FI_twitter
+  #     ,ru_RU_blogs, ru_RU_news, ru_RU_twitter)
+  # }
   
   
   texts_df <- bind_rows(
@@ -72,6 +71,12 @@ readQCorp <- function(data_dir_corpus, subsetPar)
   invisible(gc)
   qc
 }
+
+###########################################################
+#                 PRIVATE
+###########################################################
+
+
 
 # --------------------------------------------------------------------
 readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
@@ -93,11 +98,11 @@ readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
 
 # --------------------------------------------------------------------
 readtextIfEmpty <- function(mydf, in_dir, nFile)
-  # --------------------------------------------------------------------
+# --------------------------------------------------------------------
 # 
 {
-  varName <- deparse(substitute(mydf))
-  
+
+  # build full path name if dir is provided  
   if ( missing(in_dir) || is.na(in_dir) || (nchar(in_dir) <= 0)) {
     nomeFile <- nFile
   } else {
@@ -105,6 +110,7 @@ readtextIfEmpty <- function(mydf, in_dir, nFile)
     nomeFile <- file.path(in_dir,nFile)
   }
   
+  varName <- deparse(substitute(mydf))
   exists <- exists(varName)
   filled <- exists && (!is.null(nrow(mydf)) &&  nrow(mydf)> 0)
   if (filled) {
@@ -146,3 +152,7 @@ readtextIfEmpty <- function(mydf, in_dir, nFile)
   my_rt
 }
 
+
+###########################################################
+#                  TEMPORARY TESTS
+###########################################################

@@ -10,28 +10,28 @@ source("014_corpus.R")
 
 # ---------------------------------------------------------
 test_readQCorp <- function()
-# ---------------------------------------------------------
+  # ---------------------------------------------------------
 {
-    return(readQCorp(data_dir_corpus_in()))
+  return(readQCorp(data_dir_corpus_in()))
 }
 
 
 # --------------------------------------------------------------------
-  test_corpus.R <- function()
-# --------------------------------------------------------------------
+test_corpus.R <- function()
+  # --------------------------------------------------------------------
 {
-
+  
   fulldata <<- FALSE
   silent <<- T
   print(" --- Unit Testing --- ")
-
-  qc <- test_readQCorp()
+  
+  qc <<- test_readQCorp()
   print(qc)
   
   print(" --- Tests Completed --- ")
 }
 
 #
-  test_corpus.R()
-
+clean_rds("qc")
+test_corpus.R()
 
