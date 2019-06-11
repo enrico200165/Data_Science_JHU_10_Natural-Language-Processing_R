@@ -4,10 +4,6 @@
 # and writing subsetted copies with a subset of lines
 
 
-require(DBI); 
-require(RSQLite); 
-require(sqldf)
-require(quanteda) # for docvars
 require(readtext)
 require(pryr)
 
@@ -24,43 +20,41 @@ require(pryr)
 
 source("006_globals.R")
 
-# ---------------------------------------------------------
-buildWordsDBFromFile <- function(words_file, db_fname)
-# ---------------------------------------------------------
-# reads text file and put words in an sqlite table
-{
-  words_table <- "words_en"
-  words_col = "words"
+# --------------------------------------------------------------------
+subsetTextFilesByLines <- function(in_dir, out_dir, nrLinesKept
+                                   ,nrLinesRead, forceIt)
+  #' @param in_dir 
+  #' @param out_dir 
+  #' @param nrLinesKept  lines inserted in subset
+  #' @param nrLinesRead  lines read in each chunk
+  #' @param forceIt 
+  #'
+  #' @return T if ok
+{    
+  print(paste("out dir:",out_dir," - in dir: ",in_dir))
   
-  con = dbConnect(drv=RSQLite::SQLite(), dbname = db_fname)
+  stopifnot(dir.exists(in_dir)) ;stopifnot(dir.exists(out_dir))
   
-  tables = dbListTables(con)
-  if (length(tables) == 0) {
-    print("creating DB")
-    dbExecute(conn = con,"CREATE TABLE :tab ( :col TEXT);",
-              params = list(tab = words_table, col = words_col));
-  } else {
-    print(paste("table",words_table, "already exists"))
+  textFiles <- list.files(in_dir ,include.dirs = FALSE)
+  # remove dirs
+  textFiles <- textFiles[!dir.exists(file.path(in_dir,textFiles))]
+  
+  if (length(textFiles) <= 0) {
+    prt_error(paste("no files found in",in_dir))
+    return(FALSE)
   }
   
-  results <- dbGetQuery(con, paste("SELECT count(*) FROM "
-                                   ,words_table,";"))
-  res = as.numeric(results)
-  # dbClearResult(con)
-  if (is.na(res) | res <= 0) {
-    print("filling DB from file")
-    dbWriteTable(conn = con, name =  words_table
-                 ,value = words_file, row.names = FALSE, header = FALSE
-                 ,overwrite = T, sep="#")
-    dbDisconnect(con)
-    unlink(db_fname)
-  } else {
-    print(paste("DB",db_fname,"already loaded"))
-  }
+  sapply(textFiles, FUN = function(x) { 
+    subsetLines(x, in_dir, out_dir,nrLinesKept, nrLinesRead, forceIt); TRUE
+  } )
   
-  dbDisconnect(con)
-  unlink(db_fname)
-}
+  T
+} 
+
+
+###########################################################
+#             PRIVATE
+###########################################################
 
 
 # ---------------------------------------------------------
@@ -69,14 +63,14 @@ subsetFileName <- function(fname, descr) {
   # derive file name for subset files, from "father" file name
   fname <- strsplit(fname,"\\.[^\\.]*$")[[1]]
   fnameOut <- paste(fname,"_subset",descr,".txt", sep="")
-  fnameOut;
+  fnameOut
 }
 
 
 # ---------------------------------------------------------
 subsetLines <- function(fname, in_dir, out_dir, nrLinesKept
                         ,nrLinesRead,forceIt) {
-  # ---------------------------------------------------------
+# ---------------------------------------------------------
   
   stopifnot(dir.exists(in_dir))
   stopifnot(dir.exists(out_dir))
@@ -132,56 +126,6 @@ subsetLines <- function(fname, in_dir, out_dir, nrLinesKept
 }
 
 
-# ---------------------------------------------------------
-readTxtFileToStringVectors <- function(fname, nrLinesToRead) {
-  # ---------------------------------------------------------
-  enc <- getOption("encoding")
-  con <- file(fname, "rt", encoding = enc)
-  # enc <- iconvlist()[309] # utf8
-  
-  linesRead <- character(0)
-  tryCatch({
-    linesRead <- readLines(con, nrLinesToRead, skipNul = T)
-  }
-  ,error = function(x) { print("error"); print(x)}
-  ,warning = function(x) { print("warning"); print(x)}
-  ,finally = { close.connection(con); gc(); return(linesRead) }
-  )
-  
-  linesRead
-}
-
-
-
-# --------------------------------------------------------------------
-subsetTextFilesByLines <- function(in_dir, out_dir, nrLinesKept
-                                   ,nrLinesRead, forceIt)
-# --------------------------------------------------------------------
-{    
-  print(paste("out dir:",out_dir," - in dir: ",in_dir))
-  
-  stopifnot(dir.exists(in_dir)) ;stopifnot(dir.exists(out_dir))
-  
-  textFiles <- list.files(in_dir ,include.dirs = FALSE)
-  # remove dirs
-  textFiles <- textFiles[!dir.exists(file.path(in_dir,textFiles))]
-  
-  if (length(textFiles) <= 0) {
-    prt_error(paste("no files found in",in_dir))
-    return(FALSE)
-  }
-  
-  sapply(textFiles, FUN = function(x) { 
-    subsetLines(x, in_dir, out_dir,nrLinesKept, nrLinesRead, forceIt); TRUE
-  } )
-  
-  T
-} 
-
-
-
-
-
 
 
 # ---------------------------------------------------------
@@ -216,3 +160,8 @@ checkUSANewsFileProblem <- function(fname, nrLinesToRead)
   
   linesRead
 }
+
+
+###########################################################
+#                 TEMPORARY TEST
+###########################################################

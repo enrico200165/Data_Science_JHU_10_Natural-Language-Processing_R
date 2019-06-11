@@ -86,7 +86,7 @@ n3 <- reduced[[4]]
 print(head(n3[ .("at","the")], 20))
 
 n2 <- reduced[[3]]
-print(head(n2[ .("to")], 20))
+print(head(n2[ .("to")], 20)
 
 
 
