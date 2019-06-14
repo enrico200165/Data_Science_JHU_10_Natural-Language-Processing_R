@@ -1,18 +1,19 @@
 require(quanteda)
 
 # https://github.com/quanteda/quanteda/issues/48
-https://github.com/quanteda/quanteda/issues/1321
+# https://github.com/quanteda/quanteda/issues/1321
 
 trivial_3_texts <- c("a aa aaa", "b bb bbb", "d dd ddd dddd")
 
 extremely_minimal_overview <- function() {
 
+  require(quanteda)
   # corpus with 3 texts
   qc <- corpus(trivial_3_texts)
   
   #dfm
   dfm_ret <- dfm(qc
-                 ,ngrams = 1
+                 ,ngrams = 3
                  ,remove_numbers = T
                  ,remove_punct = T
                  ,remove_symbols = T

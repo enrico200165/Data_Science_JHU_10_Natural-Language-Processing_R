@@ -31,7 +31,7 @@ pipeline <- function(force_calc) {
   rie(qc,force_calc, NULL , readQCorp ,corp_dir)
   # print(qc)
   # --- calculate types frequencies
-  dtfs_gram_sep <- produce_ngram_bare_dtf(qc_full, force_calc)
+  dtfs_gram_sep <- produce_ngram_bare_dtf(qc, force_calc)
   # print(dtfs_gram_sep[[4]])
   
   # ======= REDUCE FREQUENCY DATA TABLES ========
@@ -39,8 +39,10 @@ pipeline <- function(force_calc) {
   reduced_dtfs <- reduce_dtfs(dtfs_gram_sep, reduce_matrix)
   print(reduced_dtfs[[4]])
   
+  reduced_dtfs
+  
 }
 
 
-pipeline(force_calc = F)
+red <- pipeline(force_calc = F)
 

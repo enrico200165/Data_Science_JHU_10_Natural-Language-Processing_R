@@ -47,9 +47,9 @@ produce_ngram_bare_dtf <- function(qcorpus, force_calc)
 {
   set_parallelism(6,NULL)
   
-  rie(dtf_1gram_sep, force_calc, , produce_ngram_bare_dtf_1,qcorpus, force_calc)
-  rie(dtf_2gram_sep, force_calc, , produce_ngram_bare_dtf_2,qcorpus, force_calc)
-  rie(dtf_3gram_sep, force_calc, , produce_ngram_bare_dtf_3,qcorpus, force_calc)
+  rie(dtf_1gram_sep, force_calc, , produce_ngram_bare_dtf_1, qcorpus, force_calc)
+  rie(dtf_2gram_sep, force_calc, , produce_ngram_bare_dtf_2, qcorpus, force_calc)
+  rie(dtf_3gram_sep, force_calc, , produce_ngram_bare_dtf_3, qcorpus, force_calc)
   OK = T
 
   return(list(OK, dtf_1gram_sep, dtf_2gram_sep, dtf_3gram_sep))
@@ -71,6 +71,11 @@ build_dfm_ngrams <- function(qcorpus, n)
 {
   
   # stopifnot(class(txts_par) %in% c("tokens","character"))
+  
+  if (is.null(qcorpus)) {
+    prt_error("qcorpus è null in build_dfm_ngrams(qcorpus, n) ")
+    stop(1)
+  }
   
   dfm_ret <- dfm(qcorpus
                  ,ngrams = n

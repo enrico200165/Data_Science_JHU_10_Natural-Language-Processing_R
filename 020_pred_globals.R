@@ -21,3 +21,7 @@ FREQUENCY_COL <- "frequency"
 if (!exists("dtf_1gram_sep")) dtf_1gram_sep <- NULL
 if (!exists("dtf_2gram_sep")) dtf_2gram_sep <- NULL
 if (!exists("dtf_3gram_sep")) dtf_3gram_sep <- NULL
+
+if (!exists("dtf_1gram")) dtf_1gram <- NULL
+if (!exists("dtf_2gram")) dtf_2gram <- NULL
+if (!exists("dtf_3gram")) dtf_3gram <- NULL
