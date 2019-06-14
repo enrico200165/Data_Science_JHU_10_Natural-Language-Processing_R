@@ -13,17 +13,25 @@ source("020_pred_ngram_bare_dtf.R")
 
 
 
-reduce_dtfs <- function(dtf_ngram_sep_list, n1 = 1000, n2 = 5000, n3 = 10000)
+reduce_dtfs <- function(dtf_ngram_sep_list, reduct_matrix)
+#' @param list of 4 elements:
+#' 1 - OK, boolean
+#' 2 - 1gram DT, 3 - 2gram DT, 4 3gram dt
+#' @param reduct_matrix: row i for the igram (1 for 1gramm)
+#' row has 2 elements: nr of predecessors to kee, 2 nr of predictions
+#' @return 
 {
   n <- 3
   ngram <- dtf_ngram_sep_list[[n+1]]
-  dtf_3gram_reduced <- reduce_dtf(ngram, n, n3)
+  dtf_3gram_reduced <- reduce_dtf(ngram, n, reduct_matrix[n, 1])
   
   n <- 2
   ngram <- dtf_ngram_sep_list[[n+1]]
-  dtf_2gram_reduced <- reduce_dtf(ngram, n, n2)
+  dtf_2gram_reduced <- reduce_dtf(ngram, n, reduct_matrix[n, 1])
   
-  dtf_1gram_reduced <- NULL
+  n <- 1
+  ngram <- dtf_ngram_sep_list[[n+1]]
+  dtf_1gram_reduced <- tail(ngram, reduct_matrix[n, 1])
   
   ret <- T
   return(list(dtf_1gram_reduced, dtf_1gram_reduced, dtf_2gram_reduced, dtf_3gram_reduced))

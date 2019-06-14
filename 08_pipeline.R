@@ -35,7 +35,8 @@ pipeline <- function(force_calc) {
   # print(dtfs_gram_sep[[4]])
   
   # ======= REDUCE FREQUENCY DATA TABLES ========
-  reduced_dtfs <- reduce_dtfs(dtfs_gram_sep)
+  reduce_matrix <- rbind(c(20,20), c(2000,20), c(3000,20))
+  reduced_dtfs <- reduce_dtfs(dtfs_gram_sep, reduce_matrix)
   print(reduced_dtfs[[4]])
   
 }
