@@ -35,7 +35,7 @@ subsetTextFilesByLines <- function(in_dir, out_dir, nrLinesKept
   
   stopifnot(dir.exists(in_dir)) ;stopifnot(dir.exists(out_dir))
   
-  textFiles <- list.files(in_dir ,include.dirs = FALSE)
+  textFiles <- list.files(in_dir, pattern = ".*\\.txt" ,include.dirs = FALSE)
   # remove dirs
   textFiles <- textFiles[!dir.exists(file.path(in_dir,textFiles))]
   

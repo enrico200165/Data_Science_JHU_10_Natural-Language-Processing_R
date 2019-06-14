@@ -12,7 +12,9 @@ source("014_corpus.R")
 test_readQCorp <- function()
   # ---------------------------------------------------------
 {
-  return(readQCorp(data_dir_corpus_in()))
+  corp_dir <- data_dir_corpus_in()
+  rie(qc,readQCorp,,,corp_dir)
+  return(qc)
 }
 
 
