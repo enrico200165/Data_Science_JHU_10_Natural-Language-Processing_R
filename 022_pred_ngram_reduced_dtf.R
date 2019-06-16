@@ -66,7 +66,7 @@ reduce_dtf <- function(ngram, n, pdcess_cut)
   # get predecess freq  pdcess_cut (ascending order)
   pred_frequency_to_include <- unique_predec[(.N-pdcess_cut)][[PREDECESSOR_FREQUENCY]]
   
-  # exclude predecessors
+  # exclude rows with predecessors excess predecessors
   ngram <- ngram[ ngram[[PREDECESSOR_FREQUENCY]] >= pred_frequency_to_include ] 
   setkeyv(ngram, cols = c(TYPES_COLNAMES[1:n-1], PREDECESSOR_FREQUENCY))
   key(ngram)
@@ -76,14 +76,35 @@ reduce_dtf <- function(ngram, n, pdcess_cut)
   
   # limit max predictions for each predecessor
  
+  # 
   ngram2 <-ngram[ , .SD[1:10], by = c(TYPES_COLNAMES[1:n-1])]
+  ngram2 <-ngram[ , .SD[1:min(c(10, .N))], by = c(TYPES_COLNAMES[1:n-1])]
+
+  # remove NAs for predecessors that have less than 10 rows
+  ngram2 <- na.omit(ngram2, cols = FREQUENCY_COL)
+
+  ngram2
 }
 
 ###########################################################
 #                 TEST TEMP
 ###########################################################
 
-# 
+force_calc <- F
+qc<- NULL
+
+rie(qc, force_calc, NULL, readQCorp, data_dir_corpus_in())
+dtf_ngram_sep_list <- produce_ngram_bare_dtf(qc, force_calc)
+reduce_matrix <- rbind(c(20,20), c(2000,20), c(3000,20))
+
+reduced <- reduce_dtfs(dtf_ngram_sep_list,reduce_matrix)
+
+n3 <- reduced[[4]]
+print(head(n3[ .("at","the")], 20))
+
+n2 <- reduced[[3]]
+print(head(n2[ .("to")], 20))
+
 
 
 

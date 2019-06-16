@@ -10,7 +10,10 @@ source("022_pred_ngram_reduced_dtf.R")
 
 
 
-qc <- NULL # quanteda corpus
+if (!exists("qc"))                qc            <- NULL # quanteda corpus
+if (!exists("dtfs_gram_sep"))     dtfs_gram_sep <- NULL # quanteda corpus
+if (!exists("reduced_dtfs"))      reduced_dtfs  <- NULL # quanteda corpus
+
 
 
 pipeline <- function(force_calc) {
@@ -31,18 +34,19 @@ pipeline <- function(force_calc) {
   rie(qc,force_calc, NULL , readQCorp ,corp_dir)
   # print(qc)
   # --- calculate types frequencies
+  rie(dtfs_gram_sep, force_calc,NULL,produce_ngram_bare_dtf,qc, force_calc)
   dtfs_gram_sep <- produce_ngram_bare_dtf(qc, force_calc)
   # print(dtfs_gram_sep[[4]])
   
   # ======= REDUCE FREQUENCY DATA TABLES ========
   reduce_matrix <- rbind(c(20,20), c(2000,20), c(3000,20))
-  reduced_dtfs <- reduce_dtfs(dtfs_gram_sep, reduce_matrix)
+  reduced_dtfs_all <- reduce_dtfs(dtfs_gram_sep, reduce_matrix)
   print(reduced_dtfs[[4]])
   
-  reduced_dtfs
+  reduced_dtfs_all
   
 }
 
 
-red <- pipeline(force_calc = F)
+ret <- pipeline(force_calc = F)
 

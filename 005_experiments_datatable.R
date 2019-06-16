@@ -490,3 +490,66 @@ f("a","b","c")
 dt[   , mapply(f, .SD), .SDCol[1:3] ]
 
 
+dt = data.table(
+  A = rep(c("a","b") ,each = 12)
+ ,B = rep(c("x","y","z"), each = 8)
+ ,C = 1:24)
+dt[ ,.(S = sum(B)), by = A][S > 10]
+dt[ S > 10, .(S = sum(B)), by = A]
+
+dt[, sum(B)]
+dt[, .I[sum(B) > 10]] # somma su tutto B, quindi 22
+idx_aggr_subset <- dt[, .I[sum(B) > 10], by = A] # somma per gruppi, passa 10+10
+idxs <- idx_aggr_subset$V1
+dt[idxs]
+
+dt[ idx_aggr_subset <- dt[, .I[sum(B) > 10], by = A]$V1  ]
+
+
+dt[ 
+  ,if (sum(B) > 10) .SD
+  ,by = A]
+
+
+
+print(dt)
+dt2 <- dt[  , sum(C), by = .(A, B) ]
+dt2 <- dt2[  , .SD[1:3], by = A]
+mycols <- c("B","V1")
+
+na.omit(dt2, cols = which(names(dt2) %in%  mycols ))
+
+na.omit(dt2, cols = mycols )
+
+
+dt <- data.table(A = 1)
+dt[ , .SD[1:5]]
+dt[ , .SD[1:min(c(5, .N))]]
+
+
+
+col_names <- c("one", "two","three")
+dummy_vals <- cbind(1:3,LETTERS[1:3],letters[1:3])
+dt <- data.table()
+for ( i in seq_along(col_names)) {
+  dt[ , x := dummy_vals[,i]]
+  new_names <- names(dt)
+  new_names[length(new_names)] <- col_names[i]
+  setnames(dt,new_names)
+}
+print(dt)
+
+
+
+
+dt <- data.table()
+col_names <- c("one", "two","three")
+lapply(col_names, function(x) {dt[ , c(x) := 1:3] } )
+dt
+
+
+dt2 <- fread("a",col.names = col_name)
+
+col_name <- "ok"
+dt[ , col_name := 1:3]
+
