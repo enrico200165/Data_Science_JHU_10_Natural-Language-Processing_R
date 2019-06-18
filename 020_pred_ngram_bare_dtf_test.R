@@ -1,9 +1,10 @@
 
 
+source("007_utils.R")
 source("020_pred_ngram_bare_dtf.R")
 source("014_corpus.r")
 
-clean_rds("[1-3]")
+clean_rds("ngram[1-3][^_]")
 
 
 # --------------------------------------------------------------------

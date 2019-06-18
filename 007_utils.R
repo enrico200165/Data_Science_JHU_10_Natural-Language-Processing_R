@@ -190,13 +190,15 @@ rie <- function(df, force_calc, force_fname, calc_function,...)
 
 #---------------------------------------------------------------------
 rie_str <- function(vname, force_calc, force_fname, calc_function,...) 
-  #---------------------------------------------------------------------
+#---------------------------------------------------------------------
 #' @description identical to rie but var name is not deparsed
 {
   args <- list(...)
   ret <- FALSE
   
   varName <- vname
+  # to check passed value. using df for historic reasons
+  df <- parent.frame(n = 1)[[vname]]
   
   # rdsFName <- if (is.null(force_fname)) getSerializFName(varName) else getSerializFName(force_fname)
   rdsFName <- getSerializFName(varName, force_fname)

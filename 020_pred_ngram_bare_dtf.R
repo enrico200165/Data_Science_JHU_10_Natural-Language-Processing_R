@@ -47,17 +47,21 @@ produce_ngram_bare_dtf <- function(qcorpus, force_calc)
 {
   set_parallelism(6,NULL)
   
-  rie(dtf_1gram_sep, force_calc, , produce_ngram_bare_dtf_1, qcorpus, force_calc)
-  rie(dtf_2gram_sep, force_calc, , produce_ngram_bare_dtf_2, qcorpus, force_calc)
-  rie(dtf_3gram_sep, force_calc, , produce_ngram_bare_dtf_3, qcorpus, force_calc)
-  OK = T
+  rie(dtf_1gram_sep, force_calc, , build_ngram_bare_dtf, qcorpus, force_calc, 1)
+  rie(dtf_2gram_sep, force_calc, , build_ngram_bare_dtf, qcorpus, force_calc, 2)
+  rie(dtf_3gram_sep, force_calc, , build_ngram_bare_dtf, qcorpus, force_calc, 3)
 
+  OK = T
   return(list(OK, dtf_1gram_sep, dtf_2gram_sep, dtf_3gram_sep))
 }
 
 ###########################################################
 #               private
 ###########################################################
+
+
+# column that contains the ngrams in quanteda
+feature <- "feature"
 
 
 # --------------------------------------------------------------------
@@ -102,9 +106,6 @@ dtf_ngram <- function(qcorpus, n, force_calc)
   prt("dtf_ngram() - begininning - n=",n)
   stopifnot(1 <= n && n <= 3)
 
-  if (n==2) {
-    prt("debug")
-  }
   prt("dtf_ngram() - lazy calling build_dfm_ngrams(txts_merged, n) - n=",n)
   
   alias <- paste0("dfm_ngram", n)
@@ -124,114 +125,36 @@ dtf_ngram <- function(qcorpus, n, force_calc)
 }
 
 
-  
 # --------------------------------------------------------------------
-produce_ngram_bare_dtf_1 <- function(qcorpus, force_calc) 
+build_ngram_bare_dtf <- function(qcorpus, force_calc, n) 
 # --------------------------------------------------------------------
 # https://stackoverflow.com/questions/20345022/convert-a-data-frame-to-a-data-table-without-copy
 #
 {
-  feature <- "feature"
 
-  prt("builfrequency data tables sigle-string _sep")
-  rie(dtf_1gram, force_calc, , dtf_ngram ,qcorpus , 1,force_calc)
-  prt("splitting dts 1grams")
+  # get textstatfrequency
+  alias <- paste0("dtf_", n, "gram", collapse = "")
+  rie_str(alias, force_calc, NULL, dtf_ngram ,qcorpus, n, force_calc)
+  cur_ngram <- environment()[[alias]]
   
-  if (feature %in% colnames(dtf_1gram)) {
-    dt1_fun <- function(dt) { 
-      setnames(dt, "feature", TYPES_COLNAMES[1])
-    }
-    rie(dtf_1gram_sep, force_calc, , dt1_fun, dtf_1gram)
-  } else {
-    prt_error("feature col not found")
-    stop()
+  if (!feature %in% colnames(cur_ngram)) {
+    prt_error("not found",feature, "column")
+    stop(1)
   }
-  assign("dtf_1gram_sep" ,dtf_1gram_sep, .GlobalEnv)
-  if (nrow(dtf_1gram) != nrow(dtf_1gram_sep))
-    prt_error("different nr rows splitting unigram:",nrow(dtf_1gram),nrow(dtf_1gram_sep))
+    
+  prt("splitting",n,"grams")
+  splits <- strsplit(cur_ngram[[feature]],"_" ,fixed = T)
+  
+  for (i in 1:n) {
+    col_name <- TYPES_COLNAMES[i]
+    col_val <- sapply(splits,function(x) x[i])
+    cur_ngram[ , (col_name) := col_val]
+  }
 
-  kill_var(dtf_1gram)
-  dtf_1gram_sep
+  assign(alias, cur_ngram, .GlobalEnv)
+
+  cur_ngram
 }
-
-
-# --------------------------------------------------------------------
-produce_ngram_bare_dtf_2 <- function(qcorpus, force_calc) 
-# --------------------------------------------------------------------
-# https://stackoverflow.com/questions/20345022/convert-a-data-frame-to-a-data-table-without-copy
-#
-{
-  feature <- "feature"
-
-  prt("splitting dts 2grams")
-  rie(dtf_2gram, force_calc, ,dtf_ngram ,qcorpus, 2, force_calc)
-  if (feature %in% colnames(dtf_2gram)) {
-    dt2_fun <- function(dt) {
-      
-      splits <- strsplit(dt$feature,"_" ,fixed = T)
-      prim <- sapply(splits,function(x) x[1])
-      sec  <- sapply(splits,function(x) x[2])
-      # dt[ , TYPES_COLNAMES[1:2] := list(prim, sec) ]
-      dt[ , `:=`(primo = prim, secondo = sec) ]
-      dt[, feature := NULL]
-      rm(splits , prim , sec); gc()
-      dt
-    }
-    rie(dtf_2gram_sep, force_calc,,dt2_fun, dtf_2gram)
-    assign("dtf_2gram_sep" ,dtf_2gram_sep, .GlobalEnv)
-  } else {
-    prt_error("feature col not found")
-    stop()
-  }
-  if (nrow(dtf_2gram) != nrow(dtf_2gram_sep))
-    prt("different nr rows splitting unigram:",nrow(dtf_2gram),nrow(dtf_2gram_sep))
-
-  kill_var(dtf_2gram)
-  dtf_2gram_sep
-  }
-
-
-
-# --------------------------------------------------------------------
-produce_ngram_bare_dtf_3 <- function(qcorpus, force_calc) 
-# --------------------------------------------------------------------
-# https://stackoverflow.com/questions/20345022/convert-a-data-frame-to-a-data-table-without-copy
-#
-{
-  feature <- "feature"
-
-  rie(dtf_3gram , force_calc, , dtf_ngram ,qcorpus , 3, force_calc)
-  prt("splitting dts 3grams")
-  if (feature %in% colnames(dtf_3gram)) {
-
-    dt3_fun <- function(dt) {
-          
-      splits <- strsplit(dt$feature,"_" ,fixed = T)
-      prim <- sapply(splits,function(x) x[1])
-      sec  <- sapply(splits,function(x) x[2])
-      ter  <- sapply(splits,function(x) x[3])
-
-      # dt[ , TYPES_COLNAMES[1:3] := list(prim, sec , ter) ] # seems to corrupt memory
-      dt[ , `:=`(primo = prim, secondo = sec, terzo = ter) ]
-      dt[, feature := NULL]
-      rm(splits , prim , sec , ter); gc()
-
-      dt
-    }
-    rie(dtf_3gram_sep ,force_calc, ,dt3_fun, dtf_3gram)
-    assign("dtf_3gram_sep" ,dtf_3gram_sep, .GlobalEnv)
-  } else {
-    prt_error("feature col not found")
-    stop()
-  }
-  if (nrow(dtf_3gram) != nrow(dtf_3gram_sep))
-    prt("different nr rows splitting unigram:",nrow(dtf_3gram),nrow(dtf_3gram_sep))
-
-  kill_var(dtf_3_gram)
-  dtf_3gram_sep
-  }
-
-
 
 
 # --------------------------------------------------------------------
@@ -266,7 +189,6 @@ test_ngram_bare_dtf <- function(force_calc = F)
   
   rie(qc_full, force_calc, , readQCorp, data_dir_corpus_in())
   
-  
   dtfs_gram_Sep <- produce_ngram_bare_dtf(qc_full, force_calc)
   
   ret = dtfs_gram_Sep[1]
@@ -282,6 +204,44 @@ test_ngram_bare_dtf <- function(force_calc = F)
   
 }
 
+
+###########################################################
+#            TEMPORARY TEST 
+###########################################################
+  clean_rds("ngram[1-3][^_]")
+  
+  
+  # --------------------------------------------------------------------
+  test_ngram_bare_dtf <- function(force_calc = F) 
+    # --------------------------------------------------------------------
+  {
+    silent <<- F
+    keypressWait <<- F
+    fulldata <<- F
+    
+    use_full_corpus(F,ngram_bare_re_init)
+    
+    rie(qc_full, force_calc, , readQCorp, data_dir_corpus_in())
+    
+    
+    dtfs_gram_sep <- produce_ngram_bare_dtf(qc_full, force_calc)
+    
+    ret = dtfs_gram_sep[1]
+    
+    dtf_1gram_sep <- dtfs_gram_sep[[2]]
+    dtf_2gram_sep <- dtfs_gram_sep[[3]]
+    dtf_3gram_sep <- dtfs_gram_sep[[4]]
+    
+    
+    dtf_info(dtfs_gram_sep[[2]]) 
+    dtf_info(dtfs_gram_sep[[3]]) 
+    dtf_info(dtfs_gram_sep[[4]]) 
+    
+  }
+  pred_ngrams_re_init()
+  #
+  test_ngram_bare_dtf(F)
+  
 # clean_rds("[1-3]")
 # pred_ngrams_re_init()
 # test_ngram_bare_dtf(F)
