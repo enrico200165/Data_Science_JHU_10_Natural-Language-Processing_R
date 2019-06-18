@@ -1,3 +1,4 @@
+
 require(dplyr)
 require(data.table)
 
@@ -8,6 +9,7 @@ source("006_globals.R")
 source("007_utils.R")
 source("014_corpus.R")
 source("020_pred_globals.R")
+
 
 # ####################################################################
 #                       MODULE MISSION
@@ -29,13 +31,13 @@ pred_ngrams_re_init <- function()
 {
   prt("start pred_ngrams_re_init()")
   
-  set_parallelism(6,NULL)
+  # set_parallelism(6,NULL)
 
   txts_merged <- NULL
   
   # data table frequencies
-  dtf_1gram <<- NULL ;dtf_2gram <<- NULL ;dtf_3gram <<- NULL
-  dfm_ngram <<- c(NULL, NULL, NULL) 
+  # dtf_1gram <<- NULL ;dtf_2gram <<- NULL ;dtf_3gram <<- NULL
+  # dfm_ngram <<- c(NULL, NULL, NULL) 
   prt("completed pred_ngrams_re_init()")
   pre_ngram_bare_dtf_inited <<- T
 }
@@ -99,48 +101,35 @@ build_DFM <- function(qcorpus, n)
 
 
 # --------------------------------------------------------------------
-dtf_ngram <- function(qcorpus, n, force_calc)
-# --------------------------------------------------------------------
-# NOT SURE IT IS USED, It may crash for lack of memory
-{
-  prt("dtf_ngram() - begininning - n=",n)
-  stopifnot(1 <= n && n <= 3)
-
-}
-
-
-# --------------------------------------------------------------------
 build_ngram_bare_dtf <- function(qcorpus, force_calc, n) 
 # --------------------------------------------------------------------
 # https://stackoverflow.com/questions/20345022/convert-a-data-frame-to-a-data-table-without-copy
 #
 {
-
   # dfm
   prt("dtf_ngram() - lazy calling build_DFM(txts_merged, n) - n=",n)
-  alias <- paste0("dfm_ngram", n)
+  alias <- paste0("dfm_", n, "ngram","_sep")
   rie_str(alias, force_calc, paste0("dtf_ngram",n,collapse = "")
           ,build_DFM, qcorpus,n)
   
   # textstats
   cur_ngram <- textstat_frequency(environment()[[alias]]); 
-  rm(dfm_ngram, envir = global_env()); rm(dfm_ngram, envir = environment())
   setDT(cur_ngram)
-  cur_ngram[ ,  c("rank", "group") := NULL]
+  cur_ngram[ ,  c("rank", "group", "docfreq") := NULL]
   gc()
-  if (!feature %in% colnames(cur_ngram)) {
-    prt_error("not found",feature, "column")
-    stop(1)
-  }
-    
+  
+
   prt("splitting",n,"grams")
   splits <- strsplit(cur_ngram[[feature]],"_" ,fixed = T)
+  cur_ngram[ ,  c(feature) := NULL]
+  
   for (i in 1:n) {
     col_name <- TYPES_COLNAMES[i]
     col_val <- sapply(splits,function(x) x[i])
     cur_ngram[ , (col_name) := col_val]
   }
 
+  setcolorder(cur_ngram, c(TYPES_COLNAMES[1:n],FREQUENCY_COL))
   assign(alias, cur_ngram, .GlobalEnv)
 
   cur_ngram
@@ -159,76 +148,7 @@ dtf_info <- function(dtf)
 }
 
 
-
-
 ###########################################################
 #             Temporary Test (Just to use debug)
 ###########################################################
 
-
-
-# --------------------------------------------------------------------
-test_ngram_bare_dtf <- function(force_calc = F) 
-  # --------------------------------------------------------------------
-{
-  silent <<- F
-  keypressWait <<- T 
-  fulldata <<- F
-  
-  use_full_corpus(F,ngram_bare_re_init)
-  
-  rie(qc_full, force_calc, , readQCorp, data_dir_corpus_in())
-  
-  dtfs_gram_Sep <- produce_ngram_bare_dtf(qc_full, force_calc)
-  
-  ret = dtfs_gram_Sep[1]
-
-  dtf_1gram_sep <- dtfs_gram_Sep[[2]]
-  dtf_2gram_sep <- dtfs_gram_Sep[[3]]
-  dtf_3gram_sep <- dtfs_gram_Sep[[4]]
-  
-  
-  dtf_info(dtfs_gram_Sep[[2]]) 
-  dtf_info(dtfs_gram_Sep[[3]]) 
-  dtf_info(dtfs_gram_Sep[[4]]) 
-  
-}
-
-
-###########################################################
-#            TEMPORARY TEST 
-###########################################################
-  clean_rds("ngram[1-3][^_]")
-  
-  
-  # --------------------------------------------------------------------
-  test_ngram_bare_dtf <- function(force_calc = F) 
-    # --------------------------------------------------------------------
-  {
-    silent <<- F
-    keypressWait <<- F
-    fulldata <<- F
-    
-    use_full_corpus(F,ngram_bare_re_init)
-    
-    rie(qc_full, force_calc, , readQCorp, data_dir_corpus_in())
-    
-    
-    dtfs_gram_sep <- produce_ngram_bare_dtf(qc_full, force_calc)
-    
-    ret = dtfs_gram_sep[1]
-    
-    dtf_1gram_sep <- dtfs_gram_sep[[2]]
-    dtf_2gram_sep <- dtfs_gram_sep[[3]]
-    dtf_3gram_sep <- dtfs_gram_sep[[4]]
-    
-    
-    dtf_info(dtfs_gram_sep[[2]]) 
-    dtf_info(dtfs_gram_sep[[3]]) 
-    dtf_info(dtfs_gram_sep[[4]]) 
-    
-  }
-  pred_ngrams_re_init()
-  #
-  test_ngram_bare_dtf(F)
-  

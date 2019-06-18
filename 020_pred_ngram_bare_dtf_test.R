@@ -4,8 +4,8 @@ source("007_utils.R")
 source("020_pred_ngram_bare_dtf.R")
 source("014_corpus.r")
 
-clean_rds("ngram[1-3][^_]")
 
+clean_rds("ngram")
 
 # --------------------------------------------------------------------
 test_ngram_bare_dtf <- function(force_calc = F) 
@@ -19,7 +19,6 @@ test_ngram_bare_dtf <- function(force_calc = F)
   
   rie(qc_full, force_calc, , readQCorp, data_dir_corpus_in())
   
-  
   dtfs_gram_sep <- produce_ngram_bare_dtf(qc_full, force_calc)
   
   ret = dtfs_gram_sep[1]
@@ -31,9 +30,12 @@ test_ngram_bare_dtf <- function(force_calc = F)
   
   dtf_info(dtfs_gram_sep[[2]]) 
   dtf_info(dtfs_gram_sep[[3]]) 
-  dtf_info(dtfs_gram_sep[[4]]) 
+  dtf_info(dtfs_gram_sep[[4]])
   
+  print("ok")
 }
+
 pred_ngrams_re_init()
 #
 test_ngram_bare_dtf(F)
+

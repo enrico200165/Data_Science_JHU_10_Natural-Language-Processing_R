@@ -2,7 +2,7 @@
 source("022_pred_ngram_reduced_dtf.R")
 
 force_calc <- F
-
+qc<- NULL
 
 rie(qc, force_calc, NULL, readQCorp, data_dir_corpus_in())
 dtf_ngram_sep_list <- produce_ngram_bare_dtf(qc, force_calc)
@@ -15,4 +15,7 @@ print(head(n3[ .("at","the")], 20))
 
 n2 <- reduced[[3]]
 print(head(n2[ .("to")], 20))
-      
+
+
+
+
