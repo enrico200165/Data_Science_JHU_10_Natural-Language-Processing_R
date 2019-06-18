@@ -43,5 +43,7 @@ pipeline <- function(force_calc) {
 }
 
 
-ret <- pipeline(force_calc = F)
-
+reduced_dtfs <- pipeline(force_calc = F)
+ngram1 <- reduced_dtfs[[2]]
+ngram2 <- reduced_dtfs[[3]]
+ngram3 <- reduced_dtfs[[4]]
