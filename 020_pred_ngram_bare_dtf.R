@@ -65,7 +65,7 @@ feature <- "feature"
 
 
 # --------------------------------------------------------------------
-build_dfm_ngrams <- function(qcorpus, n) 
+build_DFM <- function(qcorpus, n) 
 # --------------------------------------------------------------------
 #' @description EVGuess: tokenizes and calculates
 #' @param qcorpus quanteda corpus
@@ -77,7 +77,7 @@ build_dfm_ngrams <- function(qcorpus, n)
   # stopifnot(class(txts_par) %in% c("tokens","character"))
   
   if (is.null(qcorpus)) {
-    prt_error("qcorpus è null in build_dfm_ngrams(qcorpus, n) ")
+    prt_error("qcorpus è null in build_DFM(qcorpus, n) ")
     stop(1)
   }
   
@@ -106,22 +106,6 @@ dtf_ngram <- function(qcorpus, n, force_calc)
   prt("dtf_ngram() - begininning - n=",n)
   stopifnot(1 <= n && n <= 3)
 
-  prt("dtf_ngram() - lazy calling build_dfm_ngrams(txts_merged, n) - n=",n)
-  
-  alias <- paste0("dfm_ngram", n)
-  rie_str(alias, force_calc, paste0("dtf_ngram",n,collapse = "")
-      ,build_dfm_ngrams, qcorpus,n)
-
-    # textstats
-  prt("dtf_ngram() - textstat_frequency(dfm_ngram) - n=",n)
-  texstat_ngram <- textstat_frequency(environment()[[alias]]); 
-  rm(dfm_ngram, envir = global_env()); 
-  rm(dfm_ngram, envir = environment()); 
-  gc()
-
-  prt("dtf_ngram() - setDT(texstat_ngram) - n=",n)
-
-  setDT(texstat_ngram)
 }
 
 
@@ -132,11 +116,18 @@ build_ngram_bare_dtf <- function(qcorpus, force_calc, n)
 #
 {
 
-  # get textstatfrequency
-  alias <- paste0("dtf_", n, "gram", collapse = "")
-  rie_str(alias, force_calc, NULL, dtf_ngram ,qcorpus, n, force_calc)
-  cur_ngram <- environment()[[alias]]
+  # dfm
+  prt("dtf_ngram() - lazy calling build_DFM(txts_merged, n) - n=",n)
+  alias <- paste0("dfm_ngram", n)
+  rie_str(alias, force_calc, paste0("dtf_ngram",n,collapse = "")
+          ,build_DFM, qcorpus,n)
   
+  # textstats
+  cur_ngram <- textstat_frequency(environment()[[alias]]); 
+  rm(dfm_ngram, envir = global_env()); rm(dfm_ngram, envir = environment())
+  setDT(cur_ngram)
+  cur_ngram[ ,  c("rank", "group") := NULL]
+  gc()
   if (!feature %in% colnames(cur_ngram)) {
     prt_error("not found",feature, "column")
     stop(1)
@@ -144,7 +135,6 @@ build_ngram_bare_dtf <- function(qcorpus, force_calc, n)
     
   prt("splitting",n,"grams")
   splits <- strsplit(cur_ngram[[feature]],"_" ,fixed = T)
-  
   for (i in 1:n) {
     col_name <- TYPES_COLNAMES[i]
     col_val <- sapply(splits,function(x) x[i])
@@ -242,6 +232,3 @@ test_ngram_bare_dtf <- function(force_calc = F)
   #
   test_ngram_bare_dtf(F)
   
-# clean_rds("[1-3]")
-# pred_ngrams_re_init()
-# test_ngram_bare_dtf(F)
