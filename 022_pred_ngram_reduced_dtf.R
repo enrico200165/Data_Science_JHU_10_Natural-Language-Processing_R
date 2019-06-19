@@ -21,24 +21,24 @@ reduce_dtfs <- function(dtf_ngram_sep_list, reduct_matrix)
 #' row has 2 elements: nr of predecessors to kee, 2 nr of predictions
 #' @return 
 {
-  n <- 3
+  n <- 1
   ngram <- dtf_ngram_sep_list[[n+1]]
-  dtf_3gram_reduced <- reduce_dtf(ngram, n, reduct_matrix[n, 1])
+  dtf_1gram_reduced <- head(ngram, reduct_matrix[n, 1])
   
   n <- 2
   ngram <- dtf_ngram_sep_list[[n+1]]
-  dtf_2gram_reduced <- reduce_dtf(ngram, n, reduct_matrix[n, 1])
+  dtf_2gram_reduced <- reduce_dtf(ngram, n, reduct_matrix[n, 1], reduct_matrix[n, 2]) 
   
-  n <- 1
+  n <- 3
   ngram <- dtf_ngram_sep_list[[n+1]]
-  dtf_1gram_reduced <- tail(ngram, reduct_matrix[n, 1])
+  dtf_3gram_reduced <- reduce_dtf(ngram, n, reduct_matrix[n, 1], reduct_matrix[n, 2])
   
   ret <- T
-  return(list(dtf_1gram_reduced, dtf_1gram_reduced, dtf_2gram_reduced, dtf_3gram_reduced))
+  return(list(ret, dtf_1gram_reduced, dtf_2gram_reduced, dtf_3gram_reduced))
 }
 
 
-reduce_dtf <- function(ngram, n, pdcess_cut)
+reduce_dtf <- function(ngram, n, n_success_cut, pdcess_cut)
   #' @param dtf_ngram_sep_list 
   #' list(dtf_1gram_sep, dtf_2gram_sep, dtf_3gram_sep)
   #'
@@ -49,40 +49,29 @@ reduce_dtf <- function(ngram, n, pdcess_cut)
 
   cols_to_keep <- c(TYPES_COLNAMES[1:n], PREDECESSOR_FREQUENCY, FREQUENCY_COL)
   cols_to_remove <- setdiff(names(ngram), cols_to_keep)
+  extract_cols <- c(preds_cols, PREDECESSOR_FREQUENCY)
   
   # remove unnecessary columns
   if (length(cols_to_remove) > 0)
       ngram[  ,(cols_to_remove) := NULL]
   
-  # get predecessor's frequency
-  # () needed to get variable content
+  # calculate predecessor's frequency, () needed to get variable content
   ngram[ , (PREDECESSOR_FREQUENCY) := sum(frequency) , by = preds_cols]
+
+  # reduce the number of successor to a max
+  ngram <-ngram[ , .SD[1:min(c(n_success_cut, .N))], by = c(TYPES_COLNAMES[1:n-1])]
+  
+  
   # get index of last predecessor
   # ngram must be ordered by predecessor frequency, descending
-  extract_cols <- c(preds_cols, PREDECESSOR_FREQUENCY)
   unique_predec <- unique(ngram[ , ..extract_cols])
   setkeyv(unique_predec, cols = c(PREDECESSOR_FREQUENCY, TYPES_COLNAMES[1:n-1]))
-  key(unique_predec)
   # get predecess freq  pdcess_cut (ascending order)
   pred_frequency_to_include <- unique_predec[(.N-pdcess_cut)][[PREDECESSOR_FREQUENCY]]
-  
-  # exclude rows with predecessors excess predecessors
   ngram <- ngram[ ngram[[PREDECESSOR_FREQUENCY]] >= pred_frequency_to_include ] 
   setkeyv(ngram, cols = c(TYPES_COLNAMES[1:n-1], PREDECESSOR_FREQUENCY))
-  key(ngram)
-  
-  # just for test
-  # ngram[ .("at","the")][, head(.SD,10) ]
-  
-  # limit max predictions for each predecessor
- 
-  # 
-  ngram2 <-ngram[ , .SD[1:min(c(10, .N))], by = c(TYPES_COLNAMES[1:n-1])]
 
-  # old way to remove NAs for predecessors that have less than 10 rows
-  # ngram2 <- na.omit(ngram2, cols = FREQUENCY_COL)
-
-  ngram2
+  ngram
 }
 
 ###########################################################
@@ -94,15 +83,24 @@ qc<- NULL
 
 rie(qc, force_calc, NULL, readQCorp, data_dir_corpus_in())
 dtf_ngram_sep_list <- produce_ngram_bare_dtf(qc, force_calc)
-reduce_matrix <- rbind(c(20,20), c(2000,20), c(3000,20))
+reduce_matrix <- rbind(c(20,20), c(20, 2000), c(20, 3000))
 
 reduced <- reduce_dtfs(dtf_ngram_sep_list,reduce_matrix)
 
+
+print(" 1 grams")
+n1 <- reduced[[2]]
+print(paste("num rows 1grams",nrow(n1)))
+print(head(n1, 20))
+
+print(" 2 grams")
+n2 <- reduced[[3]]
+print(paste("num rows 2grams",nrow(n2)))
+print(head(n2[ .("to")], 20))
+
+print(" 3 grams")
 n3 <- reduced[[4]]
+print(paste("num rows 3grams",nrow(n3)))
 print(head(n3[ .("at","the")], 20))
 print(head(n3[.("zack","ryder")], 20))
-
-
-n2 <- reduced[[3]]
-print(head(n2[ .("to")], 20))
 

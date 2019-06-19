@@ -14,8 +14,8 @@ source("020_pred_globals.R")
 # ####################################################################
 #                       MODULE MISSION
 # from text files produce 3 (global ngrams) data.tables 
-# "separated"  each token of an ngram in one column  "tok1" "tok2" "tok3"
-# (rather than in a single column "tok1_tok2_to3")
+# "separated"  each token of an ngram in one column  
+# ex.. "tok1" "tok2" "tok3" instead of "tok1_tok2_to3"
 #
 # ####################################################################
 #                     EXTERNAL FUNCIONS
@@ -31,7 +31,7 @@ pred_ngrams_re_init <- function()
 {
   prt("start pred_ngrams_re_init()")
   
-  # set_parallelism(6,NULL)
+  set_parallelism(4,NULL)
 
   txts_merged <- NULL
   

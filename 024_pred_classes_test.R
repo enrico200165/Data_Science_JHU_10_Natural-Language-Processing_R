@@ -106,27 +106,27 @@ test_freq_ge_feat_idx <- function(o1, o2, o3) {
 test_pred_classes <- function(force_calc)
 # --------------------------------------------------------------------
 {
-  rie(dtf_1gram_sep,force_calc, ,  produce_ngram_bare_dtf_1)
-  # o_1grams_basic <- DTF_Basic$new(dtf_1gram_sep)
-  rie(o_1grams_basic, force_calc, ,  DTF_Basic$new, dtf_1gram_sep)
-  assign("o_1grams_basic", o_1grams_basic, .GlobalEnv)
+  
+  rie(qc, force_calc, NULL, readQCorp, data_dir_corpus_in())
+  dtf_ngram_sep_list <- produce_ngram_bare_dtf(qc, force_calc)
 
-  rie(dtf_2gram_sep, force_calc, , produce_ngram_bare_dtf_2)
+  reduce_matrix <- rbind(c(20,20), c(2000,20), c(3000,20))
+  ngrams_reduced_l <- reduce_dtfs(dtf_ngram_sep_list,reduce_matrix)
+  
+  
+  rie(o_1grams_basic, force_calc, ,  DTF_Basic$new, ngrams_reduced_l[[2]])
+  #assign("o_1grams_basic", o_1grams_basic, .GlobalEnv)
+
   # o_2grams_basic <- DTF_Basic$new(dtf_2gram_sep)
-  rie(o_2grams_basic, force_calc, , DTF_Basic$new, dtf_2gram_sep)
-  assign("o_2grams_basic", o_2grams_basic, .GlobalEnv)
+  rie(o_2grams_basic, force_calc, , DTF_Basic$new, ngrams_reduced_l[[3]])
+  # assign("o_2grams_basic", o_2grams_basic, .GlobalEnv)
 
-  rie(dtf_3gram_sep, force_calc, , produce_ngram_bare_dtf_3)
-  # o_3grams_basic <- DTF_Basic$new(dtf_3gram_sep)
-  rie(o_3grams_basic, force_calc, , DTF_Basic$new, dtf_3gram_sep)
+  rie(o_3grams_basic, force_calc, , DTF_Basic$new, ngrams_reduced_l[[4]])
   assign("o_3grams_basic", o_3grams_basic, .GlobalEnv)
 
   # test_nfeat_for_size(o_1grams_basic ,o_2grams_basic ,o_3grams_basic)
 
-  test_freq_ge_feat_idx(
-    o_1grams_basic, o_2grams_basic
-    , o_3grams_basic
-  )
+  test_freq_ge_feat_idx(o_1grams_basic, o_2grams_basic, o_3grams_basic)
 
   if (F) {
     print(o_1grams_basic$coverageGraphs()[[1]])
@@ -161,8 +161,8 @@ use_full_corpus(F)
 build_small_test_objects()
 
 
-# test_pred_classes()
-# stop("ok SUCCESSO")
+test_pred_classes()
+stop("ok SUCCESSO")
 
 force_calc = F
 

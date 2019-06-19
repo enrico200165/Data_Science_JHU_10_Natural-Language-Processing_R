@@ -28,11 +28,13 @@ test_ngram_bare_dtf <- function(force_calc = F)
   dtf_3gram_sep <- dtfs_gram_sep[[4]]
   
   
-  dtf_info(dtfs_gram_sep[[2]]) 
-  dtf_info(dtfs_gram_sep[[3]]) 
-  dtf_info(dtfs_gram_sep[[4]])
+  dtf_info(dtf_1gram_sep)
+  dtf_info(dtf_2gram_sep) 
+  dtf_info(dtf_3gram_sep)
   
   print("ok")
+  
+  print(dtf_1gram_sep)
 }
 
 pred_ngrams_re_init()
