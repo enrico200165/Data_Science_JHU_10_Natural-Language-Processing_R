@@ -60,8 +60,7 @@ reduce_dtf <- function(ngram, n, n_success_cut, pdcess_cut)
 
   # reduce the number of successor to a max
   ngram <-ngram[ , .SD[1:min(c(n_success_cut, .N))], by = c(TYPES_COLNAMES[1:n-1])]
-  
-  
+
   # get index of last predecessor
   # ngram must be ordered by predecessor frequency, descending
   unique_predec <- unique(ngram[ , ..extract_cols])
@@ -77,3 +76,34 @@ reduce_dtf <- function(ngram, n, n_success_cut, pdcess_cut)
 ###########################################################
 #                 TEST TEMP
 ###########################################################
+
+force_calc <- F
+qc<- NULL
+
+rie(qc, force_calc, NULL, readQCorp, data_dir_corpus_in())
+dtf_ngram_sep_list <- produce_ngram_bare_dtf(qc, force_calc)
+reduce_matrix <- rbind(c(20,20), c(20, 2000), c(20, 3000))
+
+reduced <- reduce_dtfs(dtf_ngram_sep_list,reduce_matrix)
+
+
+
+print(" 1 grams")
+n1 <- reduced[[2]]
+dtf_info(n1, T)
+
+coverageGraphs(n1, 1,qtiles_vec)
+
+print(" 2 grams")
+n2 <- reduced[[3]]
+dtf_info(n2, T)
+
+print(" 3 grams")
+n3 <- reduced[[4]]
+dtf_info(n3, T)
+
+print(head(n3[ .("at","the")], 20))
+print(head(n3[.("zack","ryder")], 20))
+
+print(n3[.("and","the")])
+

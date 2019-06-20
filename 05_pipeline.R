@@ -36,14 +36,19 @@ pipeline <- function(force_calc) {
   # print(dtfs_gram_sep[[4]])
   
   # ======= REDUCE FREQUENCY DATA TABLES ========
-  reduce_matrix <- rbind(c(20,20), c(2000,20), c(3000,20))
+  reduce_matrix <- rbind(c(20,20), c(20, 2000), c(20, 3000))
   reduced_dtfs <- reduce_dtfs(dtfs_gram_sep, reduce_matrix)
 
-  reduced_dtfs
+  if (!reduced_dtfs[[1]]) {
+    stop("pipeline failed")
+  }
+  
+  for (i in seq_along(reduced_dtfs[2:4])) {
+    saveRDS(reduced_dtfs[[i+1]], file = PRED_NGRAM_FNAMES[i])
+    prt("generated ngram prediction file: ", PRED_NGRAM_FNAMES[i])
+  }
+    
+  TRUE
 }
 
-
-reduced_dtfs <- pipeline(force_calc = F)
-ngram1 <- reduced_dtfs[[2]]
-ngram2 <- reduced_dtfs[[3]]
-ngram3 <- reduced_dtfs[[4]]
+pipeline(F)
