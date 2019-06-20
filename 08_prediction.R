@@ -19,7 +19,7 @@ pred_init <- function() {
 
 pred_init()
 
-pred_successors <- function(predecessors) {
+pred_success_core <- function(predecessors) {
   
   if (any(is.null(predecessors), length(predecessors) == 0)) {
     successors <- ngrams_freqs[[1]]
@@ -38,7 +38,7 @@ pred_successors <- function(predecessors) {
     } else if (length(predecessors) <= 1) {
       predecessors <- NULL
     }
-    return(pred_successors(predecessors))
+    return(pred_success_core(predecessors))
   } 
   
   # print(successors)
@@ -47,32 +47,52 @@ pred_successors <- function(predecessors) {
 }
 
 
-ret <- pred_successors(c("asdsa","sss"))
+pred_successors <- function(predecessors, start_sentence = F, reduce_to) {
+
+  if (start_sentence) {
+    if (any(!is.null(predecessors), length(predecessors) >= 0)) {
+       print("ERROR: start_sentence predecessors found")
+      stop()
+    }
+    predecessors <- c("sss")
+  }
+  
+  successors <- pred_success_core(predecessors)
+  if(reduce_to < nrow(successors)) {
+    setkeyv(successors, FREQUENCY_COL)
+    successors <- successors[.N:(.N-reduce_to+1)]
+  }
+  
+  successors
+}
+
+
+ret <- pred_successors(c("asdsa","sss"),F,  5)
 print(ret)
 
 
 
-ret <- pred_successors(c("sss","asdasda"))
+ret <- pred_successors(c("sss","asdasda"),F,  5)
 print(ret)
 
 
-ret <- pred_successors(c("a£$%£%","%&//"))
+ret <- pred_successors(c("a£$%£%","%&//"),F,  5)
 print(ret)
 
 
-ret <- pred_successors(c("the","usual"))
+ret <- pred_successors(c("the","usual"),F,  5)
 print(ret)
 
 
-ret <- pred_successors(c("a£$%£%","usual"))
+ret <- pred_successors(c("a£$%£%","usual"),F,  5)
 print(ret)
 
 
-ret <- pred_successors(c("a£$%£%","%&//"))
+ret <- pred_successors(c("a£$%£%","%&//"),F,  5)
 print(ret)
 
 
-print(pred_successors(NULL))
+print(pred_successors(NULL),F,  5)
 
 # to make 2pred fail and fall down to 1 prede
 predecessors2_nosecond <- setdiff(
