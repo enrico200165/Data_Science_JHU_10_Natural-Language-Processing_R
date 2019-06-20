@@ -77,30 +77,3 @@ reduce_dtf <- function(ngram, n, n_success_cut, pdcess_cut)
 ###########################################################
 #                 TEST TEMP
 ###########################################################
-
-force_calc <- F
-qc<- NULL
-
-rie(qc, force_calc, NULL, readQCorp, data_dir_corpus_in())
-dtf_ngram_sep_list <- produce_ngram_bare_dtf(qc, force_calc)
-reduce_matrix <- rbind(c(20,20), c(20, 2000), c(20, 3000))
-
-reduced <- reduce_dtfs(dtf_ngram_sep_list,reduce_matrix)
-
-
-print(" 1 grams")
-n1 <- reduced[[2]]
-print(paste("num rows 1grams",nrow(n1)))
-print(head(n1, 20))
-
-print(" 2 grams")
-n2 <- reduced[[3]]
-print(paste("num rows 2grams",nrow(n2)))
-print(head(n2[ .("to")], 20))
-
-print(" 3 grams")
-n3 <- reduced[[4]]
-print(paste("num rows 3grams",nrow(n3)))
-print(head(n3[ .("at","the")], 20))
-print(head(n3[.("zack","ryder")], 20))
-

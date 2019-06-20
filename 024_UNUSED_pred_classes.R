@@ -8,8 +8,6 @@ source("020_pred_globals.R")
 source("022_pred_ngram_reduced_dtf.R")
 
 
-qtiles_vec <- c(0.5, 0.55 ,0.6 ,0.65 ,0.7 ,0.75 ,0.8,0.85 ,0.9, 0.95
-  ,0.96,0.97,0.98,0.99, 0.995)
 
 # --------------------------------------------------------------------
 DTF_Basic <- R6Class("DTF_Basic"
@@ -33,10 +31,11 @@ DTF_Basic <- R6Class("DTF_Basic"
     stopifnot(nrow(dtf_par$primo) > 0)
 
     private$..dtf <- dtf_par
-    private$..nfeat <- nrow(private$..dtf );
-    tmp <- coverage_of_freq_list(
-      private$..dtf$frequency ,qtiles_vec ,self$size())
+    private$..nfeat <- nrow(private$..dtf )
+    tmp <- coverage_of_freq_list(private$..dtf$frequency ,qtiles_vec ,self$size())
     private$..coverage <- data.frame(tmp)
+
+    
     if (all(TYPES_COLNAMES[1:3] %in% names(private$..dtf))) {
       prt("building 3 grams object")
       private$..ngram = 3
@@ -62,7 +61,7 @@ DTF_Basic <- R6Class("DTF_Basic"
     }
     else {
       prt_error("unexpected situation setting keys")
-      stop()      
+      stop("corrupted dtf")      
     }
     # 
     prt("key",key(private$..dtf),"indexes",indices(private$..dtf))
@@ -192,8 +191,7 @@ DTF_Basic <- R6Class("DTF_Basic"
     frqs_vect <- self$get_frq_df()$frequency # just alias
     
     idx <- which(frqs_vect < frq )[1] # first smaller index
-    stopifnot(idx > 0) # paranoid check
-    idx <- if (idx >= 2) (idx-1) else idx
+    if (is.null(idx)) 0 else if (idx >= 2) (idx-1) else idx
    }
 
    
@@ -299,7 +297,7 @@ test_nfeat_for_size <- function(o1, o2, o3) {
 # --------------------------------------------------------------------
 test_freq_ge_feat_idx <- function(o1, o2, o3) {
   
-  f <- 100
+  f <- mean(o1$get_frq_df()[[FREQUENCY_COL]])
   idx <- o1$freq_ge_feat_idx(f)
   # prt("index", ret$last_idx, "for frequencies >= ", ret$lower_freq)
   prt("index", idx, "for frequencies >= ", f)
@@ -344,23 +342,21 @@ test_pred_classes <- function(force_calc)
 # --------------------------------------------------------------------
 {
   rie(qc, force_calc, NULL, readQCorp, data_dir_corpus_in())
-  dtf_ngram_sep_list <- produce_ngram_bare_dtf(qc, force_calc)
   
+  dtf_ngram_sep_list <- produce_ngram_bare_dtf(qc, force_calc)
   reduce_matrix <- rbind(c(20,20), c(2000,20), c(3000,20))
   ngrams_reduced_l <- reduce_dtfs(dtf_ngram_sep_list,reduce_matrix)
   
   
   rie(o_1grams_basic, force_calc, NULL,  DTF_Basic$new, ngrams_reduced_l[[2]])
-  #assign("o_1grams_basic", o_1grams_basic, .GlobalEnv)
+  assign("o_1grams_basic", o_1grams_basic, .GlobalEnv)
   
   # o_2grams_basic <- DTF_Basic$new(dtf_2gram_sep)
   rie(o_2grams_basic, force_calc, NULL, DTF_Basic$new, ngrams_reduced_l[[3]])
-  # assign("o_2grams_basic", o_2grams_basic, .GlobalEnv)
+  assign("o_2grams_basic", o_2grams_basic, .GlobalEnv)
   
   rie(o_3grams_basic, force_calc, NULL, DTF_Basic$new, ngrams_reduced_l[[4]])
   assign("o_3grams_basic", o_3grams_basic, .GlobalEnv)
-  
-  # test_nfeat_for_size(o_1grams_basic ,o_2grams_basic ,o_3grams_basic)
   
   test_freq_ge_feat_idx(o_1grams_basic, o_2grams_basic, o_3grams_basic)
   

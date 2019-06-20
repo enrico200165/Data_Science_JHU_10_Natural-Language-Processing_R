@@ -97,46 +97,6 @@ serializeIfNeeded <- function(dfPar, forceIt = FALSE, rdsFName)
 }
 
 
-# #---------------------------------------------------------------------
-#   readIfEmpty <- function(df, rdsFName, forceSerialization = FALSE) 
-# #---------------------------------------------------------------------
-# # probably should be rewritten (to use a better subfunction I will
-# # probably write soon)
-# # return:
-# # TRUE if it was or has bee filled
-# {
-#   ret <- FALSE
-#    
-#   varName <- deparse(substitute(df))
-#   rdsFName <- getSerializFName(varName,rdsFName)
-#   
-#   if (!exists(varName) || is.null(df) || (length(df) <= 0 && nrow(df) <= 0)) {
-#     prt(paste(varName,"is empty", rdsFName))
-#     if (file.exists(rdsFName)) {
-#       # print(paste("reading serialization for:",varName," file:", rdsFName))
-#       df <- readRDS(rdsFName)
-#       #assign(varName,df,.GlobalEnv) # pass it outside
-#       assign(varName,df,parent.frame(n = 1)) # pass it outside
-#       ret <- TRUE
-#     } else {
-#       print(paste(varName,"cannot read, no file: ", rdsFName))
-#       ret <- FALSE
-#     }
-#   } else {
-#     prt(paste(varName,"alread filled, size GB (rounded down):"
-#       ,XiB(pryr::object_size(df))),"fulldata:",fulldata)
-#     ret <- TRUE
-#   }
-#   # print(paste("exit",varName, ))
-#   
-#   if (ret) {
-#     serializeIfNeeded(df, forceSerialization, rdsFName)
-#   }
-#   
-#   ret
-# }
-
-
 #---------------------------------------------------------------------
 rie <- function(df, force_calc, force_fname, calc_function,...) 
 #---------------------------------------------------------------------
@@ -467,53 +427,13 @@ prt_warn <- function(...) do.call(prt,prepend(list(...),"# WARNING:"))
 prt_error <- function(...) do.call(prt,prepend(list(...),"### ERROR:"))
 
 
-# --------------------------------------------------------------------
-coverage_of_freq_list <- function(frq_vect, qtiles_vec, size = 0)
-# --------------------------------------------------------------------
+
+# --------------------------------------------------------
+tstmp_fname <- function() 
+# --------------------------------------------------------
 {
-  
-  stopifnot(!is.null(frq_vect) && exists("frq_vect"))
-  stopifnot(!is.null(qtiles_vec) && exists("qtiles_vec"))
-  
-  # naive attempt to avoid underflow
-  molt <- 100 * 1000
-  
-  # get proportions
-  props <- frq_vect*molt/sum(frq_vect);
-  stopifnot(!strict() || round(sum(props)-(1*molt),5) == 0)
-  # cumulative
-  cumul <- cumsum(props)
-  
-  
-  idxs <- numeric(length =length(qtiles_vec))
-  pcts <- numeric(length =length(qtiles_vec))
-  frqs <- numeric(length =length(qtiles_vec))
-  sizs <- numeric(length =length(qtiles_vec))
-  
-  for (i in seq_along(qtiles_vec)) {
-    
-    qtile <- qtiles_vec[i]
-    idx_set <- which(cumul >= qtile*molt)
-    if (length(idx_set) <= 0) {
-      prt_warn("unable to find quantile")
-      prt_warn("freq vector:", frq_vect)
-      stop()
-    }
-    idxs[i] <- idx_set[1]
-    pcts[i] <- idxs[i]/length(frq_vect)
-    frqs[i] <- frq_vect[idx_set[1]]
-    sizs[i] <- XiB(pcts[i]*size)
-    
-    #prt(qtile,"somma:",round(sum(props[1:idxs[i]])/molt ,2))
-    #print("")
-  }
-  
-  list(
-    qtls = qtiles_vec
-    ,idxs = idxs
-    ,pcts = pcts
-    ,frqs = frqs
-    ,sizs = sizs)
+  # used in file names, avoid funny charss
+  format(Sys.time(), "%Y%m%d_%H%M%S")
 }
 
 

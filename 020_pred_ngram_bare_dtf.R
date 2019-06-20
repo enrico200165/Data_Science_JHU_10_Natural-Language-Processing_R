@@ -136,19 +136,40 @@ build_ngram_bare_dtf <- function(qcorpus, force_calc, n)
 }
 
 
+###########################################################
+#          Temporary Test (Just to use debug)
+###########################################################
+
+
+clean_rds("ngram")
+
 # --------------------------------------------------------------------
-dtf_info <- function(dtf)
+test_ngram_bare_dtf <- function(force_calc = F) 
 # --------------------------------------------------------------------
 {
-  prt("info about",deparse(substitute(dtf))
-    ,"size",XiB(pryr::object_size(dtf))
-    ,"nr features:",nrow(dtf)
-    ,"memory/feature ratio", round(pryr::object_size(dtf)/nrow(dtf),0)
-    )
+  silent <<- F
+  keypressWait <<- F
+  fulldata <<- F
+  
+  use_full_corpus(F,ngram_bare_re_init)
+  
+  rie(qc_full, force_calc, , readQCorp, data_dir_corpus_in())
+  
+  dtfs_gram_sep <- produce_ngram_bare_dtf(qc_full, force_calc)
+  
+  ret = dtfs_gram_sep[1]
+  
+  dtf_1gram_sep <- dtfs_gram_sep[[2]]
+  dtf_2gram_sep <- dtfs_gram_sep[[3]]
+  dtf_3gram_sep <- dtfs_gram_sep[[4]]
+  
+  
+  dtf_info(dtf_1gram_sep, T)
+  dtf_info(dtf_2gram_sep, T) 
+  dtf_info(dtf_3gram_sep, T)
+  
 }
 
-
-###########################################################
-#             Temporary Test (Just to use debug)
-###########################################################
-
+pred_ngrams_re_init()
+#
+test_ngram_bare_dtf(F)

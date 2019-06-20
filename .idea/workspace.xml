@@ -2,8 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5ba8a49a-3a0f-4350-9154-23f0a61934b3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/005_experiments_quanteda.R" beforeDir="false" afterPath="$PROJECT_DIR$/005_experiments_quanteda.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/VialiEn.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/VialiEn.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/020_pred_globals.R" beforeDir="false" afterPath="$PROJECT_DIR$/020_pred_globals.R" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/020_pred_ngram_bare_dtf.R" beforeDir="false" afterPath="$PROJECT_DIR$/020_pred_ngram_bare_dtf.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/022_pred_ngram_reduced_dtf.R" beforeDir="false" afterPath="$PROJECT_DIR$/022_pred_ngram_reduced_dtf.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/022_pred_ngram_reduced_dtf_test.R" beforeDir="false" afterPath="$PROJECT_DIR$/022_pred_ngram_reduced_dtf_test.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/024_pred_classes.R" beforeDir="false" afterPath="$PROJECT_DIR$/024_pred_classes.R" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -11,31 +16,35 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DefaultGradleProjectSettings">
+    <option name="testRunner" value="GRADLE" />
+    <option name="delegatedBuild" value="true" />
+  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/010_subset_text_files.R">
+        <entry file="file://$PROJECT_DIR$/020_pred_ngram_bare_dtf_unused.R">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="594">
-              <caret line="33" column="2" selection-start-line="33" selection-start-column="2" selection-end-line="33" selection-end-column="2" />
+            <state relative-caret-position="18">
+              <caret line="1" selection-start-line="1" selection-end-line="1" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/020_pred_ngram_bare_dtf.R">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="288">
+              <caret line="16" column="7" selection-start-line="16" selection-start-column="5" selection-end-line="16" selection-end-column="7" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/020_pred_ngram_bare_dtf.R">
+        <entry file="file://$PROJECT_DIR$/024_pred_classes_test.R">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="80" column="23" selection-start-line="80" selection-start-column="23" selection-end-line="80" selection-end-column="23" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/020_pred_ngram_bare_dtf_unused.R">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="36">
-              <caret line="2" selection-start-line="2" selection-end-line="2" />
+            <state relative-caret-position="50">
+              <caret line="43" column="24" selection-start-line="43" selection-start-column="24" selection-end-line="43" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -45,6 +54,8 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>produce_ngram_bare_dtf_1</find>
+      <find>paranoid</find>
+      <find>pa</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -69,8 +80,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="CatdeaLogs" />
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -82,7 +94,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -105,7 +116,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="R.024_pred_classes_test">
     <configuration name="020_pred_ngram_bare_dtf" type="RRunConfigurationType" factoryName="R" temporary="true">
       <option name="SCRIPT_PATH" value="$PROJECT_DIR$/020_pred_ngram_bare_dtf.R" />
       <option name="SCRIPT_ARGS" value="" />
@@ -113,8 +124,16 @@
       <option name="PASS_PARENT_ENVS" value="true" />
       <method v="2" />
     </configuration>
+    <configuration name="024_pred_classes_test" type="RRunConfigurationType" factoryName="R" temporary="true">
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/024_pred_classes_test.R" />
+      <option name="SCRIPT_ARGS" value="" />
+      <option name="WORKING_DIRECTORY_PATH" value="C:\Users\vialien\Documents\00_ev_data\08_dev\dev_sources\Data_Science_JHU_10_Natural-Language-Processing_R" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="R.024_pred_classes_test" />
         <item itemvalue="R.020_pred_ngram_bare_dtf" />
       </list>
     </recent_temporary>
@@ -136,7 +155,7 @@
     <frame x="-8" y="-8" width="1376" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.22264437" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2287234" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -175,28 +194,40 @@
           <line>2</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="the-r-line">
+          <url>file://$PROJECT_DIR$/024_pred_classes_test.R</url>
+          <line>64</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/010_subset_text_files.R">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="594">
+        <state relative-caret-position="550">
           <caret line="33" column="2" selection-start-line="33" selection-start-column="2" selection-end-line="33" selection-end-column="2" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/020_pred_ngram_bare_dtf_unused.R">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
+        <state relative-caret-position="18">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/020_pred_ngram_bare_dtf.R">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="80" column="23" selection-start-line="80" selection-start-column="23" selection-end-line="80" selection-end-column="23" />
+        <state relative-caret-position="288">
+          <caret line="16" column="7" selection-start-line="16" selection-start-column="5" selection-end-line="16" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/024_pred_classes_test.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="50">
+          <caret line="43" column="24" selection-start-line="43" selection-start-column="24" selection-end-line="43" selection-end-column="24" />
         </state>
       </provider>
     </entry>
