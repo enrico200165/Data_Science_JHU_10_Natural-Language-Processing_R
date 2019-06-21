@@ -16,14 +16,14 @@ EVT_KEY_DOWN  <- "keydown"
 EVT_KEY_UP    <- "keyup"
 
 
-REGR_PLOT <- "regrPlot"
+
 LOG_TEXT <- "traceOut"
 CMD_CHOSEN <- "utlCmdChosen"
 GLOBAL_STATUS  <- "globalStatus"
 X_VAR <- "xVar"
 Y_VAR <- "yVar"
 REGR_LINE <- "regrLine"
-
+UTL_CMD_ID <- "utlCmdId"
 
 TXT_IN_ID  <- "txti"
 
@@ -60,18 +60,6 @@ initBE <- function() {
 
 setMsg <- function(m) { values$msg <<- m; }
 
-plotRegression <- function(xpar, ypar,dfra,plotPar) {
-  p <- ggplot(data = dfra, aes(x=dfra[[xpar]],y=dfra[[ypar]]))
-  p <- p + geom_point(size=plotPar@pointSize)
-  p <- p + xlab(xpar) + ylab(ypar)
-  if (plotPar@regrSmoot == "Lm")
-    p <- p + geom_smooth(method='lm',formula=y~x)
-  if (plotPar@regrSmoot == "Loess")
-    p <- p + geom_smooth(method='loess',formula=y~x)
-  
-  p
-}
-
 
 performVariableCommand <- function(cmdPar, var) {
 
@@ -100,7 +88,7 @@ esidebar_panel <-       sidebarPanel(
   ,sliderInput("pointSize", "Size of points in plot:" ,min = 1, max = 8,value = 2)
   
   ,hr()
-  ,selectInput("utlCmdId", "Choose a Statistic:",utlCmdMenu, selected = "median")
+  ,selectInput(UTL_CMD_ID, "Choose a Statistic:",utlCmdMenu, selected = "median")
 ) # sidebar panel
 
 # ----------------- Main Panel -------------------------------
@@ -123,10 +111,10 @@ emain_panel <- mainPanel(
         });')
   ,div(style="display: inline-block;vertical-align:top;"
        ,textInput(TXT_IN_ID, label = h3("Text input"), value = ""))
-  ,div(style="display: inline-block;vertical-align:top;",
-       textOutput(LOG_TEXT))
+  ,div(style="display: inline-block;vertical-align:top;"
+       #,textOutput(LOG_TEXT)
+       )
   
-  ,plotOutput(REGR_PLOT)
   ,h3("Stat functions output",style="color:blue")
   ,textOutput("utlCmdOut")
   ,textOutput(CMD_CHOSEN)
@@ -135,7 +123,7 @@ emain_panel <- mainPanel(
   ,textOutput(GLOBAL_STATUS)
   ,hr()
   ,h3("Debug messages",style="color:blue")
-  #,textOutput("utlCmdChosen")
+  ,textOutput(LOG_TEXT)
   )
 
 
@@ -188,35 +176,16 @@ server <- function(input, output) {
   # Utility command 
   output[[CMD_CHOSEN]] <- renderText({
     
-    ret <- paste("function: \"",input$utlCmdId,"\"",sep="")
-    
-    if (input$utlCmdId %in% unlist(utlCmdMenu['On Data Frame'])) {
-      cmd_out <- performDFCommand(input$utlCmdId,"speed")
-    } else if(input$utlCmdId %in% unlist(utlCmdMenu['On "x" variable'])) {
-      ret <- paste(ret,"on Variable:\"",input$xVar,"\"",sep = "")
-      cmd_out <- performVariableCommand(input$utlCmdId,"speed")
-    } else {
-      cmd_out <- "unable To execute function"    
-    }
-    cmd_out <- paste(cmd_out,sep = " ", collapse = " ")
-    ret <- paste(ret,"Raw Output: ",cmd_out, sep = " ", collapse = " ")
+    ret <- paste("dummy", CMD_CHOSEN, collapse = "")
     return(ret)
   })
-  
-  output[[REGR_PLOT]] <- renderPlot({
-    plotPars@regrSmoot <- input[[REGR_LINE]]
-    plotPars@pointSize <- input$pointSize
-    plotRegression(input$xVar,input$xVar,mtcars,
-                   plotPars);
-  })
-  
   
   # "trace" msgs
-  #output$traceOut <- renderText({
   output[[LOG_TEXT]] <- renderText({
-      ret <- paste0("enrico trace",values$msg);
-    return(ret)
+     ret <- paste0("enrico trace",values$msg);
+   return(ret)
   })
+
 }
 
 # Run the application 
