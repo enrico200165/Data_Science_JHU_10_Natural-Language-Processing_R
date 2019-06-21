@@ -5,7 +5,6 @@
 # https://github.com/daattali/advanced-shiny/tree/master/message-javascript-to-r-force
 #
 
-
 library(shiny)
 library(shinyjs)
 require(ggplot2)
@@ -16,10 +15,17 @@ EVT_KEY_PRESS <- "keypress"
 EVT_KEY_DOWN  <- "keydown"
 EVT_KEY_UP    <- "keyup"
 
+
+REGR_PLOT <- "regrPlot"
 LOG_TEXT <- "traceOut"
+CMD_CHOSEN <- "utlCmdChosen"
+GLOBAL_STATUS  <- "globalStatus"
+X_VAR <- "xVar"
+Y_VAR <- "yVar"
+REGR_LINE <- "regrLine"
+
 
 TXT_IN_ID  <- "txti"
-GSTATUS_ID <- "globalStatus"
 
 
 #####################################################################
@@ -85,12 +91,12 @@ performDFCommand <- function(cmdPar, var) match.fun(cmdPar)(mtcars)
 
 esidebar_panel <-       sidebarPanel(
   
-  selectInput("yVar", "Choose Y Variable:", names(mtcars), selected = 1)
+  selectInput(Y_VAR, "Choose Y Variable:", names(mtcars), selected = 1)
   
-  ,selectInput("xVar", "Choose X Variable:", names(mtcars) 
+  ,selectInput(X_VAR, "Choose X Variable:", names(mtcars) 
                ,selected = names(mtcars)[length(names(mtcars))])
   
-  ,radioButtons("regrLine", "Regression Smoothing", plotParamConsts$regrPlotSmooth ,selected = "Loess")
+  ,radioButtons(REGR_LINE, "Regression Smoothing", plotParamConsts$regrPlotSmooth ,selected = "Loess")
   ,sliderInput("pointSize", "Size of points in plot:" ,min = 1, max = 8,value = 2)
   
   ,hr()
@@ -120,13 +126,13 @@ emain_panel <- mainPanel(
   ,div(style="display: inline-block;vertical-align:top;",
        textOutput(LOG_TEXT))
   
-  ,plotOutput("regrPlot")
+  ,plotOutput(REGR_PLOT)
   ,h3("Stat functions output",style="color:blue")
   ,textOutput("utlCmdOut")
-  ,textOutput("utlCmdChosen")
+  ,textOutput(CMD_CHOSEN)
   ,hr()
   ,h3("AppStatus",style="color:blue")
-  ,textOutput(GSTATUS_ID)
+  ,textOutput(GLOBAL_STATUS)
   ,hr()
   ,h3("Debug messages",style="color:blue")
   #,textOutput("utlCmdChosen")
@@ -173,22 +179,22 @@ server <- function(input, output) {
   })
 
   
-  output$globalStatus <- renderText({
-    status <- paste("y var:",input$yVar, " ", "x var:",input$xVar, sep="");
+  output[[GLOBAL_STATUS]] <- renderText({
+    status <- paste("x var:",input[[X_VAR]], sep="");
     return(status)
   })
   
   
   # Utility command 
-  output$utlCmdChosen <- renderText({
+  output[[CMD_CHOSEN]] <- renderText({
     
     ret <- paste("function: \"",input$utlCmdId,"\"",sep="")
     
     if (input$utlCmdId %in% unlist(utlCmdMenu['On Data Frame'])) {
-      cmd_out <- performDFCommand(input$utlCmdId,input$xVar)
+      cmd_out <- performDFCommand(input$utlCmdId,"speed")
     } else if(input$utlCmdId %in% unlist(utlCmdMenu['On "x" variable'])) {
       ret <- paste(ret,"on Variable:\"",input$xVar,"\"",sep = "")
-      cmd_out <- performVariableCommand(input$utlCmdId,input$xVar)
+      cmd_out <- performVariableCommand(input$utlCmdId,"speed")
     } else {
       cmd_out <- "unable To execute function"    
     }
@@ -197,17 +203,18 @@ server <- function(input, output) {
     return(ret)
   })
   
-  output$regrPlot <- renderPlot({
-    plotPars@regrSmoot <- input$regrLine
+  output[[REGR_PLOT]] <- renderPlot({
+    plotPars@regrSmoot <- input[[REGR_LINE]]
     plotPars@pointSize <- input$pointSize
-    plotRegression(input$xVar,input$yVar,mtcars,
+    plotRegression(input$xVar,input$xVar,mtcars,
                    plotPars);
   })
   
   
   # "trace" msgs
-  output$traceOut <- renderText({
-    ret <- paste0("enrico trace",values$msg);
+  #output$traceOut <- renderText({
+  output[[LOG_TEXT]] <- renderText({
+      ret <- paste0("enrico trace",values$msg);
     return(ret)
   })
 }
