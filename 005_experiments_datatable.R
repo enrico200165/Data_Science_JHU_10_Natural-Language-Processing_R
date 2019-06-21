@@ -512,3 +512,10 @@ DT[ "z" ]
 DT[ .("b","z") ]
 
 setkey(DF,A)
+
+
+require(data.table)
+DT <- data.table(a = letters[1:10]
+  ,b = c(1,5,2,6,3,7,4,8,5,10))
+setkey(DT,b)
+DT

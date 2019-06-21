@@ -113,4 +113,6 @@ print(ret)
 ret <- pred_successors(c("the","usual"))
 print(ret)
 
+print(format(object.size(ngrams_freqs), units = "MB"))
 
+print(format(object.size(ngrams_freqs[[3]]), units = "MB"))
