@@ -44,7 +44,8 @@ pipeline <- function(force_calc) {
   }
   
   for (i in seq_along(reduced_dtfs[2:4])) {
-    saveRDS(reduced_dtfs[[i+1]], file = PRED_NGRAM_FNAMES[i])
+    fname <- file.path(SHINY_LOCAL_DATA_DIR,PRED_NGRAM_FNAMES[i])
+    saveRDS(reduced_dtfs[[i+1]], file = fname)
     prt("generated ngram prediction file: ", PRED_NGRAM_FNAMES[i])
   }
     

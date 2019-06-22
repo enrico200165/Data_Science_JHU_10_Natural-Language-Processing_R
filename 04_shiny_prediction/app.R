@@ -27,8 +27,10 @@
 # https://github.com/daattali/advanced-shiny/tree/master/message-javascript-to-r-force
 #
 
+rm(list = ls())
+
 library(shiny)
-#library(shinyjs)
+library(shinyjs)
 
 # ------------------------ IDs -------------------------
 
@@ -46,10 +48,10 @@ Y_VAR <- "yVar"
 REGR_LINE <- "regrLine"
 UTL_CMD_ID <- "utlCmdId"
 
-TXT_IN_ID  <- "txti"
+TXT_IN_ID  <- "text_input"
 
 
-
+#' TODO
 predictions <- paste("dummy predict",1:5)
 
 
@@ -59,6 +61,20 @@ predictions <- paste("dummy predict",1:5)
 # Change focus
 # https://www.reddit.com/r/rstats/comments/7fmkah/moving_focus_to_next_input_in_shiny/
 
+
+###########################################################
+#               GLOBAL INIZIALITAIONS
+###########################################################
+
+# SOURCED files will execute code
+
+print(paste("working dir: ",getwd()))
+s <- paste(head(list.files(getwd()),5), collapse = " ")
+print(paste("files in working dir:",s))
+
+source("shiny_globals.R")
+
+source("08_prediction.R")
 
 
 
@@ -161,7 +177,6 @@ emain_panel <- mainPanel(
        )
   
   ,h3("Stat functions output",style="color:blue")
-  ,textOutput("utlCmdOut")
   ,textOutput(CMD_CHOSEN)
   ,hr()
   ,h3("AppStatus",style="color:blue")
@@ -216,7 +231,10 @@ server <- function(input, output, session) {
 
   
   output[[GLOBAL_STATUS]] <- renderText({
-    status <- paste("x var:",input[[X_VAR]], sep="");
+    # status <- paste("x var:",input[[X_VAR]], sep="");
+    status <- if (exists("ngrams_freqs")) "ok, ngrams_freqs esiste" else "ngrams_freqs NON ESISTE"
+    n <- nrow(ngrams_freqs[[3]])
+    status <- paste(status," nr rows:",n)
     return(status)
   })
   

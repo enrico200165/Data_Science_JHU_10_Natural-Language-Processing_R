@@ -17,7 +17,7 @@ TYPES_COLNAMES <- c(TYPE1_COLNAME, TYPE2_COLNAME , TYPE3_COLNAME)
 PREDECESSOR_FREQUENCY <- "pdcessor_freq"
 FREQUENCY_COL <- "frequency"
 
-
+SHINY_LOCAL_DATA_DIR <- file.path(".","04_shiny_prediction","data")
 PRED_NGRAM_FNAMES <- paste0("pred_",1:3,"gram.rds")
 
 # --- bare DTF with ngrams probabilities
