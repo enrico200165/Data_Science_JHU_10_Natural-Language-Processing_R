@@ -1,4 +1,26 @@
-# resources 
+# resources
+#  
+# You can see your logs in the shinyapps.io dashboard under the Logs tab 
+#in the Application view. Alternatively, you can use the rsconnect::showLogs() 
+# function to show the log messages of a deployed application.
+# FAILS Attempting to change the working directory. 
+# Use of packages that require Windows (shinyapps.io runs on Linux)
+
+# STORAGE
+#https://docs.rstudio.com/shinyapps.io/Storage.html#Storage
+# The application only has access to the data that was uploaded with the 
+# application at the time of deployment. 
+# Redeploying your application will reset the storage for your application 
+# to only what is included in the upload bundle.
+# http://shiny.rstudio.com/articles/persistent-data-storage.html#basic
+
+# https://shiny.rstudio.com/articles/scoping.html
+# objects to be visible across all sessions. For example, if you have large data 
+# structures, or if you have utility functions that are not reactive 
+# (ones that don’t involve the input or output objects), then you can create 
+# these objects once and share them across all user sessions 
+# (within the same R process), by placing them in app.R, but outside of the server function definition.
+
 # VITAL: https://shiny.rstudio.com/articles/js-send-message.html in particular
 # https://stackoverflow.com/questions/47215230/listen-to-button-events-with-shiny-oninputchange-r-shiny
 #
@@ -6,8 +28,7 @@
 #
 
 library(shiny)
-library(shinyjs)
-require(ggplot2)
+#library(shinyjs)
 
 # ------------------------ IDs -------------------------
 
@@ -26,6 +47,19 @@ REGR_LINE <- "regrLine"
 UTL_CMD_ID <- "utlCmdId"
 
 TXT_IN_ID  <- "txti"
+
+
+
+predictions <- paste("dummy predict",1:5)
+
+
+###################################################################
+#           NECESSARY HELP
+####################################################################
+# Change focus
+# https://www.reddit.com/r/rstats/comments/7fmkah/moving_focus_to_next_input_in_shiny/
+
+
 
 
 #####################################################################
@@ -75,14 +109,20 @@ performDFCommand <- function(cmdPar, var) match.fun(cmdPar)(mtcars)
 #                           UI
 #####################################################################
 
+jscode <- "shinyjs.refocus = function(e_id) { console.log('refocusing'); document.getElementById(e_id).focus(); }"
+
 # ----------------- SIDEBAR ----------------------------------------
 
 esidebar_panel <-       sidebarPanel(
   
   selectInput(Y_VAR, "Choose Y Variable:", names(mtcars), selected = 1)
   
-  ,selectInput(X_VAR, "Choose X Variable:", names(mtcars) 
-               ,selected = names(mtcars)[length(names(mtcars))])
+  ,selectInput(X_VAR, "Prediction:", predictions 
+               ,selected = predictions[1])
+  
+  # ,selectInput(X_VAR, "Prediction:", predictions ,selected = predictions[1], selectize=T)
+  
+  ,selectizeInput(X_VAR, "Prediction:", predictions, options = list(maxOptions = 10))
   
   ,radioButtons(REGR_LINE, "Regression Smoothing", plotParamConsts$regrPlotSmooth ,selected = "Loess")
   ,sliderInput("pointSize", "Size of points in plot:" ,min = 1, max = 8,value = 2)
@@ -94,6 +134,7 @@ esidebar_panel <-       sidebarPanel(
 # ----------------- Main Panel -------------------------------
 
 emain_panel <- mainPanel(
+  
   p(strong("Documentation")
      ,tags$a(href="https://enrico200165.shinyapps.io/appdocumentation/"
              ,"here",style="color:blue;"),style="color:red"
@@ -105,8 +146,12 @@ emain_panel <- mainPanel(
         $(document).on("keypress", function (e) {
           if(e.which == 32) {
             Shiny.onInputChange("tasto", [e.key, Math.random()]);
-            console.log("rilevato keypress significativo")
-            // alert("key_press " + e.which)
+            console.log("premuto spazio, è attivo:",document.activeElement.id);
+            // document.getElementById("txti").removeClass("active");
+            $("#txti").removeClass("active");
+            // document.getElementById("yVar").addClass("active");
+           $("#yVar").addClass("active");
+            console.log("tentato di cambiare focus:",document.activeElement.id)
           }
         });')
   ,div(style="display: inline-block;vertical-align:top;"
@@ -129,13 +174,14 @@ emain_panel <- mainPanel(
 
 # ---------------------------------------------------------
 ui <- fluidPage(
-    
+  
+  useShinyjs(),
+  extendShinyjs(text = jscode, functions = "refocus"),
     # Application title
     titlePanel("Next Word Prediction"),
     
     # Sidebar with a slider input for number of bins
-    sidebarLayout(esidebar_panel, emain_panel, position = "right"
-    )
+    sidebarLayout(esidebar_panel, emain_panel, position = "right")
   )
 
 
@@ -152,7 +198,7 @@ do_test <- function() {
 #                                 SERVER
 ########################################################################
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   initBE()
   print("Server started")
@@ -164,6 +210,8 @@ server <- function(input, output) {
   observeEvent(input$tasto, {
     setMsg(paste(input[[TXT_IN_ID]] ,"### should predict now ###"))
     print(paste("Enrico server side, ricevuto evento a",Sys.time(), input[[TXT_IN_ID]][1]))
+    js$refocus('xVar')
+    updateSelectInput(session, "yVar", label = NULL, choices = c("a","b"))
   })
 
   
