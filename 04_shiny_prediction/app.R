@@ -27,6 +27,7 @@
 # https://github.com/daattali/advanced-shiny/tree/master/message-javascript-to-r-force
 #
 
+# clean up to reduce risk of working thanks to desktop variables
 rm(list = ls())
 
 library(shiny)
@@ -40,18 +41,11 @@ EVT_KEY_PRESS <- "keypress"
 EVT_KEY_DOWN  <- "keydown"
 EVT_KEY_UP    <- "keyup"
 
-
-
 LOG_TEXT <- "traceOut"
 PREDICTIONS <- "predictions"
 APP_STATUS  <- "appStatus"
 
-Y_VAR <- "yVar"
-PREDICTION_TYPE <- "prediction_type"
-UTL_CMD_ID <- "utlCmdId"
-
 TXT_IN_ID  <- "text_input"
-
 
 
 ###################################################################
@@ -65,7 +59,7 @@ TXT_IN_ID  <- "text_input"
 #               GLOBAL INIZIALITAIONS
 ###########################################################
 
-# SOURCED files will execute code
+# NB SOURCED files will execute code
 
 print(paste("working dir: ",getwd()))
 s <- paste(head(list.files(getwd()),5), collapse = " ")
@@ -76,14 +70,9 @@ source("shiny_globals.R")
 source("08_prediction.R")
 
 
-
 #####################################################################
 #                 BACKEND
 #####################################################################
-
-
-utlCmdMenu <- list('On Data Frame' = c("names", "nrow","ncol"),
-                   'On "x" variable' = c("mean", "median"))
 
 
 # smooth
@@ -122,13 +111,9 @@ jscode <- "shinyjs.refocus = function(e_id) { console.log('refocusing'); documen
 # ----------------- SIDEBAR ----------------------------------------
 
 esidebar_panel <- sidebarPanel(
-  
-  selectInput(Y_VAR, "Choose Y Variable:", names(mtcars), selected = 1)
-  ,selectInput(UTL_CMD_ID, "Choose a Statistic:",utlCmdMenu, selected = "median")
-  
-  ,radioButtons(PREDICTION_TYPE, "Regression Smoothing", regrPlotSmooth ,selected = regrPlotSmooth[1])
-  ,sliderInput("pointSize", "Size of points in plot:" ,min = 1, max = 8,value = 2)
-  
+  h5("Predictions",style="color:blue")
+  ,uiOutput(PREDICTIONS)
+  ,hr()
 ) # sidebar panel
 
 
@@ -152,10 +137,6 @@ emain_panel <- mainPanel(
         });')
   ,div(style="display: inline-block;vertical-align:top;"
        ,textInput(TXT_IN_ID, label = h3("Text input"), value = ""))
-  ,h3("Predictions",style="color:blue")
-  ,hr()
-  # ,textOutput(PREDICTIONS)
-  , uiOutput(PREDICTIONS)
   ,hr()
   ,h3("AppStatus",style="color:blue")
   ,textOutput(APP_STATUS)
@@ -195,23 +176,26 @@ server <- function(input, output, session) {
   onevent(EVT_KEY_PRESS, "", do_test)
   onevent(EVT_KEY_UP, "textSample", do_test)
   onevent(EVT_KEY_DOWN, "textSample", do_test)
+  
+  output[[PREDICTIONS]] <- renderText({
+    ret <- pred_successors_aggregate("",F,  5)
+    pred_html_table <- result_lines_html(ret)
+    # cat(pred_html_table)
+    return(HTML(pred_html_table))
+  })
+  
     
   observeEvent(input$tasto_prediz, {
     print(paste("Enrico server side, ricevuto evento a",Sys.time(), input[[TXT_IN_ID]][1]))
     setMsg(paste(input[[TXT_IN_ID]] ,"### should predict now ###"))
-    # TODO REMOVE EXPERIMENT
-    updateSelectInput(session, Y_VAR, label = NULL, choices = c("a","b"))
-    
+
     input_text <- input[[TXT_IN_ID]]
     print(paste("should predict for:",input_text))
     predecessor_tokens <- last_n_tokens(input_text,2)
     ret <- pred_successors_aggregate(predecessor_tokens,F,  5)
     pred_html_table <- result_lines_html(ret)
-    cat(pred_html_table)
-    # output[[PREDICTIONS]] <- renderText({paste("should predict for:"
-    #                                   ,input_text)})
+    # cat(pred_html_table)
     output[[PREDICTIONS]] <- renderUI({HTML(pred_html_table)})
-    
   })
 
   
@@ -221,13 +205,6 @@ server <- function(input, output, session) {
     n <- nrow(ngrams_freqs[[3]])
     status <- paste(status," nr rows:",n)
     return(status)
-  })
-  
-  # Utility command 
-  output[[PREDICTIONS]] <- renderText({
-    
-    ret <- paste("dummy prdictions", PREDICTIONS, collapse = "")
-    return(ret)
   })
   
   # "trace" msgs

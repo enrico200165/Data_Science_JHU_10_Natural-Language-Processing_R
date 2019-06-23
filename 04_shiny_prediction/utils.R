@@ -15,8 +15,20 @@ last_n_tokens <- function(x, n) {
   tokens[(l-nr+1):l]
 }
 
+# --------------------------------------------------------
+tstmp_fname <- function() 
+# --------------------------------------------------------
+{
+  # used in file names, avoid funny charss
+  format(Sys.time(), "%Y%m%d_%H%M%S")
+}
 
-print(paste(last_n_tokens(" ciao   ", -1)))
+# --------------------------------------------------------
+tstmp <- function() 
+# --------------------------------------------------------
+{
+  # used in file names, avoid funny charss
+  format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+}
 
-for (i in -1:10) 
-  print(paste(i,last_n_tokens(" ciao salamone come   stai   ", i)))
+

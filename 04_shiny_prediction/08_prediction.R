@@ -68,10 +68,11 @@ pred_success_core <- function(predecessors)
   }
   
   n_predecessors <- length(predecessors)
-  if (n_predecessors > 2) {
-    print("WARN: pred_success_core() to many predecessors")
-    # riga sotto funziona solo perchè usiamo 3grams
-    predecessors <- predecessors[(n_predecessors-1):n_predecessors]
+  
+  while (n_predecessors > MAX_PREDECESSORS) {
+    print(paste("WARN: pred_success_core() to many predecessors:",n_predecessors))
+    # remove 1 precedessors, the farthest
+    predecessors <- predecessors[2:n_predecessors]
     n_predecessors <- length(predecessors)
   }
     
@@ -174,10 +175,10 @@ result_lines_html <- function(dt)
   tr <- "<tr>"; tre <- "</tr>"
   td <- "<td>"; tde <-"</td>"
   
-  
-  html_lines <- "<style>table, th, td { border: 1px solid grey; border-collapse: collapse;}</style>"
-  html_lines <- paste0(html_lines,"\n")
-  html_lines <- paste0(html_lines,"<table>")
+  html_lines = ""
+  #html_lines <- "<style>table, th, td { border: 1px solid grey; border-collapse: collapse;}</style>"
+  #html_lines <- paste0(html_lines,"\n")
+  html_lines <- paste0(html_lines,"<table>","\n")
   html_lines <- paste0(html_lines,"<th>prediction</th><th>predictor</th>")
   html_lines <- paste0(html_lines,"\n")
   for (i in 1:length(successors)) {
@@ -188,7 +189,8 @@ result_lines_html <- function(dt)
     html_lines <- paste0(html_lines,cur,"\n")
   }
   html_lines <- paste0(html_lines,"</table>","\n")
-
+  html_lines <- paste0(html_lines,"timestamp:",tstmp(),"\n")
+  
   html_lines
 }
 
@@ -226,71 +228,8 @@ if (any(is.null(ngrams_freqs),length(ngrams_freqs) != 3) ) {
 # ---------------------------------------------------------
 #           TEMPORARY TESTS
 # ---------------------------------------------------------
-
 if (!shiny::isRunning() ) {
+# ---------------------------------------------------------
 
-  
-#pred_successors_aggregate(c("your","time","on"),F,  5)
-ret <- pred_successors_aggregate(c("your","time","on"),F,  2)
-s <- result_lines_html(ret)
-cat(s)
-stop("fermati")
-
-  
-pred_successors(c("asas","sdsds","your","time","on"),F,  5)
-  
-    
-pred_successors(c("a","baby","was","sdsds"),F,  5)
-  
-  
-ret <- pred_successors(c("a","baby"),F,  5)
-print_pred_result(ret)
-
-
-
-ret <- pred_successors(c("sss","asdasda"),F,  5)
-print_pred_result(ret)
-
-
-ret <- pred_successors(c("a£$%£%","%&//"),F,  5)
-print_pred_result(ret)
-
-
-ret <- pred_successors(c("the","usual"),F,  5)
-print(ret)
-
-
-ret <- pred_successors(c("a£$%£%","usual"),F,  5)
-print(ret)
-
-
-ret <- pred_successors(c("a£$%£%","%&//"),F,  5)
-print(ret)
-
-pred_successors(NULL, F,  5)
-print(ret)
-
-# to make 2pred fail and fall down to 1 prede
-predecessors2_nosecond <- setdiff(
-  ngrams_freqs[[2]][["primo"]],ngrams_freqs[[3]][["secondo"]])
-
-
-ret <- pred_successors(c("and","the"), F,5)
-print(ret)
-
-ret <- pred_successors(c("and","you"), F,5)
-print(ret)
-
-ret <- pred_successors(c("you","are"), F,5)
-print(ret)
-
-# last predecessor fails
-
-ret <- pred_successors(c("the","usual"), F,5)
-print(ret)
-
-print(format(object.size(ngrams_freqs), units = "MB"), F,5)
-
-print(format(object.size(ngrams_freqs[[3]]), units = "MB"), F,5)
-
-}
+# ---------------------------------------------------------
+} # if not shiny is running

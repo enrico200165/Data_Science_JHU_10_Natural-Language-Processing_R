@@ -1,20 +1,31 @@
 
 
-
 setwd("./04_shiny_prediction")
 source("./08_prediction.R")
 
-ret <- pred_successors(c("asdsa","sss"),F,  5)
-print(ret)
+
+#pred_successors_aggregate(c("your","time","on"),F,  5)
+ret <- pred_successors_aggregate(c("your","time","on"),F,  2)
+s <- result_lines_html(ret)
+
+
+pred_successors(c("asas","sdsds","your","time","on"),F,  5)
+
+
+pred_successors(c("a","baby","was","sdsds"),F,  5)
+
+
+ret <- pred_successors(c("a","baby"),F,  5)
+print_pred_result(ret)
 
 
 
 ret <- pred_successors(c("sss","asdasda"),F,  5)
-print(ret)
+print_pred_result(ret)
 
 
 ret <- pred_successors(c("a£$%£%","%&//"),F,  5)
-print(ret)
+print_pred_result(ret)
 
 
 ret <- pred_successors(c("the","usual"),F,  5)
