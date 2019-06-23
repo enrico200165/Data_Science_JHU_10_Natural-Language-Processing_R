@@ -36,7 +36,7 @@ PRED_NGRAM_FNAMES <- paste0("pred_",1:3,"gram.rds")
 read_models <- function() 
 # ---------------------------------------------------------
 {
-  ngrams_freqs_loc <- vector("list",3)
+  ngrams_freqs_loc <<- vector("list",3)
   
   dir_size <- 0L
   sapply(list.files(SHINY_LOCAL_DATA_DIR), function(x) { 
@@ -189,7 +189,7 @@ result_lines_html <- function(dt)
     html_lines <- paste0(html_lines,cur,"\n")
   }
   html_lines <- paste0(html_lines,"</table>","\n")
-  html_lines <- paste0(html_lines,"timestamp:",tstmp(),"\n")
+  html_lines <- paste0(html_lines,br,"Prediction time:",br,tstmp(),"\n")
   
   html_lines
 }

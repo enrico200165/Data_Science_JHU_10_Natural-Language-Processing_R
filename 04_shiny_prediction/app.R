@@ -48,6 +48,7 @@ APP_STATUS  <- "appStatus"
 TXT_IN_ID  <- "text_input"
 
 
+
 ###################################################################
 #           NECESSARY HELP
 ####################################################################
@@ -69,21 +70,18 @@ source("shiny_globals.R")
 
 source("08_prediction.R")
 
+dir_size <- 0L
+
 
 #####################################################################
 #                 BACKEND
 #####################################################################
 
 
-# smooth
-regrPlotSmooth = c("onegram","bigram","trigram")
-
 initBE <- function() {
  data("mtcars")
  values <<- reactiveValues()
- values$msg <<- "reactive value message"
- 
- curdf <<- mtcars
+ values$msg <<- "app status ok"
 }
 
 setMsg <- function(m) { values$msg <<- m; }
@@ -121,12 +119,8 @@ esidebar_panel <- sidebarPanel(
 
 emain_panel <- mainPanel(
   
-  tags$a(href="https://enrico200165.shinyapps.io/appdocumentation/"
-             ,"Documentation here",style="color:blue;")
-  ,hr()
-  
   # javascript in HTML tag
-  ,tags$script('
+  tags$script('
         $(document).on("keypress", function (e) {
           if(e.which == 32) {
             Shiny.onInputChange("tasto_prediz", [e.key, Math.random()]);
@@ -139,7 +133,11 @@ emain_panel <- mainPanel(
        ,textInput(TXT_IN_ID, label = h3("Text input"), value = ""))
   ,hr()
   ,h3("AppStatus",style="color:blue")
-  ,textOutput(APP_STATUS)
+  ,uiOutput(APP_STATUS)
+  ,textOutput(hr())
+  # ,tags$a(href="https://enrico200165.shinyapps.io/appdocumentation/"
+  #         ,"Documentation here",style="color:blue;")
+  
   ,hr()
   ,h3("Debug messages",style="color:blue")
   ,textOutput(LOG_TEXT)
@@ -187,7 +185,7 @@ server <- function(input, output, session) {
     
   observeEvent(input$tasto_prediz, {
     print(paste("Enrico server side, ricevuto evento a",Sys.time(), input[[TXT_IN_ID]][1]))
-    setMsg(paste(input[[TXT_IN_ID]] ,"### should predict now ###"))
+    setMsg(paste0("Prediction time:",tstmp()))
 
     input_text <- input[[TXT_IN_ID]]
     print(paste("should predict for:",input_text))
@@ -198,18 +196,32 @@ server <- function(input, output, session) {
     output[[PREDICTIONS]] <- renderUI({HTML(pred_html_table)})
   })
 
+  dir_size <<- 0L
+  sapply(list.files(SHINY_LOCAL_DATA_DIR), function(x) { 
+    dir_size <<- dir_size+file.info(file.path(SHINY_LOCAL_DATA_DIR,x))$size})
+  class(dir_size) <- "object_size"
+  models_disk_size <- paste(format(dir_size,"Mb"),"Mb")
+  size_pct_max <- paste("(this is)",format(unclass(dir_size)/32000000,digits = 2)
+      ,"% of the 32Mb allowed by shinyapps)")
+  models_RAM_size <- paste("Models RAM size:",format(object.size(ngrams_freqs),"Mb"))
+  total_ram_usage <- paste("Application RAM size, Mb:",colSums(gc())[4])
+  ngram1_rows <- paste("1-gram model nr rows",nrow(ngrams_freqs[[1]]))
+  ngram2_rows <- paste("2-gram model nr rows",nrow(ngrams_freqs[[2]]))
+  ngram3_rows <- paste("3- gram model nr rows",nrow(ngrams_freqs[[3]]))
+  status <- ""
+  status <- HTML(paste(status,"Size of models on disk:",models_disk_size,br))
+  status <- paste(status,size_pct_max,br)
+  status <- paste(status,models_RAM_size,br)
+  status <- paste(status,total_ram_usage, br)
+  status <- paste(status, ngram1_rows, br)
+  status <- paste(status, ngram2_rows, br)
+  status <- paste(status, ngram3_rows, br)
   
-  output[[APP_STATUS]] <- renderText({
-    # status <- paste("x var:",input[[X_VAR]], sep="");
-    status <- if (exists("ngrams_freqs")) "ok, ngrams_freqs esiste" else "ngrams_freqs NON ESISTE"
-    n <- nrow(ngrams_freqs[[3]])
-    status <- paste(status," nr rows:",n)
-    return(status)
-  })
+  output[[APP_STATUS]] <- renderUI({ return(HTML(status))})
   
   # "trace" msgs
   output[[LOG_TEXT]] <- renderText({
-     ret <- paste0("enrico trace",values$msg);
+     ret <- paste0(values$msg);
    return(ret)
   })
 

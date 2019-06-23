@@ -11,3 +11,4 @@ shstop <- function(m, rv = 99) {
   stop(m)
 }
 
+br <- "<br/>"
