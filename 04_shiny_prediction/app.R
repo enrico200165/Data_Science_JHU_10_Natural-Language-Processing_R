@@ -154,7 +154,8 @@ emain_panel <- mainPanel(
        ,textInput(TXT_IN_ID, label = h3("Text input"), value = ""))
   ,h3("Predictions",style="color:blue")
   ,hr()
-  ,textOutput(PREDICTIONS)
+  # ,textOutput(PREDICTIONS)
+  , uiOutput(PREDICTIONS)
   ,hr()
   ,h3("AppStatus",style="color:blue")
   ,textOutput(APP_STATUS)
@@ -204,12 +205,13 @@ server <- function(input, output, session) {
     input_text <- input[[TXT_IN_ID]]
     print(paste("should predict for:",input_text))
     predecessor_tokens <- last_n_tokens(input_text,2)
-    ret <- pred_successors(predecessor_tokens,F,  5)
-    print_pred_result(ret)
+    ret <- pred_successors_aggregate(predecessor_tokens,F,  5)
+    pred_html_table <- result_lines_html(ret)
+    cat(pred_html_table)
+    # output[[PREDICTIONS]] <- renderText({paste("should predict for:"
+    #                                   ,input_text)})
+    output[[PREDICTIONS]] <- renderUI({HTML(pred_html_table)})
     
-    output[[PREDICTIONS]] <- renderText({paste("should predict for:"
-                                      ,input_text)
-    })
   })
 
   

@@ -70,6 +70,7 @@ pred_success_core <- function(predecessors)
   n_predecessors <- length(predecessors)
   if (n_predecessors > 2) {
     print("WARN: pred_success_core() to many predecessors")
+    # riga sotto funziona solo perchè usiamo 3grams
     predecessors <- predecessors[(n_predecessors-1):n_predecessors]
     n_predecessors <- length(predecessors)
   }
@@ -164,8 +165,32 @@ pred_successors_aggregate <- function(predecessors, start_sentence = F, nr_to_ge
   results_dt
 }
 
+# ---------------------------------------------------------
+result_lines_html <- function(dt)
+# ---------------------------------------------------------
+{
+  successors <- dt[["successors"]] 
+  nr_preds <- dt[["nr_predecessors_used"]]
+  tr <- "<tr>"; tre <- "</tr>"
+  td <- "<td>"; tde <-"</td>"
+  
+  
+  html_lines <- "<style>table, th, td { border: 1px solid grey; border-collapse: collapse;}</style>"
+  html_lines <- paste0(html_lines,"\n")
+  html_lines <- paste0(html_lines,"<table>")
+  html_lines <- paste0(html_lines,"<th>prediction</th><th>predictor</th>")
+  html_lines <- paste0(html_lines,"\n")
+  for (i in 1:length(successors)) {
+    cur <- paste0(tr
+      ,td, successors[i] ,tde
+      ,td, nr_preds[i],"-gram" ,tde
+      ,tre)
+    html_lines <- paste0(html_lines,cur,"\n")
+  }
+  html_lines <- paste0(html_lines,"</table>","\n")
 
-
+  html_lines
+}
 
 
 
@@ -206,8 +231,10 @@ if (!shiny::isRunning() ) {
 
   
 #pred_successors_aggregate(c("your","time","on"),F,  5)
-pred_successors_aggregate(c("your","time","on"),F,  2)
-  
+ret <- pred_successors_aggregate(c("your","time","on"),F,  2)
+s <- result_lines_html(ret)
+cat(s)
+stop("fermati")
 
   
 pred_successors(c("asas","sdsds","your","time","on"),F,  5)
