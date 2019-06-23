@@ -130,7 +130,8 @@ emain_panel <- mainPanel(
           }
         });')
   ,div(style="display: inline-block;vertical-align:top;"
-       ,textInput(TXT_IN_ID, label = h4("There (with 'space key' it will predict)"), value = ""))
+       ,textInput(TXT_IN_ID, label = h4("Type here"), value = ""))
+  ,p("(when space key is typed it will 'predict')")
   ,hr()
   ,h3("AppStatus",style="color:blue")
   ,uiOutput(APP_STATUS)
