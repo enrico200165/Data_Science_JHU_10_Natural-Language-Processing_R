@@ -32,6 +32,8 @@ rm(list = ls())
 library(shiny)
 library(shinyjs)
 
+source("08_prediction.R")
+
 # ------------------------ IDs -------------------------
 
 EVT_KEY_PRESS <- "keypress"
@@ -41,18 +43,15 @@ EVT_KEY_UP    <- "keyup"
 
 
 LOG_TEXT <- "traceOut"
-CMD_CHOSEN <- "utlCmdChosen"
-GLOBAL_STATUS  <- "globalStatus"
-X_VAR <- "xVar"
+PREDICTIONS <- "predictions"
+APP_STATUS  <- "appStatus"
+
 Y_VAR <- "yVar"
-REGR_LINE <- "regrLine"
+PREDICTION_TYPE <- "prediction_type"
 UTL_CMD_ID <- "utlCmdId"
 
 TXT_IN_ID  <- "text_input"
 
-
-#' TODO
-predictions <- paste("dummy predict",1:5)
 
 
 ###################################################################
@@ -88,17 +87,7 @@ utlCmdMenu <- list('On Data Frame' = c("names", "nrow","ncol"),
 
 
 # smooth
-plotParamConsts <- list(
-  regrPlotSmooth = c("None","Lm","Loess")
-  
-)
-
-setClass("plotParsClass",
-         slots = c(regrSmoot = "character"
-                   , pointSize = "numeric")
-)
-plotPars = new("plotParsClass")
-
+regrPlotSmooth = c("onegram","bigram","trigram")
 
 initBE <- function() {
  data("mtcars")
@@ -117,8 +106,11 @@ performVariableCommand <- function(cmdPar, var) {
   match.fun(cmdPar)(mtcars[[var]])
 }
 
+# ---------------------------------------------------------
+performDFCommand <- function(cmdPar, var) 
+# ---------------------------------------------------------
+  match.fun(cmdPar)(var)
 
-performDFCommand <- function(cmdPar, var) match.fun(cmdPar)(mtcars)
 
 
 #####################################################################
@@ -129,58 +121,43 @@ jscode <- "shinyjs.refocus = function(e_id) { console.log('refocusing'); documen
 
 # ----------------- SIDEBAR ----------------------------------------
 
-esidebar_panel <-       sidebarPanel(
+esidebar_panel <- sidebarPanel(
   
   selectInput(Y_VAR, "Choose Y Variable:", names(mtcars), selected = 1)
+  ,selectInput(UTL_CMD_ID, "Choose a Statistic:",utlCmdMenu, selected = "median")
   
-  ,selectInput(X_VAR, "Prediction:", predictions 
-               ,selected = predictions[1])
-  
-  # ,selectInput(X_VAR, "Prediction:", predictions ,selected = predictions[1], selectize=T)
-  
-  ,selectizeInput(X_VAR, "Prediction:", predictions, options = list(maxOptions = 10))
-  
-  ,radioButtons(REGR_LINE, "Regression Smoothing", plotParamConsts$regrPlotSmooth ,selected = "Loess")
+  ,radioButtons(PREDICTION_TYPE, "Regression Smoothing", regrPlotSmooth ,selected = regrPlotSmooth[1])
   ,sliderInput("pointSize", "Size of points in plot:" ,min = 1, max = 8,value = 2)
   
-  ,hr()
-  ,selectInput(UTL_CMD_ID, "Choose a Statistic:",utlCmdMenu, selected = "median")
 ) # sidebar panel
+
 
 # ----------------- Main Panel -------------------------------
 
 emain_panel <- mainPanel(
   
-  p(strong("Documentation")
-     ,tags$a(href="https://enrico200165.shinyapps.io/appdocumentation/"
-             ,"here",style="color:blue;"),style="color:red"
-  )
+  tags$a(href="https://enrico200165.shinyapps.io/appdocumentation/"
+             ,"Documentation here",style="color:blue;")
   ,hr()
   
   # javascript in HTML tag
   ,tags$script('
         $(document).on("keypress", function (e) {
           if(e.which == 32) {
-            Shiny.onInputChange("tasto", [e.key, Math.random()]);
+            Shiny.onInputChange("tasto_prediz", [e.key, Math.random()]);
             console.log("premuto spazio, è attivo:",document.activeElement.id);
-            // document.getElementById("txti").removeClass("active");
-            $("#txti").removeClass("active");
-            // document.getElementById("yVar").addClass("active");
-           $("#yVar").addClass("active");
-            console.log("tentato di cambiare focus:",document.activeElement.id)
+            // $("#txti").removeClass("active"); $("#yVar").addClass("active");
+            // console.log("tentato di cambiare focus:",document.activeElement.id)
           }
         });')
   ,div(style="display: inline-block;vertical-align:top;"
        ,textInput(TXT_IN_ID, label = h3("Text input"), value = ""))
-  ,div(style="display: inline-block;vertical-align:top;"
-       #,textOutput(LOG_TEXT)
-       )
-  
-  ,h3("Stat functions output",style="color:blue")
-  ,textOutput(CMD_CHOSEN)
+  ,h3("Predictions",style="color:blue")
+  ,hr()
+  ,textOutput(PREDICTIONS)
   ,hr()
   ,h3("AppStatus",style="color:blue")
-  ,textOutput(GLOBAL_STATUS)
+  ,textOutput(APP_STATUS)
   ,hr()
   ,h3("Debug messages",style="color:blue")
   ,textOutput(LOG_TEXT)
@@ -189,14 +166,10 @@ emain_panel <- mainPanel(
 
 # ---------------------------------------------------------
 ui <- fluidPage(
-  
   useShinyjs(),
   extendShinyjs(text = jscode, functions = "refocus"),
-    # Application title
-    titlePanel("Next Word Prediction"),
-    
-    # Sidebar with a slider input for number of bins
-    sidebarLayout(esidebar_panel, emain_panel, position = "right")
+  titlePanel("Next Word Prediction"),
+  sidebarLayout(esidebar_panel, emain_panel, position = "right")
   )
 
 
@@ -222,15 +195,25 @@ server <- function(input, output, session) {
   onevent(EVT_KEY_UP, "textSample", do_test)
   onevent(EVT_KEY_DOWN, "textSample", do_test)
     
-  observeEvent(input$tasto, {
-    setMsg(paste(input[[TXT_IN_ID]] ,"### should predict now ###"))
+  observeEvent(input$tasto_prediz, {
     print(paste("Enrico server side, ricevuto evento a",Sys.time(), input[[TXT_IN_ID]][1]))
-    js$refocus('xVar')
-    updateSelectInput(session, "yVar", label = NULL, choices = c("a","b"))
+    setMsg(paste(input[[TXT_IN_ID]] ,"### should predict now ###"))
+    # TODO REMOVE EXPERIMENT
+    updateSelectInput(session, Y_VAR, label = NULL, choices = c("a","b"))
+    
+    input_text <- input[[TXT_IN_ID]]
+    print(paste("should predict for:",input_text))
+    predecessor_tokens <- last_n_tokens(input_text,2)
+    ret <- pred_successors(predecessor_tokens,F,  5)
+    print_pred_result(ret)
+    
+    output[[PREDICTIONS]] <- renderText({paste("should predict for:"
+                                      ,input_text)
+    })
   })
 
   
-  output[[GLOBAL_STATUS]] <- renderText({
+  output[[APP_STATUS]] <- renderText({
     # status <- paste("x var:",input[[X_VAR]], sep="");
     status <- if (exists("ngrams_freqs")) "ok, ngrams_freqs esiste" else "ngrams_freqs NON ESISTE"
     n <- nrow(ngrams_freqs[[3]])
@@ -238,11 +221,10 @@ server <- function(input, output, session) {
     return(status)
   })
   
-  
   # Utility command 
-  output[[CMD_CHOSEN]] <- renderText({
+  output[[PREDICTIONS]] <- renderText({
     
-    ret <- paste("dummy", CMD_CHOSEN, collapse = "")
+    ret <- paste("dummy prdictions", PREDICTIONS, collapse = "")
     return(ret)
   })
   
