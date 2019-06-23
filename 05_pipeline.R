@@ -1,4 +1,6 @@
 
+
+
 source("006_globals.R")
 source("007_utils.R")
 
@@ -16,13 +18,16 @@ if (!exists("reduced_dtfs"))      reduced_dtfs  <- NULL # quanteda corpus
 pipeline <- function(force_calc) {
   
   ok = T
+  sound_nr <- 1
   
   # ================ clean ======================
   # done in java once and for all
   
   # ================  subset ====================
-  ok && subsetTextFilesByLines(data_dir_corpus_in() 
-    ,data_dir_corpus_subset ,1,1000 , force_calc)
+  ok && subsetTextFilesByLines(data_dir_corpus_full 
+    ,data_dir_corpus_subset ,10,100 , force_calc)
+  beep(sound = sound_nr, expr = NULL)
+  
   
   # ===== FREQUENCY RAW DATA TABLES ============
   # --- use qanteda for tokenization and freq calc
@@ -33,12 +38,16 @@ pipeline <- function(force_calc) {
   # --- calculate types frequencies
   rie(dtfs_gram_sep, force_calc,NULL,produce_ngram_bare_dtf,qc, force_calc)
   dtfs_gram_sep <- produce_ngram_bare_dtf(qc, force_calc)
+  beep(sound = sound_nr, expr = NULL)
   # print(dtfs_gram_sep[[4]])
   
   # ======= REDUCE FREQUENCY DATA TABLES ========
-  reduce_matrix <- rbind(c(20,20), c(20, 2000), c(20, 3000))
+  mille  <- 1000
+  nr_succ <- 10
+  reduce_matrix <- rbind(c(20,20), c(nr_succ, 400*mille), c(nr_succ, 400*mille))
   reduced_dtfs <- reduce_dtfs(dtfs_gram_sep, reduce_matrix)
-
+  beep(sound = sound_nr, expr = NULL)
+  
   if (!reduced_dtfs[[1]]) {
     stop("pipeline failed")
   }
@@ -46,9 +55,11 @@ pipeline <- function(force_calc) {
   for (i in seq_along(reduced_dtfs[2:4])) {
     fname <- file.path(SHINY_LOCAL_DATA_DIR,PRED_NGRAM_FNAMES[i])
     saveRDS(reduced_dtfs[[i+1]], file = fname)
-    prt("generated ngram prediction file: ", PRED_NGRAM_FNAMES[i])
+    prt("generated ngram prediction file: ", fname)
   }
-    
+  
+  beep(sound = sound_nr, expr = NULL)
+  
   TRUE
 }
 

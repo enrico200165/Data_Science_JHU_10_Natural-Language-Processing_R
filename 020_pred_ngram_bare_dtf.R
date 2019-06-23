@@ -170,6 +170,3 @@ test_ngram_bare_dtf <- function(force_calc = F)
   
 }
 
-pred_ngrams_re_init()
-#
-test_ngram_bare_dtf(F)

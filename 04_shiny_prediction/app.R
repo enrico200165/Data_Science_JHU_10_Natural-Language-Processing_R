@@ -130,7 +130,7 @@ emain_panel <- mainPanel(
           }
         });')
   ,div(style="display: inline-block;vertical-align:top;"
-       ,textInput(TXT_IN_ID, label = h3("Text input"), value = ""))
+       ,textInput(TXT_IN_ID, label = h4("There (with 'space key' it will predict)"), value = ""))
   ,hr()
   ,h3("AppStatus",style="color:blue")
   ,uiOutput(APP_STATUS)
@@ -176,7 +176,7 @@ server <- function(input, output, session) {
   onevent(EVT_KEY_DOWN, "textSample", do_test)
   
   output[[PREDICTIONS]] <- renderText({
-    ret <- pred_successors_aggregate("",F,  5)
+    ret <- pred_successors_aggregate(NULL,F,  5)
     pred_html_table <- result_lines_html(ret)
     # cat(pred_html_table)
     return(HTML(pred_html_table))
@@ -200,8 +200,8 @@ server <- function(input, output, session) {
   sapply(list.files(SHINY_LOCAL_DATA_DIR), function(x) { 
     dir_size <<- dir_size+file.info(file.path(SHINY_LOCAL_DATA_DIR,x))$size})
   class(dir_size) <- "object_size"
-  models_disk_size <- paste(format(dir_size,"Mb"),"Mb")
-  size_pct_max <- paste("(this is)",format(unclass(dir_size)/32000000,digits = 2)
+  models_disk_size <- paste(format(dir_size,"Mb"))
+  size_pct_max <- paste("(this is",format(unclass(dir_size)/32000000,digits = 2)
       ,"% of the 32Mb allowed by shinyapps)")
   models_RAM_size <- paste("Models RAM size:",format(object.size(ngrams_freqs),"Mb"))
   total_ram_usage <- paste("Application RAM size, Mb:",colSums(gc())[4])
