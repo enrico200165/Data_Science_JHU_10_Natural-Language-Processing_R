@@ -186,12 +186,12 @@ server <- function(input, output, session) {
     
   observeEvent(input$tasto_prediz, {
     print(paste("Enrico server side, ricevuto evento a",Sys.time(), input[[TXT_IN_ID]][1]))
-    setMsg(paste0("Prediction time:",tstmp()))
+    #setMsg(paste0("Prediction time:",tstmp()))
 
     input_text <- input[[TXT_IN_ID]]
     print(paste("should predict for:",input_text))
     predecessor_tokens <- last_n_tokens(input_text,2)
-    ret <- pred_successors_aggregate(predecessor_tokens,F,  5)
+    ret <- pred_successors_aggregate(predecessor_tokens,F,10)
     pred_html_table <- result_lines_html(ret)
     # cat(pred_html_table)
     output[[PREDICTIONS]] <- renderUI({HTML(pred_html_table)})

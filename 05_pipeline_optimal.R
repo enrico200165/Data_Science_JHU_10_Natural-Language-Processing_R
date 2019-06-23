@@ -25,7 +25,7 @@ pipeline <- function(force_calc) {
   
   # ================  subset ====================
   ok && subsetTextFilesByLines(data_dir_corpus_full 
-    ,data_dir_corpus_subset ,100,100 , force_calc)
+    ,data_dir_corpus_subset ,10,100 , force_calc)
   beep(sound = sound_nr, expr = NULL)
   
   
@@ -44,7 +44,7 @@ pipeline <- function(force_calc) {
   # ======= REDUCE FREQUENCY DATA TABLES ========
   mille  <- 1000
   nr_succ <- 10
-  reduce_matrix <- rbind(c(20,20), c(nr_succ, 1000*mille), c(nr_succ, 400*mille))
+  reduce_matrix <- rbind(c(20,20), c(nr_succ, 400*mille), c(nr_succ, 400*mille))
   reduced_dtfs <- reduce_dtfs(dtfs_gram_sep, reduce_matrix)
   beep(sound = sound_nr, expr = NULL)
   
