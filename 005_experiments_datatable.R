@@ -514,8 +514,83 @@ DT[ .("b","z") ]
 setkey(DF,A)
 
 
+dt <- data.table(
+  A = LETTERS[1:3]
+  ,B= 1:3
+  ,C = 101:103)
+
+DT <- data.table(a = 1:6
+                 ,b = rep(c("a","b"), each = 3))
+
+DT[,  sum(a)]
+
 require(data.table)
+
+cols <- c("x","y")
+DT <- data.table(a = 1:6, b = 11:16)
+DT[ , cols := c(letters[1:6], LETTERS[1:6])]
+DT[ , cols := .(letters[1:6], LETTERS[1:6])]
+DT[ , .(cols) := c(letters[1:6], LETTERS[1:6]) ] 
+DT[ , (cols):= .(letters[1:6], LETTERS[1:6])]
+DT
+
+
 DT <- data.table(a = letters[1:10]
   ,b = c(1,5,2,6,3,7,4,8,5,10))
 setkey(DT,b)
 DT
+
+
+colName <- "a"
+for (i in seq_along(DT$a)) {
+  if (i <=3)
+    set(DT, ,colName,NULL)
+}
+
+
+DT <- data.table(x  = rep(c("a","b"), each = 4))
+setkey(DT, x)
+DT[ , grp_idx := .GRP, by = key(DT)]
+DT
+
+DT <- data.table(
+  x = rep(c("a","b"), each = 8)
+ ,y = rep(c("x","y"), each =4)
+ ,z = 1:16)
+
+DT[ , .(ug = uniqueN(z))
+    ,by = .(x, y)]
+
+DT[ , .(ug = uniqueN(z))
+    ,by = .(x)]
+
+DT[ , .(ug = unique(y))
+    ,by = .(x)]
+
+
+setkey(DT, x,y)
+n <- 3
+DT[ , .N, by = x  ] 
+DT[ , .SD[1:min(.N,n)], by = x  ] 
+DT[, .I[1:min(.N,n)], by = x]
+
+
+
+f <- function(a,b,c,d) { 
+  print("chiamata")
+  print(paste(a,b,c,d, sep = "-", collapse = "#")) }
+
+
+f <- function(a,b,c,d) { str(a); str(b);str(c);str(d) }
+
+f2 <- function(a,b) a+b
+
+dt[ ,  f2(.SD[,3],.SD[,4])]
+f2 <- function(a,b) { str(a);str(b)}
+
+
+dt <- data.table(
+  x = 1:3, y = 11:13)
+f <- function(a,b) { str(a);str(b)}
+dt[ ,f(.SD[1],.SD[2])] 
+dt[ ,f(.SD[,1],.SD[,2])] 
