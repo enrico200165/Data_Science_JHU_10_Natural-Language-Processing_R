@@ -43,8 +43,8 @@ pipeline <- function(force_calc) {
   beep(sound = sound_nr, expr = NULL)
 
   # ======= REDUCE FREQUENCY DATA TABLES ========
-  mille  <- 1000
-  nr_succ <- 6
+  mille  <- 0 # 1000
+  nr_succ <- 0 # 6
   reduce_matrix <- rbind(c(20,20), c(nr_succ, 1000*mille), c(nr_succ, 400*mille))
   prt("Reduce DTF - Start")
   reduced_dtfs <- reduce_dtfs(dtfs_gram_sep, reduce_matrix)
