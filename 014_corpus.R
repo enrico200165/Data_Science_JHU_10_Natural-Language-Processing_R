@@ -89,9 +89,12 @@ readtextIfEmpty_Wrapper <- function(text_df,data_dir_corpus
   fname <- list.files(data_dir_corpus,paste0(fnamePattern,".*\\.txt"))
   if (!(length(fname) == 1)) {
     print(length(fname))
+  } else {
+    print(paste("ERROR found > 1  file for pattern"))
+    print(paste(fname, collapse = " "))
+    print(paste("Terminating"))
+    stopifnot(length(fname) == 1)
   }
-  stopifnot(length(fname) == 1)
-  
   readtextIfEmpty(text_df,data_dir_corpus,fname)
 }
 

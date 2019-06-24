@@ -44,6 +44,10 @@ subsetTextFilesByLines <- function(in_dir, out_dir, nrLinesKept
     return(FALSE)
   }
   
+  # clean destination directory
+  sapply(list.files(out_dir)
+         ,function(x) unlink(file.path(out_dir,x)))
+  
   sapply(textFiles, FUN = function(x) { 
     subsetLines(x, in_dir, out_dir,nrLinesKept, nrLinesRead, forceIt); TRUE
   } )

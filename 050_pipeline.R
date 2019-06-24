@@ -25,7 +25,7 @@ pipeline <- function(force_calc) {
   
   # ================  subset ====================
   ok && subsetTextFilesByLines(data_dir_corpus_full 
-    ,data_dir_corpus_subset ,100,100 , force_calc)
+    ,data_dir_corpus_subset ,50,100 , force_calc)
   beep(sound = sound_nr, expr = NULL)
   
   
