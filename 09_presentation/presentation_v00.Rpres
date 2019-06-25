@@ -9,10 +9,10 @@ Next Word Prediction App Overview
 <br/>
 Application to predict the next word for a given text
 
-It does not use the now very popular deep/unsupervised learning.   
-As requested by the course it uses the n-grams approach.  
+It does not use the now very popular deep/unsupervised learning   
+As requested by the course it uses the n-grams approach  
 
-Its scans texts provided by the course to learn which words are most <b>likely</B> to be the "right" successors for a given text.
+Its scans texts provided by the course to learn which words are most <b>likely</B> to be the "right" successors for a given text
 
 
 Algorythm and Model
@@ -21,9 +21,9 @@ The software uses the "stupid back off" algorythm
 
 The models currently uploaded are 3-grams.
 
-The texts have been subset to produce models of size usable by the Web app.
+The texts have been subset to produce models of size usable by the Web app within the resource limits of the free usage of shinyapps.io.
 
-The sofware is modular: can theoretically handle N-grams with any N and a different algoryth can be plugged in with relative simplicity
+The sofware is modular: can theoretically handle N-grams with any N and a different algorithm can be plugged in with relative simplicity
 
 
 Application Architecture
@@ -42,7 +42,7 @@ Key Points About the Application
 The modular structure (decoupling the learning part from the Web
 prediction app.) allows to produce models of different power and size.   
 
-This has allowed a relatively easy tuning of size of the models to upload to avoid a start-up too slow of the Web application <i>(just making the software modular and reconfigurable has required some additional months of work and learning R to advanced level)</i>
+This has allowed a relatively easy tuning of size of the models to avoid a start-up too slow of the Web application <i>(just making the software modular and reconfigurable has required some additional months of work and learning R to advanced level)</i>
 
 Usage of data.table package and preforming most of the heavy calculations in the "batch" part allows the Web app to be relatively light
 
@@ -65,6 +65,6 @@ Annex - Application Screenshots - 01
 
 Annex - Application Screenshots - 02
 ========================================================
-<p>Pressing "submit"Predict" button produces the prediction<br/></p>
+<p>Pressing the Predict" button produces the prediction for the text in the input text widet<br/></p>
 ![alt text](app_02.jpg)
 
