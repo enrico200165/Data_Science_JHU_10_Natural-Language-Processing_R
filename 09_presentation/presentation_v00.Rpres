@@ -4,7 +4,7 @@ author: Enrico
 date: 
 autosize: true
 
-Next Word Prediction App Overview
+1 - Next Word Prediction App Overview
 ========================================================  
 <br/>
 Application to predict the next word for a given text
@@ -15,7 +15,7 @@ As requested by the course it uses the n-grams approach
 Its scans texts provided by the course to learn which words are most <b>likely</B> to be the "right" successors for a given text
 
 
-Algorythm and Model
+2 - Algorithm and Model
 ========================================================
 The software uses the "stupid back off" algorythm
 
@@ -26,7 +26,7 @@ The texts have been subset to produce models of size usable by the Web app withi
 The sofware is modular: can theoretically handle N-grams with any N and a different algorithm can be plugged in with relative simplicity
 
 
-Application Architecture
+3 - Application Architecture
 ========================================================
 
 The application consists of 2 parts. 
@@ -36,7 +36,7 @@ The application consists of 2 parts.
 - A Web application deployed on shinyapps.io that contains the prediction algorithm and applies it to the model files that are deployed along with it  
 
 
-Key Points About the Application
+4 - Key Points About the Application
 ========================================================
 
 The modular structure (decoupling the learning part from the Web
@@ -47,7 +47,7 @@ This has allowed a relatively easy tuning of size of the models to avoid a start
 Usage of data.table package and preforming most of the heavy calculations in the "batch" part allows the Web app to be relatively light
 
 
-Application Info
+5 - Application Info
 ========================================================
 The application is running at
  <https://enrico200165.shinyapps.io/jhu_cstone_nwp>  
@@ -57,14 +57,15 @@ if you are reviewing the app and it is not running get in touch via coursera or 
 ![alt text](miamail.jpg)  
 Two screenshots of the application follow
 
-Annex - Application Screenshots - 01
-========================================================
-<p>Just started up -no prediction yet<br/></p>
-![alt text](app_01.jpg)
+
+<!-- Annex - Application Screenshots - 01 -->
+<!-- ======================================================== -->
+<!-- <p>Just started up -no prediction yet<br/></p> -->
+<!-- ![alt text](app_01.jpg) -->
 
 
-Annex - Application Screenshots - 02
-========================================================
-<p>Pressing the Predict" button produces the prediction for the text in the input text widet<br/></p>
-![alt text](app_02.jpg)
+<!-- Annex - Application Screenshots - 02 -->
+<!-- ======================================================== -->
+<!-- <p>Pressing the Predict" button produces the prediction for the text in the input text widet<br/></p> -->
+<!-- ![alt text](app_02.jpg) -->
 

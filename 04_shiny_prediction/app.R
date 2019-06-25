@@ -158,10 +158,19 @@ emain_panel <- mainPanel(
 
 # ---------------------------------------------------------
 ui <- fluidPage(
-  useShinyjs(),
-  extendShinyjs(text = jscode, functions = "refocus"),
+  #  useShinyjs(),
+  # extendShinyjs(text = jscode, functions = "refocus"),
+
   titlePanel("Next Word Prediction"),
   sidebarLayout(esidebar_panel, emain_panel, position = "right")
+  
+  # fluidRow(
+  #   titlePanel("Next Word Prediction"),
+  #   
+  #   column(6,emain_panel),
+  #   column(10,esidebar_panel)
+  # )
+  
   )
 
 
@@ -225,12 +234,12 @@ server <- function(input, output, session) {
   ngram3_rows <- paste("3- gram model nr rows",nrow(ngrams_freqs[[3]]))
   status <- ""
   status <- HTML(paste(status,"Size of models on disk:",models_disk_size,br))
-  status <- paste(status,size_pct_max,br)
+  # status <- paste(status,size_pct_max,br)
   status <- paste(status,models_RAM_size,br)
   status <- paste(status,total_ram_usage, br)
-  status <- paste(status, ngram1_rows, br)
-  status <- paste(status, ngram2_rows, br)
-  status <- paste(status, ngram3_rows, br)
+  # status <- paste(status, ngram1_rows, br)
+  # status <- paste(status, ngram2_rows, br)
+  # status <- paste(status, ngram3_rows, br)
   output[[APP_STATUS]] <- renderUI({ return(HTML(status))})
   
 }

@@ -179,12 +179,13 @@ result_lines_html <- function(dt)
   #html_lines <- "<style>table, th, td { border: 1px solid grey; border-collapse: collapse;}</style>"
   #html_lines <- paste0(html_lines,"\n")
   html_lines <- paste0(html_lines,"<table>","\n")
-  html_lines <- paste0(html_lines,"<th>prediction</th><th>predictor</th>")
+  html_lines <- paste0(html_lines,"<th>prediction</th>")
+  # html_lines <- paste0(html_lines,"<th>predictor</th>")
   html_lines <- paste0(html_lines,"\n")
   for (i in 1:length(successors)) {
     cur <- paste0(tr
       ,td, successors[i] ,tde
-      ,td, nr_preds[i],"-gram" ,tde
+      #,td, nr_preds[i],"-gram" ,tde
       ,tre)
     html_lines <- paste0(html_lines,cur,"\n")
   }
