@@ -35,11 +35,12 @@ library(shinyjs)
 
 source("08_prediction.R")
 
-# ------------------------ IDs -------------------------
+# ------------------------ GUI IDs -------------------------
 
 EVT_KEY_PRESS <- "keypress"
 EVT_KEY_DOWN  <- "keydown"
 EVT_KEY_UP    <- "keyup"
+
 
 LOG_TEXT <- "traceOut"
 PREDICTIONS <- "predictions"
@@ -47,7 +48,8 @@ APP_STATUS  <- "appStatus"
 
 TXT_IN_ID  <- "text_input"
 
-
+SUB_BUTTON <- "bottone"
+SUB_BUTTON_OUT <- "bottone_out"
 
 ###################################################################
 #           NECESSARY HELP
@@ -129,9 +131,9 @@ emain_panel <- mainPanel(
             // console.log("tentato di cambiare focus:",document.activeElement.id)
           }
         });')
-  ,div(style="display: inline-block;vertical-align:top;"
-       ,textInput(TXT_IN_ID, label = h4("Type here"), value = ""))
-  ,p("(when space key is typed it will 'predict')")
+  ,div(style="display: inline-block;vertical-align:top;")
+  ,textInput(TXT_IN_ID, label = h4("Type here"), value = "")
+  ,actionButton(SUB_BUTTON, "Predict")
   ,hr()
   ,h3("AppStatus",style="color:blue")
   ,uiOutput(APP_STATUS)
@@ -142,6 +144,7 @@ emain_panel <- mainPanel(
   ,hr()
   ,h3("Debug messages",style="color:blue")
   ,textOutput(LOG_TEXT)
+  ,textOutput(SUB_BUTTON_OUT)
   )
 
 
@@ -176,27 +179,27 @@ server <- function(input, output, session) {
   onevent(EVT_KEY_UP, "textSample", do_test)
   onevent(EVT_KEY_DOWN, "textSample", do_test)
   
-  output[[PREDICTIONS]] <- renderText({
-    ret <- pred_successors_aggregate(NULL,F,  5)
-    pred_html_table <- result_lines_html(ret)
-    # cat(pred_html_table)
-    return(HTML(pred_html_table))
+  react_pred_button <- eventReactive(input[[SUB_BUTTON]], { 
+      print(paste("submit evento a",Sys.time(), input[[TXT_IN_ID]][1]))
+      #setMsg(paste0("Prediction time:",tstmp()))
+      
+      input_text <- input[[TXT_IN_ID]]
+      print(paste("should predict for:",input_text))
+      predecessor_tokens <- last_n_tokens(input_text,2)
+      ret <- pred_successors_aggregate(predecessor_tokens,F,10)
+      pred_html_table <- result_lines_html(ret)
+      HTML(pred_html_table)
+    })
+  
+  output[[PREDICTIONS]] <- renderUI({react_pred_button()})
+  
+  # "trace" msgs
+  output[[LOG_TEXT]] <- renderText({
+    ret <- paste0(values$msg);
+    return(ret)
   })
   
-    
-  observeEvent(input$tasto_prediz, {
-    print(paste("Enrico server side, ricevuto evento a",Sys.time(), input[[TXT_IN_ID]][1]))
-    #setMsg(paste0("Prediction time:",tstmp()))
-
-    input_text <- input[[TXT_IN_ID]]
-    print(paste("should predict for:",input_text))
-    predecessor_tokens <- last_n_tokens(input_text,2)
-    ret <- pred_successors_aggregate(predecessor_tokens,F,10)
-    pred_html_table <- result_lines_html(ret)
-    # cat(pred_html_table)
-    output[[PREDICTIONS]] <- renderUI({HTML(pred_html_table)})
-  })
-
+  
   dir_size <<- 0L
   sapply(list.files(SHINY_LOCAL_DATA_DIR), function(x) { 
     dir_size <<- dir_size+file.info(file.path(SHINY_LOCAL_DATA_DIR,x))$size})
@@ -217,15 +220,8 @@ server <- function(input, output, session) {
   status <- paste(status, ngram1_rows, br)
   status <- paste(status, ngram2_rows, br)
   status <- paste(status, ngram3_rows, br)
-  
   output[[APP_STATUS]] <- renderUI({ return(HTML(status))})
   
-  # "trace" msgs
-  output[[LOG_TEXT]] <- renderText({
-     ret <- paste0(values$msg);
-   return(ret)
-  })
-
 }
 
 # Run the application 
