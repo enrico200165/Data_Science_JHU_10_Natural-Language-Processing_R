@@ -1,0 +1,70 @@
+Capstone Project
+========================================================
+author: Enrico  
+date: 
+autosize: true
+
+Next Word Prediction App Overview
+========================================================  
+<br/>
+Application to predict the next word for a given text
+
+It does not use the now very popular deep/unsupervised learning.   
+As requested by the course it uses the n-grams approach.  
+
+Its scans texts provided by the course to learn which words are most <b>likely</B> to be the "right" successors for a given text.
+
+
+Algorythm and Model
+========================================================
+The software uses the "stupid back off" algorythm
+
+The models currently uploaded are 3-grams.
+
+The texts have been subset to produce models of size usable by the Web app.
+
+The sofware is modular: can theoretically handle N-grams with any N and a different algoryth can be plugged in with relative simplicity
+
+
+Application Architecture
+========================================================
+
+The application consists of 2 parts. 
+
+- A batch command line application run from the command line or within R Studio that learns from the training text and writes what it has "learned" in some model files (that are uploaded along with the Web application)  
+
+- A Web application deployed on shinyapps.io that contains the prediction algorithm and applies it to the model files that are deployed along with it  
+
+
+Key Points About the Application
+========================================================
+
+The modular structure (decoupling the learning part from the Web
+prediction app.) allows to produce models of different power and size.   
+
+This has allowed a relatively easy tuning of size of the models to upload to avoid a start-up too slow of the Web application <i>(just making the software modular and reconfigurable has required some additional months of work and learning R to advanced level)</i>
+
+Usage of data.table package and preforming most of the heavy calculations in the "batch" part allows the Web app to be relatively light
+
+
+Application Info
+========================================================
+The application is running at
+ <https://enrico200165.shinyapps.io/jhu_cstone_nwp>  
+
+shinyapps.io free subscription has a limit of (currently) 25hours,
+if you are reviewing the app and it is not running get in touch via coursera or email <i>(as image to reduce spam)</i>:  
+![alt text](miamail.jpg)  
+Two screenshots of the application follow
+
+Annex - Application Screenshots - 01
+========================================================
+<p>Just started up -no prediction yet<br/></p>
+![alt text](app_01.jpg)
+
+
+Annex - Application Screenshots - 02
+========================================================
+<p>Pressing "submit"Predict" button produces the prediction<br/></p>
+![alt text](app_02.jpg)
+
