@@ -233,9 +233,9 @@ server <- function(input, output, session) {
   ngram2_rows <- paste("2-gram model nr rows",nrow(ngrams_freqs[[2]]))
   ngram3_rows <- paste("3- gram model nr rows",nrow(ngrams_freqs[[3]]))
   status <- ""
-  status <- HTML(paste(status,"Size of models on disk:",models_disk_size,br))
+  # status <- paste(status,"Size of models on disk:",models_disk_size,br)
   # status <- paste(status,size_pct_max,br)
-  status <- paste(status,models_RAM_size,br)
+  # status <- paste(status,models_RAM_size,br)
   status <- paste(status,total_ram_usage, br)
   # status <- paste(status, ngram1_rows, br)
   # status <- paste(status, ngram2_rows, br)
