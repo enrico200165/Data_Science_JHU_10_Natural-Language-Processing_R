@@ -50,6 +50,8 @@ TXT_IN_ID  <- "text_input"
 
 SUB_BUTTON <- "bottone"
 SUB_BUTTON_OUT <- "bottone_out"
+SLIDER_NR_PRED <- "nr_pred_slider"
+
 
 ###################################################################
 #           NECESSARY HELP
@@ -111,9 +113,15 @@ jscode <- "shinyjs.refocus = function(e_id) { console.log('refocusing'); documen
 # ----------------- SIDEBAR ----------------------------------------
 
 esidebar_panel <- sidebarPanel(
-  h5("Predictions",style="color:blue")
-  ,uiOutput(PREDICTIONS)
+  # Input: Simple integer interval ----
+  sliderInput(SLIDER_NR_PRED, "Nr. Predictions:",
+              min = 0, max = 15,
+              value = 8)
+  
   ,hr()
+  ,h5("Predictions",style="color:blue")
+
+  ,uiOutput(PREDICTIONS)
 ) # sidebar panel
 
 
@@ -170,6 +178,8 @@ do_test <- function() {
 #                                 SERVER
 ########################################################################
 
+initial <- T
+
 server <- function(input, output, session) {
   
   initBE()
@@ -178,20 +188,21 @@ server <- function(input, output, session) {
   onevent(EVT_KEY_PRESS, "", do_test)
   onevent(EVT_KEY_UP, "textSample", do_test)
   onevent(EVT_KEY_DOWN, "textSample", do_test)
-  
-  react_pred_button <- eventReactive(input[[SUB_BUTTON]], { 
-      print(paste("submit evento a",Sys.time(), input[[TXT_IN_ID]][1]))
-      #setMsg(paste0("Prediction time:",tstmp()))
-      
+
+  react_pred_button <- eventReactive(input[[SUB_BUTTON]], {
+      # print(paste("Predict button at",Sys.time(), input[[TXT_IN_ID]][1]))
       input_text <- input[[TXT_IN_ID]]
       print(paste("should predict for:",input_text))
       predecessor_tokens <- last_n_tokens(input_text,2)
-      ret <- pred_successors_aggregate(predecessor_tokens,F,10)
+      ret <- pred_successors_aggregate(predecessor_tokens,F
+        ,predictions_nr())
       pred_html_table <- result_lines_html(ret)
       HTML(pred_html_table)
     })
-  
   output[[PREDICTIONS]] <- renderUI({react_pred_button()})
+  
+  predictions_nr <- reactive({ as.integer(input[[SLIDER_NR_PRED]])})
+  
   
   # "trace" msgs
   output[[LOG_TEXT]] <- renderText({
